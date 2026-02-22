@@ -24,7 +24,7 @@ So that the build runs even if `vercel.json` is ignored or missing:
    |--------------------|--------|
    | **Framework Preset** | **Other** (so Vercel doesn’t auto-detect and skip your commands). |
    | **Install Command**  | `cd TWS && npm install` |
-   | **Build Command**    | `cd TWS && CI=false NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false npm run build:frontend` |
+   | **Build Command**    | `cd TWS && node frontend/scripts/ensure-public-html.js && CI=false NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false npm run build:frontend` |
    | **Output Directory**| `TWS/frontend/build` |
 
 4. Leave **Root Directory** empty (so the project root is the repo root and `cd TWS` works).
@@ -53,7 +53,7 @@ Root `vercel.json` should look like:
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd TWS && npm install",
-  "buildCommand": "cd TWS && npm run build:frontend",
+  "buildCommand": "cd TWS && node frontend/scripts/ensure-public-html.js && CI=false NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false npm run build:frontend",
   "outputDirectory": "TWS/frontend/build",
   "framework": null,
   "rewrites": [
@@ -84,6 +84,17 @@ If you ever see the repo root again in artefacts, the first thing to check is th
 | 3 | Ensure the repo Vercel deploys (tws.erp, branch main) has the root **vercel.json** above, so future deploys keep using the same build even without dashboard overrides. |
 
 Once the build runs and output is `TWS/frontend/build`, the 404 on `/` and “no files prepared” will stop.
+
+---
+
+## If the build fails: `Could not find a required file. Name: index.html`
+
+This happens when `TWS/frontend/public` (or `index.html`) is missing in the deployed repo (e.g. not committed or different repo structure). The fix is already in the build command: **run the ensure script before building**:
+
+- In **vercel.json**: `buildCommand` must start with `cd TWS && node frontend/scripts/ensure-public-html.js && ...`
+- The script creates `frontend/public/index.html` (and a minimal `favicon.svg` if missing) so `craco build` always has the required file.
+
+Ensure the repo Vercel deploys has `TWS/frontend/scripts/ensure-public-html.js` committed. Then redeploy.
 
 ---
 
