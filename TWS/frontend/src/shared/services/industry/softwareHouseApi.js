@@ -6,7 +6,6 @@
  */
 
 import axiosInstance from '../../utils/axiosInstance';
-import { isValidJWT } from './utils/tokenUtils';
 
 /**
  * SECURITY FIX: Removed localStorage token access

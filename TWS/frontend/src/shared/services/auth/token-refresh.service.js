@@ -151,9 +151,10 @@ export const getBestToken = async () => {
   }
 };
 
-export default {
+const tokenRefreshService = {
   refreshToken,
   resetRefreshLock,
   getBestToken,
   clearAllTokens
 };
+export default tokenRefreshService;

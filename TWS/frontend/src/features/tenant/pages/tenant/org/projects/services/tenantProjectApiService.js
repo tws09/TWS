@@ -7,14 +7,6 @@
 import tenantApiService from '../../../../../../../shared/services/tenant/tenant-api.service';
 import { API_ENDPOINTS, ERROR_MESSAGES } from '../constants/projectConstants';
 
-// SECURITY FIX: Token management using HttpOnly cookies
-// Tokens are in HttpOnly cookies, not accessible to JavaScript
-const getTenantToken = () => {
-  // SECURITY FIX: Don't read tokens from localStorage - they're in HttpOnly cookies
-  // Return null - cookies are sent automatically with credentials: 'include'
-  return null;
-};
-
 // SECURITY FIX: Refresh tenant token using cookies
 const refreshTenantToken = async () => {
   try {
@@ -1063,31 +1055,6 @@ class TenantProjectApiService {
     }
   }
 
-  /**
-   * Get clients for the organization
-   * @param {string} tenantSlug - Tenant slug
-   * @returns {Promise} Clients data
-   */
-  async getClients(tenantSlug) {
-    try {
-      const url = API_ENDPOINTS.CLIENTS(tenantSlug);
-      const response = await makeRequest(url, { method: 'GET' });
-      // Handle different response structures
-      if (Array.isArray(response)) {
-        return response;
-      } else if (response?.data && Array.isArray(response.data)) {
-        return response.data;
-      } else if (response?.clients && Array.isArray(response.clients)) {
-        return response.clients;
-      }
-      return [];
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-      // Return empty array on error - don't block project creation
-      return [];
-    }
-  }
-
   async getDeliverablesNeedingValidation(tenantSlug, daysThreshold = 14) {
     try {
       const endpoint = `${API_ENDPOINTS.DELIVERABLES_NEEDING_VALIDATION(tenantSlug)}?daysThreshold=${daysThreshold}`;
@@ -1137,5 +1104,6 @@ class TenantProjectApiService {
 }
 
 // Export singleton instance
-export default new TenantProjectApiService();
+const tenantProjectApiServiceInstance = new TenantProjectApiService();
+export default tenantProjectApiServiceInstance;
 

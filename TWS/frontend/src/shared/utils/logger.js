@@ -55,7 +55,7 @@ const sanitizeError = (error) => {
  */
 export const logError = (message, error = null, context = {}) => {
   const sanitizedError = error ? sanitizeError(error) : null;
-  const logData = {
+  const _logPayload = {
     level: LOG_LEVELS.ERROR,
     message,
     error: sanitizedError,
@@ -81,7 +81,7 @@ export const logError = (message, error = null, context = {}) => {
  * @param {Object} context - Additional context (optional)
  */
 export const logWarn = (message, context = {}) => {
-  const logData = {
+  const _logPayload = {
     level: LOG_LEVELS.WARN,
     message,
     context,
@@ -103,7 +103,7 @@ export const logWarn = (message, context = {}) => {
  * @param {Object} context - Additional context (optional)
  */
 export const logInfo = (message, context = {}) => {
-  const logData = {
+  const _logPayload = {
     level: LOG_LEVELS.INFO,
     message,
     context,
