@@ -1,0 +1,11 @@
+# Railway config for TWS frontend (use when Root Directory is set to TWS/frontend)
+# Set REACT_APP_API_URL to your backend URL (e.g. https://your-backend.up.railway.app) before building.
+
+[build]
+builder = "RAILPACK"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm run start:prod"
+healthcheckPath = "/"
+healthcheckTimeout = 30

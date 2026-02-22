@@ -4,14 +4,14 @@
   "description": "Frontend React application for The Wolf Stack Management Portal",
   "private": true,
   "dependencies": {
-    "@ant-design/icons": "^6.1.0",
     "@blocknote/core": "^0.16.0",
     "@blocknote/mantine": "^0.16.0",
     "@blocknote/react": "^0.16.0",
-    "@headlessui/react": "^1.7.17",
-    "@heroicons/react": "^2.0.18",
     "@mantine/core": "^7.0.0",
     "@mantine/hooks": "^7.0.0",
+    "@ant-design/icons": "^6.1.0",
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
     "@use-gesture/react": "^10.3.1",
     "antd": "^5.27.6",
     "autoprefixer": "^10.4.16",
@@ -39,6 +39,7 @@
     "react-window": "^1.8.8",
     "react-window-infinite-loader": "^1.0.9",
     "recharts": "^2.8.0",
+    "serve": "^14.2.4",
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^3.3.5"
   },
@@ -47,7 +48,6 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.5.1",
-    "cross-env": "^7.0.3",
     "jest": "^27.5.1",
     "jest-axe": "^7.0.0",
     "jest-watch-typeahead": "^2.2.2",
@@ -57,9 +57,9 @@
   },
   "scripts": {
     "start": "craco start",
+    "start:prod": "serve -s build -l ${PORT:-3000}",
     "dev": "craco start",
-    "prebuild": "node scripts/ensure-public-html.cjs",
-    "build": "npm run prebuild && cross-env DISABLE_ESLINT_PLUGIN=true craco build",
+    "build": "craco build",
     "test": "craco test",
     "test:watch": "craco test --watch",
     "test:coverage": "craco test --coverage",
@@ -71,18 +71,7 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ],
-    "rules": {
-      "no-unused-vars": "off",
-      "react-hooks/exhaustive-deps": "off",
-      "no-dupe-keys": "off",
-      "no-dupe-class-members": "off",
-      "no-mixed-operators": "off",
-      "import/no-anonymous-default-export": "off",
-      "no-useless-escape": "off",
-      "jsx-a11y/anchor-is-valid": "off",
-      "jsx-a11y/role-supports-aria-props": "off"
-    }
+    ]
   },
   "browserslist": {
     "production": [
