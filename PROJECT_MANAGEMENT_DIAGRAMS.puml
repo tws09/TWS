@@ -1,0 +1,722 @@
+' ============================================
+' PROJECT MANAGEMENT DEPARTMENT - PLANTUML DIAGRAMS
+' Tenant Software House Category
+' ============================================
+
+@startuml Project Management Actors
+
+!define RECTANGLE class
+
+package "Tenant Software House ERP" {
+  
+  package "Project Management Department" {
+    
+    actor "Project Manager" as PM
+    actor "Scrum Master" as SM
+    actor "Developer" as DEV
+    actor "QA Engineer" as QA
+    actor "Designer" as DES
+    actor "Client" as CLIENT
+    actor "Finance Manager" as FIN
+    actor "Department Lead" as LEAD
+    actor "Executive" as EXEC
+    actor "PMO Manager" as PMO
+    
+    rectangle "Project Management System" as PMS {
+      component "Project Portal" as Portal
+      component "Task Board" as Board
+      component "Time Tracking" as Time
+      component "Resource Management" as Resource
+      component "Client Portal" as ClientPortal
+      component "Analytics & Reports" as Analytics
+    }
+    
+    PM --> Portal : Manages Projects
+    PM --> Resource : Allocates Resources
+    PM --> Analytics : Views Reports
+    
+    SM --> Board : Manages Sprints
+    SM --> Portal : Plans Sprints
+    
+    DEV --> Board : Works on Tasks
+    DEV --> Time : Logs Hours
+    
+    QA --> Board : Reviews Tasks
+    QA --> Time : Logs QA Hours
+    
+    DES --> Board : Creates Designs
+    DES --> Time : Logs Design Hours
+    
+    CLIENT --> ClientPortal : Views Progress
+    CLIENT --> Portal : Approves Deliverables
+    
+    FIN --> Analytics : Reviews Budgets
+    FIN --> Resource : Reviews Costs
+    
+    LEAD --> Resource : Manages Team
+    LEAD --> Analytics : Views Utilization
+    
+    EXEC --> Analytics : Portfolio View
+    EXEC --> Portal : Strategic Planning
+    
+    PMO --> Analytics : Portfolio Metrics
+    PMO --> Portal : Standards & Processes
+    
+  }
+}
+
+@enduml
+
+' ============================================
+
+@startuml Actor Use Case Relationships
+
+left to right direction
+
+actor "Project Manager" as PM
+actor "Developer" as DEV
+actor "Client" as CLIENT
+actor "Finance Manager" as FIN
+actor "Scrum Master" as SM
+actor "Executive" as EXEC
+
+rectangle "Project Management Use Cases" {
+  usecase "UC-1: Create Project" as UC1
+  usecase "UC-2: Manage Tasks" as UC2
+  usecase "UC-3: Track Time" as UC3
+  usecase "UC-4: Allocate Resources" as UC4
+  usecase "UC-5: Manage Milestones" as UC5
+  usecase "UC-6: Plan Sprint" as UC6
+  usecase "UC-7: Client Portal" as UC7
+  usecase "UC-8: Track Finances" as UC8
+  usecase "UC-9: Generate Reports" as UC9
+  usecase "UC-10: Close Project" as UC10
+}
+
+PM --> UC1
+PM --> UC2
+PM --> UC4
+PM --> UC5
+PM --> UC8
+PM --> UC9
+PM --> UC10
+
+DEV --> UC2
+DEV --> UC3
+
+CLIENT --> UC7
+
+FIN --> UC8
+FIN --> UC9
+
+SM --> UC6
+SM --> UC2
+
+EXEC --> UC9
+
+UC1 ..> UC2 : includes
+UC1 ..> UC4 : includes
+UC2 ..> UC3 : uses
+UC4 ..> UC8 : affects
+UC5 ..> UC9 : feeds
+
+@enduml
+
+' ============================================
+
+@startuml System Boundary
+
+!theme plain
+skinparam componentStyle rectangle
+
+package "External Actors" {
+  actor "Project Manager" as PM
+  actor "Team Member" as TM
+  actor "Client" as CLIENT
+  actor "Finance Dept" as FIN
+}
+
+package "Project Management System" {
+  component "Project Portal" as Portal
+  component "Task Management" as Tasks
+  component "Time Tracking" as Time
+  component "Resource Mgmt" as Resource
+  component "Client Portal" as ClientPortal
+  component "Analytics Engine" as Analytics
+  component "Notification System" as Notify
+}
+
+database "MongoDB" as DB {
+  component "Projects" as ProjDB
+  component "Tasks" as TaskDB
+  component "Timesheets" as TimeDB
+  component "Resources" as ResDB
+}
+
+PM --> Portal
+PM --> Resource
+PM --> Analytics
+
+TM --> Tasks
+TM --> Time
+
+CLIENT --> ClientPortal
+
+FIN --> Analytics
+
+Portal --> ProjDB
+Tasks --> TaskDB
+Time --> TimeDB
+Resource --> ResDB
+
+Portal --> Notify
+Tasks --> Notify
+Time --> Notify
+
+@enduml
+
+' ============================================
+
+@startuml Project Management ERD
+
+!theme plain
+skinparam linetype ortho
+
+entity "Organization" as Org {
+  * orgId : ObjectId
+  --
+  * name : String
+  * tenantId : ObjectId
+  slug : String
+  status : String
+}
+
+entity "Client" as Client {
+  * clientId : ObjectId
+  * orgId : ObjectId <<FK>>
+  --
+  * name : String
+  company : String
+  email : String
+  phone : String
+  slug : String
+}
+
+entity "Project" as Project {
+  * projectId : ObjectId
+  * orgId : ObjectId <<FK>>
+  clientId : ObjectId <<FK>>
+  workspaceId : ObjectId <<FK>>
+  templateId : ObjectId <<FK>>
+  createdBy : ObjectId <<FK>>
+  --
+  * name : String
+  * slug : String
+  description : String
+  projectType : String
+  methodology : String
+  status : String
+  priority : String
+  budget : Object
+  timeline : Object
+  metrics : Object
+}
+
+entity "ProjectMember" as Member {
+  * memberId : ObjectId
+  * projectId : ObjectId <<FK>>
+  * userId : ObjectId <<FK>>
+  invitedBy : ObjectId <<FK>>
+  --
+  role : String
+  permissions : Object
+  status : String
+  joinedAt : Date
+}
+
+entity "Task" as Task {
+  * taskId : ObjectId
+  * orgId : ObjectId <<FK>>
+  projectId : ObjectId <<FK>>
+  milestoneId : ObjectId <<FK>>
+  sprintId : ObjectId <<FK>>
+  assignee : ObjectId <<FK>>
+  reporter : ObjectId <<FK>>
+  --
+  * title : String
+  description : String
+  status : String
+  priority : String
+  type : String
+  storyPoints : Number
+  dueDate : Date
+  labels : Array
+}
+
+entity "Milestone" as Milestone {
+  * milestoneId : ObjectId
+  * orgId : ObjectId <<FK>>
+  projectId : ObjectId <<FK>>
+  ownerId : ObjectId <<FK>>
+  --
+  * title : String
+  description : String
+  dueDate : Date
+  status : String
+  progress : Number
+}
+
+entity "Sprint" as Sprint {
+  * sprintId : ObjectId
+  * orgId : ObjectId <<FK>>
+  projectId : ObjectId <<FK>>
+  --
+  * name : String
+  startDate : Date
+  endDate : Date
+  goal : String
+  status : String
+  capacity : Object
+  metrics : Object
+}
+
+entity "Resource" as Resource {
+  * resourceId : ObjectId
+  * orgId : ObjectId <<FK>>
+  * userId : ObjectId <<FK>>
+  --
+  role : String
+  department : String
+  jobTitle : String
+  skills : Array
+  availability : Boolean
+  utilization : Number
+  workload : Object
+}
+
+entity "TimeEntry" as TimeEntry {
+  * entryId : ObjectId
+  * orgId : ObjectId <<FK>>
+  projectId : ObjectId <<FK>>
+  employeeId : ObjectId <<FK>>
+  --
+  * date : Date
+  * hours : Number
+  description : String
+  billable : Boolean
+  status : String
+  tags : Array
+}
+
+entity "Board" as Board {
+  * boardId : ObjectId
+  * projectId : ObjectId <<FK>>
+  --
+  * name : String
+  workflow : Object
+  settings : Object
+}
+
+entity "Card" as Card {
+  * cardId : ObjectId
+  * boardId : ObjectId <<FK>>
+  listId : ObjectId <<FK>>
+  projectId : ObjectId <<FK>>
+  --
+  * title : String
+  description : String
+  status : String
+  priority : String
+  assignees : Array
+  dueDate : Date
+  checklists : Array
+  comments : Array
+  attachments : Array
+}
+
+Org ||--o{ Project
+Org ||--o{ Client
+Org ||--o{ Resource
+Org ||--o{ TimeEntry
+
+Client ||--o{ Project
+
+Project ||--o{ Member
+Project ||--o{ Task
+Project ||--o{ Milestone
+Project ||--o{ Sprint
+Project ||--o{ Board
+Project ||--o{ TimeEntry
+
+Board ||--o{ Card
+
+Milestone ||--o{ Task
+Sprint ||--o{ Task
+
+Resource ||--o{ TimeEntry
+
+@enduml
+
+' ============================================
+
+@startuml Project Initiation Workflow
+
+start
+
+:Receive Project Request;
+:Create Client Record\n(if new);
+:Select Project Template\n(optional);
+:Fill Project Details:
+* Name & Description
+* Project Type
+* Methodology
+* Tech Stack;
+
+:Set Budget & Timeline;
+:Assign Project Manager;
+
+if (Template Selected?) then (yes)
+  :Load Template Structure;
+  :Initialize Boards & Lists;
+else (no)
+  :Create Default Structure\nbased on Methodology;
+endif
+
+:Invite Team Members;
+:Set Permissions & Roles;
+:Configure Project Settings;
+:Create Initial Tasks/Milestones;
+
+:Project Created\n(Status: Planning);
+
+stop
+
+@enduml
+
+' ============================================
+
+@startuml Task Lifecycle Workflow
+
+start
+
+:Create Task;
+:Set Task Details:
+* Title & Description
+* Priority
+* Assignee
+* Due Date
+* Story Points;
+
+:Task Status: "To Do";
+:Notify Assignee;
+
+:Assignee Starts Work;
+:Update Status: "In Progress";
+
+if (Work Complete?) then (yes)
+  :Update Status: "Under Review";
+  :Notify Reviewer/QA;
+  
+  if (Approved?) then (yes)
+    :Update Status: "Completed";
+    :Update Project Progress;
+    :Notify Stakeholders;
+    stop
+  else (no - rejected)
+    :Add Rejection Comments;
+    :Update Status: "In Progress";
+    :Notify Assignee;
+  endif
+else (no)
+  :Continue Working;
+  :Log Time;
+endif
+
+@enduml
+
+' ============================================
+
+@startuml Sprint Planning Workflow
+
+start
+
+:Create New Sprint;
+:Set Sprint Goal;
+:Define Sprint Duration\n(typically 2 weeks);
+
+:Review Backlog Tasks;
+:Estimate Story Points;
+
+:Select Tasks for Sprint;
+:Check Team Capacity;
+:Assign Tasks to Team Members;
+
+:Start Sprint;
+:Daily Standups;
+:Update Task Status;
+
+if (Sprint Complete?) then (yes)
+  :Sprint Review;
+  :Calculate Velocity;
+  :Sprint Retrospective;
+  :Update Metrics;
+  stop
+else (no)
+  :Continue Sprint;
+endif
+
+@enduml
+
+' ============================================
+
+@startuml Project Data Flow
+
+participant "Project Manager" as PM
+participant "Project Portal" as Portal
+participant "API Service" as API
+participant "Project Controller" as Controller
+database "MongoDB" as DB
+participant "Notification Service" as Notify
+
+PM -> Portal: Create Project Request
+Portal -> API: POST /projects
+API -> Controller: createProject()
+Controller -> DB: Save Project Document
+Controller -> DB: Create Initial Board
+Controller -> DB: Save Project Members
+DB --> Controller: Project Created
+Controller -> Notify: Send Notifications
+Notify -> PM: Email/In-App Notification
+Controller --> API: Success Response
+API --> Portal: Project Data
+Portal --> PM: Display Project
+
+@enduml
+
+' ============================================
+
+@startuml Time Tracking Data Flow
+
+participant "Developer" as DEV
+participant "Time Tracking UI" as UI
+participant "Time API" as API
+participant "Time Controller" as Controller
+database "MongoDB" as DB
+participant "Project Service" as ProjectSvc
+participant "Budget Service" as BudgetSvc
+
+DEV -> UI: Submit Time Entry
+UI -> API: POST /timesheets
+API -> Controller: createTimesheet()
+Controller -> DB: Save Time Entry
+DB --> Controller: Entry Saved
+Controller -> ProjectSvc: Update Project Hours
+ProjectSvc -> DB: Update Project Metrics
+Controller -> BudgetSvc: Calculate Billable Amount
+BudgetSvc -> DB: Update Budget Spent
+DB --> Controller: Updated
+Controller --> API: Success Response
+API --> UI: Confirmation
+UI --> DEV: Entry Saved
+
+@enduml
+
+' ============================================
+
+@startuml Project State Transitions
+
+[*] --> Planning: Create Project
+
+state Planning {
+  [*] --> Initializing
+  Initializing --> Configured: Setup Complete
+}
+
+Planning --> Active: Kick Off
+Planning --> Cancelled: Cancel
+
+state Active {
+  [*] --> InProgress
+  InProgress --> OnHold: Pause
+  OnHold --> InProgress: Resume
+}
+
+Active --> Completed: Deliver
+Active --> OnHold: Pause
+Active --> Cancelled: Cancel
+
+OnHold --> Active: Resume
+OnHold --> Cancelled: Cancel
+
+Completed --> Archived: Archive
+
+Cancelled --> [*]
+Archived --> [*]
+
+@enduml
+
+' ============================================
+
+@startuml Task State Transitions
+
+[*] --> ToDo: Create Task
+
+ToDo --> InProgress: Start Work
+ToDo --> Cancelled: Cancel
+
+InProgress --> UnderReview: Submit for Review
+InProgress --> ToDo: Move Back
+InProgress --> Cancelled: Cancel
+
+UnderReview --> Completed: Approve
+UnderReview --> InProgress: Reject
+
+Completed --> [*]
+
+Cancelled --> [*]
+
+@enduml
+
+' ============================================
+
+@startuml Activity Flow Network
+
+package "Project Management Activities" {
+  
+  rectangle "Project Creation" as PC
+  rectangle "Resource Allocation" as RA
+  rectangle "Task Creation" as TC
+  rectangle "Time Tracking" as TT
+  rectangle "Sprint Planning" as SP
+  rectangle "Milestone Creation" as MC
+  rectangle "Status Updates" as SU
+  rectangle "Budget Calculation" as BC
+  rectangle "Utilization Tracking" as UT
+  rectangle "Velocity Tracking" as VT
+  rectangle "Progress Calculation" as PR
+  rectangle "Milestone Tracking" as MT
+  rectangle "Client Portal Setup" as CPS
+  rectangle "Client Collaboration" as CC
+  
+  PC --> RA
+  PC --> TC
+  PC --> MC
+  PC --> CPS
+  
+  RA --> UT
+  TC --> TT
+  TC --> SP
+  TC --> SU
+  
+  TT --> BC
+  SP --> VT
+  SU --> PR
+  MC --> MT
+  CPS --> CC
+  
+  note right of PC : Initial project setup\nenables all other activities
+  
+  note right of TT : Time entries feed\ninto budget and\nutilization calculations
+  
+  note right of SP : Sprint planning\nrequires backlog\ntasks and team capacity
+}
+
+@enduml
+
+' ============================================
+
+@startuml Complete Project Lifecycle
+
+start
+
+:Project Request Received;
+:Create Project\n(Status: Planning);
+:Allocate Team & Budget;
+:Kick Off Project\n(Status: Active);
+
+partition "Execution Phase" {
+  :Create Tasks & Milestones;
+  :Plan Sprints (if Scrum);
+  
+  repeat
+    :Work on Tasks;
+    :Track Time;
+    :Update Task Status;
+    :Update Progress;
+  repeat while (Tasks Incomplete?) is (yes)
+  ->no;
+  
+  :Complete Deliverables;
+}
+
+:Client Review & Approval;
+
+if (Approved?) then (yes)
+  :Mark Project Complete\n(Status: Completed);
+  :Generate Final Report;
+  :Archive Project;
+  stop
+else (no)
+  if (Budget Exceeded?) then (yes)
+    :Put On Hold\n(Status: On Hold);
+    :Review & Adjust;
+    :Resume Project;
+  else (no)
+    :Request Changes;
+    :Continue Development;
+  endif
+endif
+
+if (Cancelled?) then (yes)
+  :Cancel Project\n(Status: Cancelled);
+  stop
+endif
+
+@enduml
+
+' ============================================
+
+@startuml Resource Allocation Flow
+
+start
+
+:View Available Resources;
+:Check Resource Capacity;
+:Select Resource;
+:View Current Allocations;
+
+if (Capacity Available?) then (yes)
+  :Select Target Project;
+  :Set Allocation Percentage;
+  :Set Start/End Dates;
+  :Set Hourly Rate;
+  
+  :Calculate Total Allocation;
+  
+  if (Total <= 100%?) then (yes)
+    :Allocate Resource;
+    :Update Resource Workload;
+    :Update Project Team;
+    :Notify Resource;
+    :Update Utilization Metrics;
+    stop
+  else (no)
+    :Warning: Over-allocation;
+    :Request Confirmation;
+    
+    if (Confirm?) then (yes)
+      :Allocate with Warning;
+      :Update Metrics;
+      stop
+    else (no)
+      :Cancel Allocation;
+      stop
+    endif
+  endif
+else (no)
+  :Resource at Capacity;
+  :Suggest Alternative Resources;
+  stop
+endif
+
+@enduml

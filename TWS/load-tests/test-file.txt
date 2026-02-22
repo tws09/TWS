@@ -1,0 +1,4 @@
+This is a test file for load testing file upload functionality.
+It contains sample text to simulate a real file upload scenario.
+The file is used by Artillery load tests to test file upload endpoints.
+Size: approximately 150 bytes.

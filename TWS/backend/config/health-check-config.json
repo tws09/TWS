@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-10-14T13:50:46.377Z",
+  "version": "1.0.0",
+  "healthChecks": {
+    "database": {
+      "enabled": true,
+      "timeout": 5000,
+      "retries": 3
+    },
+    "redis": {
+      "enabled": false,
+      "timeout": 5000,
+      "retries": 3
+    },
+    "externalServices": {
+      "enabled": true,
+      "services": [
+        {
+          "name": "email-service",
+          "url": "http://localhost:3001/health",
+          "timeout": 5000
+        }
+      ]
+    },
+    "custom": [
+      {
+        "name": "tenant-isolation",
+        "description": "Check tenant isolation integrity",
+        "timeout": 10000
+      },
+      {
+        "name": "jwt-validation",
+        "description": "Check JWT token validation",
+        "timeout": 5000
+      }
+    ]
+  }
+}

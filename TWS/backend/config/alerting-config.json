@@ -1,0 +1,58 @@
+{
+  "timestamp": "2025-10-14T13:50:46.377Z",
+  "version": "1.0.0",
+  "alerting": {
+    "channels": [
+      {
+        "type": "email",
+        "enabled": true,
+        "recipients": [
+          "admin@example.com"
+        ],
+        "smtp": {
+          "host": "localhost",
+          "port": 587,
+          "secure": false,
+          "auth": {}
+        }
+      },
+    ],
+    "rules": [
+      {
+        "name": "high_error_rate",
+        "condition": "error_rate > 5%",
+        "duration": "5m",
+        "severity": "warning",
+        "description": "Error rate is above 5% for 5 minutes"
+      },
+      {
+        "name": "high_response_time",
+        "condition": "avg_response_time > 2s",
+        "duration": "5m",
+        "severity": "warning",
+        "description": "Average response time is above 2 seconds for 5 minutes"
+      },
+      {
+        "name": "high_memory_usage",
+        "condition": "memory_usage > 80%",
+        "duration": "2m",
+        "severity": "critical",
+        "description": "Memory usage is above 80% for 2 minutes"
+      },
+      {
+        "name": "database_connection_failure",
+        "condition": "database_health == false",
+        "duration": "1m",
+        "severity": "critical",
+        "description": "Database connection failed"
+      },
+      {
+        "name": "tenant_isolation_violation",
+        "condition": "tenant_isolation_violations > 0",
+        "duration": "0m",
+        "severity": "critical",
+        "description": "Tenant isolation violation detected"
+      }
+    ]
+  }
+}

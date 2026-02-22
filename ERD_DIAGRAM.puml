@@ -1,0 +1,145 @@
+@startuml ERD_TWS
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam linetype ortho
+
+skinparam entity {
+  BackgroundColor #F5F5F5
+  BorderColor #333333
+  BorderThickness 1
+  FontName "Arial"
+  FontSize 10
+  RoundCorner 10
+}
+
+title TWS Multi-Tenant ERP Platform – High-Level ERD
+
+left to right direction
+
+entity "SupraAdmin" as SupraAdmin {
+  supra_admin_id
+  email
+}
+
+entity "Tenant" as Tenant {
+  tenant_id
+  name
+}
+
+entity "Organization" as Org {
+  organization_id
+  name
+}
+
+entity "User" as User {
+  user_id
+  email
+  role
+}
+
+entity "Employee" as Employee {
+  employee_id
+  name
+  position
+}
+
+entity "Project" as Project {
+  project_id
+  name
+}
+
+entity "Task" as Task {
+  task_id
+  title
+}
+
+entity "AuditLog" as AuditLog {
+  audit_id
+  action
+  timestamp
+}
+
+' Industry: Education
+entity "Student" as Student {
+  student_id
+  name
+}
+
+entity "Teacher" as Teacher {
+  teacher_id
+  name
+}
+
+entity "Class" as Class {
+  class_id
+  title
+}
+
+entity "Grade" as Grade {
+  grade_id
+  value
+}
+
+entity "Course" as Course {
+  course_id
+  title
+}
+
+entity "AcademicYear" as AcademicYear {
+  year_id
+  label
+}
+
+' Industry: Healthcare
+entity "Patient" as Patient {
+  patient_id
+  name
+}
+
+entity "Doctor" as Doctor {
+  doctor_id
+  name
+}
+
+entity "Appointment" as Appointment {
+  appointment_id
+  date_time
+}
+
+entity "MedicalRecord" as MedicalRecord {
+  record_id
+  summary
+}
+
+entity "Prescription" as Prescription {
+  prescription_id
+  medication
+}
+
+' Core relationships (high-level)
+SupraAdmin ||--o{ Tenant : manages
+Tenant ||--|| Org : owns
+Org ||--o{ User : has
+User ||--|| Employee : maps
+Org ||--o{ Project : runs
+Project ||--o{ Task : contains
+Org ||--o{ AuditLog : records
+
+' Education
+Org ||--o{ Student : enrolls
+Org ||--o{ Teacher : employs
+Class ||--o{ Student : includes
+Class ||--|| Course : based_on
+Course ||--o{ Grade : awards
+AcademicYear ||--o{ Class : schedules
+
+' Healthcare
+Org ||--o{ Patient : registers
+Org ||--o{ Doctor : engages
+Doctor ||--o{ Appointment : schedules
+Patient ||--o{ Appointment : books
+Patient ||--o{ MedicalRecord : has
+Doctor ||--o{ Prescription : issues
+
+@enduml
+

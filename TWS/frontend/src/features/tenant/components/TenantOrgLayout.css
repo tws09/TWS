@@ -1,0 +1,553 @@
+/* Tenant Org Layout - Premium TWS Design System */
+@import '../../../shared/styles/design-tokens.css';
+
+.tenant-org-layout {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  min-height: 100vh;
+}
+
+/* Glass Morphism Effects - Using Design Tokens */
+.glass-sidebar {
+  /* Fallback for browsers without backdrop-filter */
+  background: var(--glass-bg-light);
+  border-right: 1px solid var(--glass-border-light);
+  box-shadow: var(--shadow-lg);
+}
+
+@supports (backdrop-filter: blur(20px)) {
+  .glass-sidebar {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur) saturate(180%);
+    -webkit-backdrop-filter: var(--glass-blur) saturate(180%);
+  }
+}
+
+.dark .glass-sidebar {
+  /* Fallback for dark mode */
+  background: var(--glass-bg-dark);
+  border-right: 1px solid var(--glass-border-dark);
+  box-shadow: var(--shadow-dark-lg);
+}
+
+@supports (backdrop-filter: blur(20px)) {
+  .dark .glass-sidebar {
+    background: var(--glass-bg-dark);
+  }
+}
+
+/* Reduce backdrop blur on mobile for performance */
+@media (max-width: 1023px) {
+  .glass-sidebar {
+    backdrop-filter: var(--glass-blur-mobile);
+    -webkit-backdrop-filter: var(--glass-blur-mobile);
+  }
+}
+
+.glass-card-premium {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.dark .glass-card-premium {
+  background: rgba(17, 24, 39, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+.glass-button {
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border-light);
+  border-radius: var(--radius-button);
+  transition: all var(--duration-normal) ease;
+}
+
+.dark .glass-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border-dark);
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.dark .glass-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-dark-md);
+}
+
+/* Scrollbar Styles */
+.glass-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.glass-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.dark .glass-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.glass-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.dark .glass-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.glass-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.dark .glass-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Depth Layers - Legacy support (kept for backward compatibility) */
+.depth-layer-1 {
+  z-index: 10;
+}
+
+.depth-layer-2 {
+  z-index: 20;
+}
+
+.depth-layer-3 {
+  z-index: 30;
+}
+
+/* Standardized Z-Index Classes */
+.z-dropdown {
+  z-index: 1000;
+}
+
+.z-sticky {
+  z-index: 1010;
+}
+
+.z-fixed {
+  z-index: 1020;
+}
+
+.z-modal-backdrop {
+  z-index: 1030;
+}
+
+.z-modal {
+  z-index: 1040;
+}
+
+.z-popover {
+  z-index: 1050;
+}
+
+.z-tooltip {
+  z-index: 1060;
+}
+
+/* Animations - GPU Accelerated with Standardized Durations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in var(--duration-slow) ease-out;
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+.animate-fade-in-fast {
+  animation: fade-in var(--duration-fast) ease-out;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 3s ease-in-out infinite;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Accessibility - Focus Styles */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Skip to main content link for screen readers */
+.skip-to-main {
+  position: absolute;
+  left: -9999px;
+  z-index: 9999;
+}
+
+.skip-to-main:focus {
+  left: 50%;
+  top: 1rem;
+  transform: translateX(-50%);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-primary-600);
+  color: white;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+}
+
+/* Hover Effects */
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-scale:active {
+  transform: scale(0.95);
+}
+
+/* Shadow Glow */
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.shadow-glow-lg {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+}
+
+.dark .shadow-glow {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+.dark .shadow-glow-lg {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+}
+
+/* Theme Transition */
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.theme-transition * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Header Optimizations - Minimalist & Responsive */
+.tenant-org-layout .glass-card-premium {
+  min-height: auto;
+}
+
+/* Layout Shift Prevention - Use transform instead of height changes */
+.desktop-header {
+  transform: translateY(0);
+  transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.desktop-header.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* Sidebar Width Transitions - Prevent Layout Shifts */
+.sidebar-container {
+  width: var(--sidebar-main-width);
+  transition: width 0.5s ease-in-out;
+}
+
+.sidebar-container.collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+/* Main Content Padding - Dynamic header height */
+.main-content {
+  padding-top: var(--header-height, 40px);
+}
+
+/* Responsive Typography */
+.page-title {
+  font-size: clamp(1rem, 2vw + 0.5rem, 1.25rem);
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .page-title {
+    font-size: 1rem;
+  }
+}
+
+/* Table Overflow Handling */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-left: calc(-1 * var(--spacing-md));
+  margin-right: calc(-1 * var(--spacing-md));
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+.table-wrapper table {
+  min-width: 100%;
+  width: max-content;
+}
+
+/* Ultrawide Monitor Support - Max content width */
+@media (min-width: 1536px) {
+  .main-content-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* Responsive Design - Using standardized breakpoints */
+@media (max-width: 639px) {
+  /* Mobile (sm) */
+  .tenant-org-layout {
+    font-size: 14px;
+  }
+  
+  .tenant-org-layout .glass-sidebar {
+    width: 16rem !important;
+  }
+  
+  /* Mobile header height optimization */
+  .tenant-org-layout .glass-card-premium {
+    min-height: 56px;
+  }
+  
+  /* Tablet touch targets - minimum 44px */
+  .tenant-org-layout button,
+  .tenant-org-layout a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Tablet (md) - Optimized spacing and touch targets */
+  .tenant-org-layout .glass-sidebar {
+    width: 18rem !important;
+  }
+  
+  /* Tablet touch targets */
+  .tenant-org-layout button,
+  .tenant-org-layout a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Reduced padding for better space utilization */
+  .tenant-org-layout .main-content-inner {
+    padding: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 1023px) {
+  /* Mobile & Tablet - Sidebar should be fixed overlay */
+  .tenant-org-layout .glass-sidebar {
+    position: fixed !important;
+    z-index: 1020 !important;
+    transform: translateX(-100%);
+  }
+  
+  .tenant-org-layout .glass-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Desktop - Sidebar should be relative, not fixed */
+  .tenant-org-layout .glass-sidebar {
+    position: relative !important;
+    transform: translateX(0) !important;
+    z-index: auto !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Desktop (lg) - Sidebar must be relative, not fixed */
+  .tenant-org-layout .glass-sidebar {
+    width: 16rem;
+    position: relative !important;
+    transform: translateX(0) !important;
+    z-index: auto !important;
+    left: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    inset: auto !important;
+  }
+  
+  /* Desktop header height optimization */
+  .tenant-org-layout .glass-card-premium {
+    min-height: 56px;
+  }
+  
+  /* Ensure sidebar container doesn't cause layout issues */
+  .sidebar-container {
+    position: relative !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  /* Large Desktop (xl) */
+  .tenant-org-layout .glass-sidebar {
+    width: 18rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  /* Extra Large Desktop (2xl) */
+  .tenant-org-layout .glass-sidebar {
+    width: 20rem;
+  }
+  
+  /* Max content width for readability on ultrawide monitors */
+  .main-content-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* Glass Input Styles */
+.glass-input {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #111827;
+  transition: all 0.2s ease;
+}
+
+.dark .glass-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f9fafb;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.dark .glass-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.glass-input::placeholder {
+  color: #9ca3af;
+}
+
+.dark .glass-input::placeholder {
+  color: #6b7280;
+}
+
+/* Layout Variables - Prevent Layout Shifts */
+:root {
+  --sidebar-icon-width: 4rem;    /* 64px - ClickUp sidebar */
+  --sidebar-main-width: 14rem;   /* 224px - Main sidebar */
+  --sidebar-collapsed-width: 0;
+  --header-height: 40px;          /* Top navbar height */
+  
+  /* Animation Duration Scale */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+}
+
+/* Spacing Scale - 4px base unit */
+:root {
+  --spacing-xs: 0.5rem;   /* 8px */
+  --spacing-sm: 1rem;     /* 16px */
+  --spacing-md: 1.5rem;   /* 24px */
+  --spacing-lg: 2rem;     /* 32px */
+  --spacing-xl: 3rem;     /* 48px */
+  --spacing-2xl: 4rem;    /* 64px */
+}
+
+/* Color Variables for Light/Dark Mode */
+:root {
+  --clean-light-pure: #ffffff;
+  --clean-light-soft: #f9fafb;
+  --primary-50: #eff6ff;
+  --glass-dark-deepest: #0f172a;
+  --glass-dark-deep: #1e293b;
+  --glass-dark-base: #334155;
+}
+
+.dark {
+  --clean-light-pure: #0f172a;
+  --clean-light-soft: #1e293b;
+  --primary-50: #1e293b;
+}
+
+/* Menu Item Active States */
+.tenant-org-layout .menu-item-active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+  border-left: 3px solid rgb(59, 130, 246);
+}
+
+.dark .tenant-org-layout .menu-item-active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+  border-left: 3px solid rgb(99, 102, 241);
+}
+
+/* Loading States */
+.tenant-org-layout .loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.dark .tenant-org-layout .loading-skeleton {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .tenant-org-layout .glass-sidebar,
+  .tenant-org-layout .glass-card-premium {
+    display: none !important;
+  }
+}

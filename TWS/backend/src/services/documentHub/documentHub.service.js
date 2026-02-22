@@ -1,0 +1,537 @@
+/**
+ * Document Hub – service layer: CRUD, versions, audit, S3 URLs
+ */
+const OrgDocument = require('../../models/OrgDocument');
+const OrgDocumentVersion = require('../../models/OrgDocumentVersion');
+const OrgDocumentAudit = require('../../models/OrgDocumentAudit');
+const OrgDocumentComment = require('../../models/OrgDocumentComment');
+const DocumentShare = require('../../models/DocumentShare');
+const DocumentFolder = require('../../models/DocumentFolder');
+const DocumentTag = require('../../models/DocumentTag');
+const { generateSignedUrl } = require('../../config/s3');
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+
+/**
+ * List documents with filters and pagination
+ */
+async function listDocuments({ orgId, tenantId, userId, folderId, tags, status, type, templateId, ownerId, search, sort = 'updatedAt', order = 'desc', page = DEFAULT_PAGE, limit = DEFAULT_LIMIT }) {
+  const filter = { orgId, deletedAt: null };
+  if (folderId !== undefined && folderId !== null && folderId !== '') filter.folderId = folderId;
+  if (status) filter.status = status;
+  if (type) filter.type = type;
+  if (templateId) filter.templateId = templateId;
+  if (ownerId) filter.ownerId = ownerId;
+  if (tags && tags.length) filter.tags = { $in: tags };
+
+  if (search && search.trim()) {
+    filter.$or = [
+      { title: { $regex: search.trim(), $options: 'i' } },
+      { fileName: { $regex: search.trim(), $options: 'i' } }
+    ];
+  }
+
+  const safeLimit = Math.min(limit, MAX_LIMIT);
+  const skip = (Math.max(1, page) - 1) * safeLimit;
+  const sortObj = { [sort]: order === 'asc' ? 1 : -1 };
+
+  const [documents, total] = await Promise.all([
+    OrgDocument.find(filter)
+      .populate('folderId', 'name parentId')
+      .populate('tags', 'name color')
+      .populate('createdBy', 'fullName email')
+      .populate('ownerId', 'fullName email')
+      .populate('assigneeId', 'fullName email')
+      .sort(sortObj)
+      .skip(skip)
+      .limit(safeLimit)
+      .lean(),
+    OrgDocument.countDocuments(filter)
+  ]);
+
+  return {
+    documents,
+    pagination: {
+      page: Math.max(1, page),
+      limit: safeLimit,
+      total,
+      pages: Math.ceil(total / safeLimit) || 1
+    }
+  };
+}
+
+/**
+ * Get one document by id; optionally append signed download URL for uploads
+ */
+async function getDocument(documentId, orgId, options = {}) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null })
+    .populate('folderId', 'name parentId')
+    .populate('tags', 'name color')
+    .populate('createdBy', 'fullName email')
+    .populate('ownerId', 'fullName email')
+    .populate('assigneeId', 'fullName email')
+    .lean();
+
+  if (!doc) return null;
+  if (options.includeDownloadUrl && doc.type === 'uploaded' && doc.fileKey) {
+    try {
+      doc.downloadUrl = await generateSignedUrl(doc.fileKey);
+    } catch (e) {
+      doc.downloadUrl = null;
+    }
+  }
+  return doc;
+}
+
+/**
+ * Create document (from template or blank)
+ */
+async function createDocument({ orgId, tenantId, userId, title, templateId, content, folderId, tags }) {
+  const doc = new OrgDocument({
+    orgId,
+    tenantId,
+    type: 'created',
+    title: title || 'Untitled',
+    templateId: templateId || null,
+    content: content || null,
+    folderId: folderId || null,
+    tags: tags || [],
+    status: 'draft',
+    createdBy: userId,
+    ownerId: userId
+  });
+  await doc.save();
+
+  await OrgDocumentAudit.create({
+    documentId: doc._id,
+    orgId,
+    action: 'created',
+    userId
+  });
+
+  return doc.toObject ? doc.toObject() : doc;
+}
+
+/**
+ * Update document (metadata and/or content); create version snapshot when content changes
+ */
+async function updateDocument(documentId, orgId, userId, payload) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null });
+  if (!doc) return null;
+
+  const contentChanged = payload.content !== undefined && JSON.stringify(payload.content) !== JSON.stringify(doc.content);
+  if (contentChanged && doc.type === 'created' && doc.content) {
+    const nextVersion = await OrgDocumentVersion.countDocuments({ documentId: doc._id }) + 1;
+    await OrgDocumentVersion.create({
+      documentId: doc._id,
+      orgId,
+      versionNumber: nextVersion,
+      title: doc.title,
+      content: doc.content,
+      createdBy: userId
+    });
+  }
+
+  if (payload.title !== undefined) doc.title = payload.title;
+  if (payload.content !== undefined) doc.content = payload.content;
+  if (payload.folderId !== undefined) doc.folderId = payload.folderId;
+  if (payload.tags !== undefined) doc.tags = payload.tags;
+  if (payload.status !== undefined) doc.status = payload.status;
+  if (payload.assigneeId !== undefined) doc.assigneeId = payload.assigneeId || null;
+  doc.updatedAt = new Date();
+  await doc.save();
+
+  await OrgDocumentAudit.create({
+    documentId: doc._id,
+    orgId,
+    action: 'edited',
+    userId,
+    metadata: contentChanged ? { versionSnapshot: true } : null
+  });
+
+  return doc.toObject ? doc.toObject() : doc;
+}
+
+/**
+ * Soft delete
+ */
+async function deleteDocument(documentId, orgId, userId) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null });
+  if (!doc) return null;
+  doc.deletedAt = new Date();
+  doc.updatedAt = new Date();
+  await doc.save();
+
+  await OrgDocumentAudit.create({
+    documentId: doc._id,
+    orgId,
+    action: 'deleted',
+    userId
+  });
+
+  return doc;
+}
+
+/**
+ * Submit for review
+ */
+async function submitForReview(documentId, orgId, userId) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null });
+  if (!doc) return null;
+  if (doc.status !== 'draft') return { error: 'Only draft documents can be submitted for review' };
+  doc.status = 'in_review';
+  doc.updatedAt = new Date();
+  await doc.save();
+
+  await OrgDocumentAudit.create({
+    documentId: doc._id,
+    orgId,
+    action: 'submitted_for_review',
+    userId
+  });
+
+  return doc.toObject ? doc.toObject() : doc;
+}
+
+/**
+ * Approve or reject
+ */
+async function setReviewOutcome(documentId, orgId, userId, outcome, comment) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null });
+  if (!doc) return null;
+  if (doc.status !== 'in_review') return { error: 'Document is not in review' };
+
+  doc.status = outcome === 'approved' ? 'approved' : 'draft';
+  doc.updatedAt = new Date();
+  await doc.save();
+
+  await OrgDocumentAudit.create({
+    documentId: doc._id,
+    orgId,
+    action: outcome === 'approved' ? 'approved' : 'rejected',
+    userId,
+    comment: comment || null
+  });
+
+  return doc.toObject ? doc.toObject() : doc;
+}
+
+/**
+ * List versions for a document
+ */
+async function listVersions(documentId, orgId) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null }).select('_id').lean();
+  if (!doc) return null;
+
+  const versions = await OrgDocumentVersion.find({ documentId })
+    .sort({ versionNumber: -1 })
+    .populate('createdBy', 'fullName email')
+    .lean();
+  return versions;
+}
+
+/**
+ * Get one version (for restore preview)
+ */
+async function getVersion(versionId, documentId, orgId) {
+  const version = await OrgDocumentVersion.findOne({
+    _id: versionId,
+    documentId,
+    orgId
+  }).populate('createdBy', 'fullName email').lean();
+  return version;
+}
+
+/**
+ * Restore a version (creates new version with restored content, updates document)
+ */
+async function restoreVersion(documentId, versionId, orgId, userId) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null });
+  if (!doc) return null;
+  const version = await OrgDocumentVersion.findOne({ _id: versionId, documentId, orgId }).lean();
+  if (!version) return null;
+
+  // Save current content as new version before overwriting
+  const nextVersion = await OrgDocumentVersion.countDocuments({ documentId: doc._id }) + 1;
+  await OrgDocumentVersion.create({
+    documentId: doc._id,
+    orgId,
+    versionNumber: nextVersion,
+    title: doc.title,
+    content: doc.content,
+    createdBy: userId
+  });
+
+  doc.content = version.content;
+  doc.title = version.title;
+  doc.updatedAt = new Date();
+  await doc.save();
+
+  await OrgDocumentAudit.create({
+    documentId: doc._id,
+    orgId,
+    action: 'restored',
+    userId,
+    metadata: { fromVersionId: versionId, versionNumber: version.versionNumber }
+  });
+
+  return doc.toObject ? doc.toObject() : doc;
+}
+
+/**
+ * List audit events (optionally by documentId or userId)
+ */
+async function listAudit({ orgId, documentId, userId, action, dateFrom, dateTo, page = DEFAULT_PAGE, limit = DEFAULT_LIMIT }) {
+  const filter = { orgId };
+  if (documentId) filter.documentId = documentId;
+  if (userId) filter.userId = userId;
+  if (action) filter.action = action;
+  
+  // Date range filter
+  if (dateFrom || dateTo) {
+    filter.createdAt = {};
+    if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+    if (dateTo) {
+      // Include the entire end date (set to end of day)
+      const endDate = new Date(dateTo);
+      endDate.setHours(23, 59, 59, 999);
+      filter.createdAt.$lte = endDate;
+    }
+  }
+
+  const safeLimit = Math.min(limit, MAX_LIMIT);
+  const skip = (Math.max(1, page) - 1) * safeLimit;
+
+  const [events, total] = await Promise.all([
+    OrgDocumentAudit.find(filter)
+      .populate('userId', 'fullName email')
+      .populate('documentId', 'title')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .lean(),
+    OrgDocumentAudit.countDocuments(filter)
+  ]);
+
+  return {
+    events,
+    pagination: {
+      page: Math.max(1, page),
+      limit: safeLimit,
+      total,
+      pages: Math.ceil(total / safeLimit) || 1
+    }
+  };
+}
+
+// --- Folders ---
+async function listFolders(orgId, tenantId, scope = 'org', ownerId = null) {
+  const filter = { orgId, tenantId, scope };
+  if (scope === 'employee' && ownerId) filter.ownerId = ownerId;
+  const folders = await DocumentFolder.find(filter)
+    .populate('parentId', 'name')
+    .sort({ name: 1 })
+    .lean();
+  return folders;
+}
+
+async function createFolder({ orgId, tenantId, userId, name, parentId, scope = 'org', ownerId = null }) {
+  const folder = new DocumentFolder({
+    orgId,
+    tenantId,
+    name,
+    parentId: parentId || null,
+    scope,
+    ownerId: scope === 'employee' ? ownerId : null,
+    createdBy: userId
+  });
+  await folder.save();
+  return folder.toObject ? folder.toObject() : folder;
+}
+
+async function updateFolder(folderId, orgId, payload) {
+  const folder = await DocumentFolder.findOne({ _id: folderId, orgId });
+  if (!folder) return null;
+  if (payload.name !== undefined) folder.name = payload.name;
+  if (payload.parentId !== undefined) folder.parentId = payload.parentId;
+  folder.updatedAt = new Date();
+  await folder.save();
+  return folder.toObject ? folder.toObject() : folder;
+}
+
+async function deleteFolder(folderId, orgId) {
+  const folder = await DocumentFolder.findOne({ _id: folderId, orgId });
+  if (!folder) return null;
+  await folder.deleteOne();
+  return { deleted: true };
+}
+
+// --- Tags ---
+async function listTags(orgId, tenantId) {
+  const tags = await DocumentTag.find({ orgId, tenantId }).sort({ name: 1 }).lean();
+  return tags;
+}
+
+async function createTag({ orgId, tenantId, userId, name, color }) {
+  const tag = new DocumentTag({
+    orgId,
+    tenantId,
+    name,
+    color: color || null,
+    createdBy: userId
+  });
+  await tag.save();
+  return tag.toObject ? tag.toObject() : tag;
+}
+
+async function updateTag(tagId, orgId, payload) {
+  const tag = await DocumentTag.findOne({ _id: tagId, orgId });
+  if (!tag) return null;
+  if (payload.name !== undefined) tag.name = payload.name;
+  if (payload.color !== undefined) tag.color = payload.color;
+  await tag.save();
+  return tag.toObject ? tag.toObject() : tag;
+}
+
+async function deleteTag(tagId, orgId) {
+  const tag = await DocumentTag.findOne({ _id: tagId, orgId });
+  if (!tag) return null;
+  await tag.deleteOne();
+  return { deleted: true };
+}
+
+// --- Comments ---
+async function listComments(documentId, orgId) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null }).select('_id').lean();
+  if (!doc) return null;
+  const comments = await OrgDocumentComment.find({ documentId, orgId })
+    .populate('userId', 'fullName email')
+    .sort({ createdAt: 1 })
+    .lean();
+  return comments;
+}
+
+async function createComment(documentId, orgId, userId, content) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null }).select('_id').lean();
+  if (!doc) return null;
+  const trimmed = (content || '').trim();
+  if (!trimmed) return { error: 'Comment content is required' };
+  const comment = new OrgDocumentComment({
+    documentId,
+    orgId,
+    userId,
+    content: trimmed
+  });
+  await comment.save();
+  const populated = await OrgDocumentComment.findById(comment._id)
+    .populate('userId', 'fullName email')
+    .lean();
+  return populated;
+}
+
+// --- Share ---
+async function listShares(documentId, orgId) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null }).select('_id').lean();
+  if (!doc) return null;
+  const shares = await DocumentShare.find({ documentId, orgId })
+    .populate('userId', 'fullName email')
+    .populate('sharedBy', 'fullName email')
+    .sort({ createdAt: 1 })
+    .lean();
+  return shares;
+}
+
+async function addShare(documentId, orgId, sharedByUserId, userId, permission = 'view') {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null }).select('_id').lean();
+  if (!doc) return null;
+  const perm = permission === 'edit' ? 'edit' : 'view';
+  let share = await DocumentShare.findOne({ documentId, userId });
+  if (share) {
+    share.permission = perm;
+    share.sharedBy = sharedByUserId;
+    await share.save();
+  } else {
+    share = new DocumentShare({
+      documentId,
+      orgId,
+      userId,
+      permission: perm,
+      sharedBy: sharedByUserId
+    });
+    await share.save();
+  }
+  const populated = await DocumentShare.findById(share._id)
+    .populate('userId', 'fullName email')
+    .populate('sharedBy', 'fullName email')
+    .lean();
+  return populated;
+}
+
+async function removeShare(documentId, orgId, userId) {
+  const doc = await OrgDocument.findOne({ _id: documentId, orgId, deletedAt: null }).select('_id').lean();
+  if (!doc) return null;
+  const result = await DocumentShare.deleteOne({ documentId, userId });
+  return { deleted: result.deletedCount > 0 };
+}
+
+/**
+ * Create uploaded document (after S3 upload); req.file from multer-s3 has .key, .location, .originalname, .size, .mimetype
+ */
+async function createUploadedDocument({ orgId, tenantId, userId, fileKey, fileName, mimeType, fileSize, title, folderId, tags }) {
+  const doc = new OrgDocument({
+    orgId,
+    tenantId,
+    type: 'uploaded',
+    title: title || fileName || 'Untitled',
+    fileKey,
+    fileName: fileName || null,
+    mimeType: mimeType || null,
+    fileSize: fileSize || null,
+    folderId: folderId || null,
+    tags: tags || [],
+    status: 'draft',
+    createdBy: userId,
+    ownerId: userId
+  });
+  await doc.save();
+
+  await OrgDocumentAudit.create({
+    documentId: doc._id,
+    orgId,
+    action: 'created',
+    userId,
+    metadata: { type: 'uploaded' }
+  });
+
+  return doc.toObject ? doc.toObject() : doc;
+}
+
+module.exports = {
+  listDocuments,
+  getDocument,
+  createDocument,
+  updateDocument,
+  deleteDocument,
+  submitForReview,
+  setReviewOutcome,
+  listVersions,
+  getVersion,
+  restoreVersion,
+  listAudit,
+  listComments,
+  createComment,
+  listShares,
+  addShare,
+  removeShare,
+  listFolders,
+  createFolder,
+  updateFolder,
+  deleteFolder,
+  listTags,
+  createTag,
+  updateTag,
+  deleteTag,
+  createUploadedDocument
+};

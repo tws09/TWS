@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-10-14T13:50:46.377Z",
+  "version": "1.0.0",
+  "prometheus": {
+    "enabled": true,
+    "port": 9090,
+    "path": "/metrics",
+    "collectDefaultMetrics": true,
+    "customMetrics": [
+      {
+        "name": "http_requests_total",
+        "help": "Total number of HTTP requests",
+        "type": "counter",
+        "labelNames": [
+          "method",
+          "route",
+          "status_code"
+        ]
+      },
+      {
+        "name": "http_request_duration_seconds",
+        "help": "Duration of HTTP requests in seconds",
+        "type": "histogram",
+        "labelNames": [
+          "method",
+          "route"
+        ],
+        "buckets": [
+          0.1,
+          0.5,
+          1,
+          2,
+          5,
+          10
+        ]
+      },
+      {
+        "name": "tenant_operations_total",
+        "help": "Total number of tenant operations",
+        "type": "counter",
+        "labelNames": [
+          "tenant_id",
+          "operation",
+          "status"
+        ]
+      },
+      {
+        "name": "database_connections_active",
+        "help": "Number of active database connections",
+        "type": "gauge"
+      },
+      {
+        "name": "jwt_tokens_issued_total",
+        "help": "Total number of JWT tokens issued",
+        "type": "counter",
+        "labelNames": [
+          "user_type"
+        ]
+      }
+    ]
+  }
+}

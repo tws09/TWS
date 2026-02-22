@@ -1,0 +1,19 @@
+[Unit]
+Description=Supra-Admin Backend API
+After=network.target mongodb.service redis.service
+
+[Service]
+Type=simple
+User=node
+WorkingDirectory=/opt/supra-admin-backend
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+Environment=PORT=4000
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=supra-admin-backend
+
+[Install]
+WantedBy=multi-user.target

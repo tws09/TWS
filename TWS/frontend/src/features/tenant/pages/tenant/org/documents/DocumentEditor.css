@@ -1,0 +1,127 @@
+/* Document editor page – BlockNote with paper-like layout */
+.doc-editor-page {
+  --bn-colors-editor-text: var(--tenant-text);
+  --bn-colors-editor-background: var(--tenant-bg-elevated);
+  --bn-colors-menu-text: var(--tenant-text);
+  --bn-colors-menu-background: var(--tenant-bg-elevated);
+  --bn-colors-tooltip-text: var(--tenant-text);
+  --bn-colors-tooltip-background: var(--tenant-bg-elevated);
+  --bn-colors-hovered-text: var(--tenant-text);
+  --bn-colors-hovered-background: var(--tenant-bg);
+  --bn-colors-selected-text: var(--tenant-text);
+  --bn-colors-selected-background: rgba(var(--tenant-primary-rgb, 59, 130, 246), 0.15);
+  --bn-colors-disabled-text: var(--tenant-muted);
+  --bn-colors-border: var(--tenant-border);
+  --bn-border-radius: 0.5rem;
+  --bn-font-family: inherit;
+}
+
+.doc-editor-blocknote-wrapper {
+  min-height: 100%;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+/* Paper-style editor surface */
+.doc-editor-blocknote-wrapper .bn-editor {
+  min-height: 480px;
+  padding: 2rem 2.5rem;
+  background: var(--tenant-bg-elevated);
+  border-radius: 1rem;
+  border: 1px solid var(--tenant-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.doc-blocknote-editor {
+  background: transparent !important;
+  color: var(--tenant-text) !important;
+}
+
+.doc-editor-blocknote-wrapper [data-node-type="blockContainer"] {
+  margin: 0.35rem 0;
+}
+
+.doc-editor-blocknote-wrapper .bn-block-content {
+  color: var(--tenant-text);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.doc-editor-blocknote-wrapper .bn-editor h1,
+.doc-editor-blocknote-wrapper [data-content-type="heading"]:first-child .bn-block-content {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.doc-editor-blocknote-wrapper .bn-editor h2,
+.doc-editor-blocknote-wrapper [data-content-type="heading"] .bn-block-content {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+
+.doc-editor-blocknote-wrapper a {
+  color: var(--tenant-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.doc-editor-blocknote-wrapper a:hover {
+  opacity: 0.9;
+}
+
+.doc-editor-blocknote-wrapper blockquote {
+  border-left: 4px solid var(--tenant-primary);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  opacity: 0.95;
+  font-style: italic;
+}
+
+.doc-editor-blocknote-wrapper ul,
+.doc-editor-blocknote-wrapper ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.doc-editor-blocknote-wrapper pre,
+.doc-editor-blocknote-wrapper code {
+  background: var(--tenant-bg);
+  border: 1px solid var(--tenant-border);
+  border-radius: 0.5rem;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 0.9em;
+}
+
+.doc-editor-blocknote-wrapper pre {
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+
+.doc-editor-blocknote-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+
+.doc-editor-blocknote-wrapper th,
+.doc-editor-blocknote-wrapper td {
+  border: 1px solid var(--tenant-border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.doc-editor-blocknote-wrapper th {
+  background: var(--tenant-bg);
+  font-weight: 600;
+}
+
+.doc-editor-blocknote-wrapper tr:hover td {
+  background: rgba(0, 0, 0, 0.02);
+}

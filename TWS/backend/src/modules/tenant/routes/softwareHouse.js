@@ -1,0 +1,1159 @@
+const express = require('express');
+const mongoose = require('mongoose');
+// Use mergeParams: true to access :tenantSlug from parent route
+const router = express.Router({ mergeParams: true });
+const { requireRole } = require('../../../middleware/auth/rbac');
+const ErrorHandler = require('../../../middleware/common/errorHandler');
+const Tenant = require('../../../models/Tenant');
+const SoftwareHouseRole = require('../../../models/SoftwareHouseRole');
+const Project = require('../../../models/Project');
+const Card = require('../../../models/Card');
+const Sprint = require('../../../models/Sprint');
+const DevelopmentMetrics = require('../../../models/DevelopmentMetrics');
+const { TimeEntry } = require('../../../models/Finance');
+const Client = require('../../../models/Client');
+const Workspace = require('../../../models/Workspace');
+const ProjectMember = require('../../../models/ProjectMember');
+const tenantOrgService = require('../../../services/tenant/tenant-org.service');
+const timeTrackingService = require('../../../services/softwareHouse/timeTrackingService');
+
+// ✅ UNIFIED AUTHENTICATION MIDDLEWARE - Replaces unifiedSoftwareHouseAuth + verifyERPToken
+// Single middleware that handles all authentication, tenant context, and orgId resolution
+// Performance: 1-2 queries instead of 8-17 queries
+const unifiedSoftwareHouseAuth = require('../../../middleware/auth/unifiedSoftwareHouseAuth');
+
+// Get tenant software house configuration
+router.get('/config', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  
+  const tenant = await Tenant.findOne({ _id: tenantId, orgId })
+    .select('name erpCategory softwareHouseConfig erpModules');
+  
+  if (!tenant) {
+    return res.status(404).json({
+      success: false,
+      message: 'Tenant not found'
+    });
+  }
+  
+  if (tenant.erpCategory !== 'software_house') {
+    return res.status(400).json({
+      success: false,
+      message: 'Tenant is not configured as a software house'
+    });
+  }
+  
+  res.json({
+    success: true,
+    data: {
+      tenant: {
+        name: tenant.name,
+        erpCategory: tenant.erpCategory,
+        erpModules: tenant.erpModules
+      },
+      softwareHouseConfig: tenant.softwareHouseConfig || {}
+    }
+  });
+}));
+
+// Update tenant software house configuration
+router.put('/config', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  const updates = req.body;
+  
+  const tenant = await Tenant.findOne({ _id: tenantId, orgId });
+  
+  if (!tenant) {
+    return res.status(404).json({
+      success: false,
+      message: 'Tenant not found'
+    });
+  }
+  
+  // Ensure tenant is configured as software house
+  if (tenant.erpCategory !== 'software_house') {
+    return res.status(400).json({
+      success: false,
+      message: 'Tenant must be configured as software_house to update software house configuration'
+    });
+  }
+  
+  // Update software house configuration
+  tenant.softwareHouseConfig = {
+    ...tenant.softwareHouseConfig,
+    ...updates
+  };
+  
+  await tenant.save();
+  
+  res.json({
+    success: true,
+    data: tenant.softwareHouseConfig,
+    message: 'Software house configuration updated successfully'
+  });
+}));
+
+// Get tenant software house metrics
+router.get('/metrics', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  
+  // Get project metrics
+  const projectMetrics = await Project.aggregate([
+    { $match: { orgId: orgId } },
+    {
+      $group: {
+        _id: null,
+        totalProjects: { $sum: 1 },
+        activeProjects: {
+          $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] }
+        },
+        completedProjects: {
+          $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] }
+        },
+        onTrackProjects: {
+          $sum: { $cond: [{ $eq: ['$status', 'on_track'] }, 1, 0] }
+        },
+        atRiskProjects: {
+          $sum: { $cond: [{ $eq: ['$status', 'at_risk'] }, 1, 0] }
+        },
+        delayedProjects: {
+          $sum: { $cond: [{ $eq: ['$status', 'delayed'] }, 1, 0] }
+        },
+        totalBudget: { $sum: '$budget' },
+        spentBudget: { $sum: '$spent' }
+      }
+    }
+  ]);
+  
+  // Get sprint metrics
+  const sprintMetrics = await Sprint.aggregate([
+    { $match: { orgId: orgId } },
+    {
+      $group: {
+        _id: null,
+        activeSprints: {
+          $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] }
+        },
+        completedSprints: {
+          $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] }
+        },
+        totalVelocity: { $avg: '$velocity' }
+      }
+    }
+  ]);
+  
+  // Get development metrics
+  const devMetrics = await DevelopmentMetrics.aggregate([
+    { $match: { orgId: orgId } },
+    {
+      $group: {
+        _id: null,
+        avgCodeCoverage: { $avg: '$codeQuality.coverage' },
+        avgClientSatisfaction: { $avg: '$clientSatisfaction.rating' },
+        totalBugs: { $sum: '$bugAnalytics.totalBugs' },
+        totalFeatures: { $sum: '$featureDelivery.featuresDelivered' }
+      }
+    }
+  ]);
+  
+  // Get team metrics
+  const teamMetrics = await SoftwareHouseRole.aggregate([
+    { $match: { orgId: orgId, isActive: true } },
+    {
+      $group: {
+        _id: null,
+        totalTeamMembers: { $sum: 1 },
+        developers: {
+          $sum: { $cond: [{ $eq: ['$roleType', 'developer'] }, 1, 0] }
+        },
+        techLeads: {
+          $sum: { $cond: [{ $eq: ['$roleType', 'tech_lead'] }, 1, 0] }
+        },
+        projectManagers: {
+          $sum: { $cond: [{ $eq: ['$roleType', 'project_manager'] }, 1, 0] }
+        }
+      }
+    }
+  ]);
+  
+  const metrics = {
+    projects: projectMetrics[0] || {
+      totalProjects: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+      onTrackProjects: 0,
+      atRiskProjects: 0,
+      delayedProjects: 0,
+      totalBudget: 0,
+      spentBudget: 0
+    },
+    sprints: sprintMetrics[0] || {
+      activeSprints: 0,
+      completedSprints: 0,
+      totalVelocity: 0
+    },
+    development: devMetrics[0] || {
+      avgCodeCoverage: 0,
+      avgClientSatisfaction: 0,
+      totalBugs: 0,
+      totalFeatures: 0
+    },
+    team: teamMetrics[0] || {
+      totalTeamMembers: 0,
+      developers: 0,
+      techLeads: 0,
+      projectManagers: 0
+    }
+  };
+  
+  res.json({
+    success: true,
+    data: metrics
+  });
+}));
+
+// Get tenant projects with software house details
+router.get('/projects', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager', 'employee', 'contractor']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  const { status, projectType, methodology } = req.query;
+  
+  let query = { orgId };
+  
+  if (status) {
+    query.status = status;
+  }
+  
+  if (projectType) {
+    query.projectType = projectType;
+  }
+  
+  if (methodology) {
+    query.methodology = methodology;
+  }
+  
+  const projects = await Project.find(query)
+    .populate('clientId', 'name email')
+    .populate('teamMembers', 'name email avatar')
+    .select('name description status projectType methodology techStack budget spent startDate endDate clientId teamMembers')
+    .sort({ createdAt: -1 });
+  
+  res.json({
+    success: true,
+    data: projects
+  });
+}));
+
+// Get tenant active sprints
+router.get('/sprints', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager', 'employee', 'contractor']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  const { status } = req.query;
+  
+  let query = { orgId };
+  
+  if (status) {
+    query.status = status;
+  }
+  
+  const sprints = await Sprint.find(query)
+    .populate('projectId', 'name clientId')
+    .populate('teamMembers', 'name email avatar')
+    .select('name projectId startDate endDate status goal capacity velocity backlogCards teamMembers')
+    .sort({ startDate: -1 });
+  
+  res.json({
+    success: true,
+    data: sprints
+  });
+}));
+
+// Get tenant development analytics
+router.get('/analytics', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  const { projectId, timeRange } = req.query;
+  
+  let query = { orgId };
+  
+  if (projectId) {
+    query.projectId = projectId;
+  }
+  
+  // Add time range filter if provided
+  if (timeRange) {
+    const now = new Date();
+    let startDate;
+    
+    switch (timeRange) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case 'quarter':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+    
+    query.createdAt = { $gte: startDate };
+  }
+  
+  const analytics = await DevelopmentMetrics.find(query)
+    .populate('projectId', 'name clientId')
+    .select('projectId velocity burndownData codeQuality teamPerformance clientSatisfaction projectHealth bugAnalytics featureDelivery')
+    .sort({ createdAt: -1 });
+  
+  res.json({
+    success: true,
+    data: analytics
+  });
+}));
+
+// Get tenant team members with software house roles
+router.get('/team', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager', 'hr']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  
+  const teamMembers = await SoftwareHouseRole.find({ orgId, isActive: true })
+    .populate('createdBy', 'name email avatar')
+    .select('name roleType level hourlyRate techStackAccess projectTypeAccess isActive')
+    .sort({ level: 1, name: 1 });
+  
+  res.json({
+    success: true,
+    data: teamMembers
+  });
+}));
+
+// Initialize tenant as software house
+router.post('/initialize', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  const { 
+    defaultMethodology = 'agile',
+    supportedMethodologies = ['agile', 'scrum'],
+    techStack = {},
+    supportedProjectTypes = ['web_application', 'mobile_app'],
+    developmentSettings = {},
+    billingConfig = {},
+    teamConfig = {},
+    qualityConfig = {}
+  } = req.body;
+  
+  const tenant = await Tenant.findOne({ _id: tenantId, orgId });
+  
+  if (!tenant) {
+    return res.status(404).json({
+      success: false,
+      message: 'Tenant not found'
+    });
+  }
+  
+  // Update tenant to software house category
+  tenant.erpCategory = 'software_house';
+  
+  // Set default ERP modules for software house
+  tenant.erpModules = [
+    'hr', 'finance', 'projects', 'operations', 
+    'clients', 'reports', 'messaging', 'attendance', 'roles'
+  ];
+  
+  // Initialize software house configuration
+  tenant.softwareHouseConfig = {
+    defaultMethodology,
+    supportedMethodologies,
+    techStack: {
+      frontend: techStack.frontend || [],
+      backend: techStack.backend || [],
+      database: techStack.database || [],
+      cloud: techStack.cloud || [],
+      tools: techStack.tools || []
+    },
+    supportedProjectTypes,
+    developmentSettings: {
+      defaultSprintDuration: 14,
+      storyPointScale: 'fibonacci',
+      timeTrackingEnabled: true,
+      codeQualityTracking: true,
+      automatedTesting: false,
+      ...developmentSettings
+    },
+    billingConfig: {
+      defaultHourlyRate: 0,
+      currency: 'USD',
+      billingCycle: 'monthly',
+      invoiceTemplate: 'standard',
+      autoInvoiceGeneration: false,
+      ...billingConfig
+    },
+    teamConfig: {
+      maxTeamSize: 50,
+      allowRemoteWork: true,
+      requireTimeTracking: true,
+      allowOvertime: true,
+      maxOvertimeHours: 20,
+      ...teamConfig
+    },
+    qualityConfig: {
+      codeReviewRequired: true,
+      testingRequired: true,
+      documentationRequired: true,
+      minCodeCoverage: 80,
+      maxTechnicalDebt: 20,
+      ...qualityConfig
+    }
+  };
+  
+  await tenant.save();
+  
+  res.json({
+    success: true,
+    data: tenant.softwareHouseConfig,
+    message: 'Tenant initialized as software house successfully'
+  });
+}));
+
+// ==================== DEVELOPMENT METHODOLOGY ====================
+
+// Get development methodology configuration
+router.get('/development', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  
+  const tenant = await Tenant.findOne({ _id: tenantId, orgId })
+    .select('softwareHouseConfig');
+  
+  if (!tenant || tenant.erpCategory !== 'software_house') {
+    return res.status(400).json({
+      success: false,
+      message: 'Tenant is not configured as a software house'
+    });
+  }
+  
+  res.json({
+    success: true,
+    data: {
+      defaultMethodology: tenant.softwareHouseConfig?.defaultMethodology || 'agile',
+      supportedMethodologies: tenant.softwareHouseConfig?.supportedMethodologies || ['agile'],
+      developmentSettings: tenant.softwareHouseConfig?.developmentSettings || {
+        defaultSprintDuration: 14,
+        storyPointScale: 'fibonacci',
+        timeTrackingEnabled: true,
+        codeQualityTracking: true,
+        automatedTesting: false
+      }
+    }
+  });
+}));
+
+// Update development methodology configuration
+router.put('/development', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin']), ErrorHandler.asyncHandler(async (req, res) => {
+  const tenantId = req.user.tenantId;
+  const orgId = req.user.orgId;
+  const {
+    defaultMethodology,
+    supportedMethodologies,
+    developmentSettings
+  } = req.body;
+  
+  const tenant = await Tenant.findOne({ _id: tenantId, orgId });
+  
+  if (!tenant || tenant.erpCategory !== 'software_house') {
+    return res.status(400).json({
+      success: false,
+      message: 'Tenant is not configured as a software house'
+    });
+  }
+  
+  if (!tenant.softwareHouseConfig) {
+    tenant.softwareHouseConfig = {};
+  }
+  
+  if (defaultMethodology) {
+    tenant.softwareHouseConfig.defaultMethodology = defaultMethodology;
+  }
+  
+  if (supportedMethodologies) {
+    tenant.softwareHouseConfig.supportedMethodologies = supportedMethodologies;
+  }
+  
+  if (developmentSettings) {
+    tenant.softwareHouseConfig.developmentSettings = {
+      ...tenant.softwareHouseConfig.developmentSettings,
+      ...developmentSettings
+    };
+  }
+  
+  await tenant.save();
+  
+  res.json({
+    success: true,
+    data: {
+      defaultMethodology: tenant.softwareHouseConfig.defaultMethodology,
+      supportedMethodologies: tenant.softwareHouseConfig.supportedMethodologies,
+      developmentSettings: tenant.softwareHouseConfig.developmentSettings
+    },
+    message: 'Development methodology configuration updated successfully'
+  });
+}));
+
+// ==================== TIME TRACKING ====================
+
+// Start timer
+router.post('/time-tracking/start', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+  const { projectId, taskId, description } = req.body;
+
+  try {
+    const timeEntry = await timeTrackingService.startTimer(
+      orgId,
+      userId,
+      projectId,
+      taskId,
+      description
+    );
+
+    res.json({ success: true, data: timeEntry });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+  
+// Stop timer
+router.post('/time-tracking/stop/:timeEntryId', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+  const { timeEntryId } = req.params;
+
+  try {
+    const timeEntry = await timeTrackingService.stopTimer(
+      orgId,
+      userId,
+      timeEntryId
+    );
+
+    res.json({ success: true, data: timeEntry });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+
+// Get active timer
+router.get('/time-tracking/active', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+
+  const activeTimer = await TimeEntry.findOne({
+    orgId,
+    employeeId: userId,
+    'timer.isRunning': true
+  })
+    .populate('projectId', 'name')
+    .populate('taskId', 'title');
+
+  if (activeTimer && activeTimer.timer.startedAt) {
+    const currentTime = new Date();
+    const elapsedHours = (currentTime - activeTimer.timer.startedAt) / (1000 * 60 * 60);
+    activeTimer.currentElapsedHours = Math.round(elapsedHours * 100) / 100;
+  }
+
+  res.json({ success: true, data: activeTimer });
+}));
+
+// Get time entries
+router.get('/time-tracking/entries', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager', 'hr']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+  
+  // Filter by user if not admin/owner
+  const filters = { ...req.query };
+  if (req.user.role !== 'owner' && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+    filters.employeeId = userId;
+  }
+  
+  try {
+    const result = await timeTrackingService.getTimeEntries(orgId, filters);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}));
+
+// Legacy route for backward compatibility
+router.get('/time-tracking', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager', 'hr']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+  
+  const filters = { ...req.query };
+  if (req.user.role !== 'owner' && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+    filters.employeeId = userId;
+  }
+
+  try {
+    const result = await timeTrackingService.getTimeEntries(orgId, { ...filters, limit: 100 });
+    res.json({ success: true, data: result.timeEntries });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}));
+
+// Get today's time tracking summary
+router.get('/time-tracking/today', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager', 'hr']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const filters = {
+    startDate: today.toISOString(),
+    endDate: tomorrow.toISOString()
+  };
+  
+  // Filter by user if not admin
+  if (req.user.role !== 'owner' && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+    filters.employeeId = userId;
+  }
+  
+  try {
+    const result = await timeTrackingService.getTimeEntries(orgId, filters);
+    const stats = await timeTrackingService.getTimeEntryStats(orgId, filters);
+    
+    // Group by project
+  const projects = {};
+    result.timeEntries.forEach(entry => {
+    const projectName = entry.projectId?.name || 'Unknown';
+    if (!projects[projectName]) {
+      projects[projectName] = {
+        name: projectName,
+        hours: 0,
+        billable: false
+      };
+    }
+    projects[projectName].hours += entry.hours || 0;
+    if (entry.billable) {
+      projects[projectName].billable = true;
+    }
+  });
+  
+  res.json({
+    success: true,
+    data: {
+        totalHours: stats.totalHours,
+        billableHours: stats.billableHours,
+      projects: Object.values(projects),
+        entries: result.timeEntries
+    }
+  });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}));
+
+// Create manual time entry
+router.post('/time-tracking/entries', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+
+  try {
+    const timeEntry = await timeTrackingService.createTimeEntry(
+      orgId,
+      userId,
+      req.body
+    );
+
+    res.status(201).json({ success: true, data: timeEntry });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+
+// Legacy route for backward compatibility
+router.post('/time-tracking/entry', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+
+  try {
+    const timeEntry = await timeTrackingService.createTimeEntry(
+    orgId,
+      userId,
+      req.body
+    );
+
+    res.status(201).json({ success: true, data: timeEntry, message: 'Time entry created successfully' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+
+// Get time entry stats
+router.get('/time-tracking/stats', unifiedSoftwareHouseAuth, ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const userId = req.user._id;
+  
+  const filters = { ...req.query };
+  // Filter by user if not admin
+  if (req.user.role !== 'owner' && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+    filters.employeeId = userId;
+  }
+  
+  try {
+    const stats = await timeTrackingService.getTimeEntryStats(orgId, filters);
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}));
+
+// Approve time entry
+router.post('/time-tracking/entries/:timeEntryId/approve', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const { timeEntryId } = req.params;
+  const approvedBy = req.user._id;
+
+  try {
+    const timeEntry = await timeTrackingService.approveTimeEntry(
+      orgId,
+      timeEntryId,
+      approvedBy
+    );
+  
+    res.json({ success: true, data: timeEntry });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+
+// Reject time entry
+router.post('/time-tracking/entries/:timeEntryId/reject', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const { timeEntryId } = req.params;
+  const { rejectionReason } = req.body;
+  const rejectedBy = req.user._id;
+
+  try {
+    const timeEntry = await timeTrackingService.rejectTimeEntry(
+    orgId,
+      timeEntryId,
+      rejectedBy,
+      rejectionReason
+    );
+
+    res.json({ success: true, data: timeEntry });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+
+// Update time entry
+router.patch('/time-tracking/entries/:timeEntryId', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'employee', 'contractor', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const { timeEntryId } = req.params;
+
+  try {
+    const timeEntry = await timeTrackingService.updateTimeEntry(
+      orgId,
+      timeEntryId,
+      req.body
+    );
+
+    res.json({ success: true, data: timeEntry });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+
+// Delete time entry
+router.delete('/time-tracking/entries/:timeEntryId', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager']), ErrorHandler.asyncHandler(async (req, res) => {
+  const orgId = req.user.orgId;
+  const { timeEntryId } = req.params;
+
+  try {
+    await timeTrackingService.deleteTimeEntry(orgId, timeEntryId);
+    res.json({ success: true, message: 'Time entry deleted' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+}));
+
+// ==================== CLIENT PORTAL REMOVED ====================
+// Client portal functionality has been completely removed from software house ERP
+
+// Get tenant software house dashboard data
+router.get('/dashboard', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager', 'employee', 'contractor']), ErrorHandler.asyncHandler(async (req, res) => {
+  const { tenantSlug } = req.params;
+
+  try {
+    let tenant = await Tenant.findOne({ slug: tenantSlug });
+    if (!tenant && /^[0-9a-f]{24}$/i.test(tenantSlug)) {
+      tenant = await Tenant.findById(tenantSlug);
+    }
+    if (!tenant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tenant not found'
+      });
+    }
+
+    const tenantId = tenant._id;
+    const orgId = tenant.organizationId || tenant.orgId || req.user?.orgId;
+    if (!orgId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tenant organization not configured'
+      });
+    }
+
+    const orgIdObj = (orgId && mongoose.Types.ObjectId.isValid(orgId)) ? new mongoose.Types.ObjectId(orgId) : orgId;
+
+    const tenantInfo = await Tenant.findOne({ _id: tenantId, $or: [{ organizationId: orgIdObj }, { orgId: orgIdObj }] })
+      .select('name erpCategory softwareHouseConfig erpModules')
+      .lean();
+
+    if (!tenantInfo || tenantInfo.erpCategory !== 'software_house') {
+      return res.status(400).json({
+        success: false,
+        message: 'Tenant is not configured as a software house'
+      });
+    }
+
+    const safeDefaults = {
+      projects: { totalProjects: 0, activeProjects: 0, completedProjects: 0, onTrackProjects: 0, atRiskProjects: 0, delayedProjects: 0, totalBudget: 0, spentBudget: 0 },
+      sprints: { activeSprints: 0, completedSprints: 0, totalVelocity: 0 },
+      development: { avgCodeCoverage: 0, avgClientSatisfaction: 0, totalBugs: 0, totalFeatures: 0 },
+      team: { totalTeamMembers: 0 }
+    };
+
+    let recentProjects = [];
+    let activeSprints = [];
+    let projectMetrics = [];
+    let sprintMetrics = [];
+    let devMetrics = [];
+    let teamMetrics = [];
+
+    try {
+      recentProjects = await Project.find({ orgId: orgIdObj })
+        .populate('clientId', 'name email')
+        .select('name description status projectType methodology techStack budget timeline team clientId')
+        .sort({ updatedAt: -1 })
+        .limit(5)
+        .lean();
+    } catch (e) {
+      console.warn('Dashboard recentProjects:', e?.message);
+    }
+
+    try {
+      activeSprints = await Sprint.find({ orgId: orgIdObj, status: 'active' })
+        .populate('projectId', 'name clientId')
+        .select('name projectId startDate endDate status goal capacity metrics team')
+        .sort({ startDate: -1 })
+        .limit(3)
+        .lean();
+    } catch (e) {
+      console.warn('Dashboard activeSprints:', e?.message);
+    }
+
+    try {
+      projectMetrics = await Project.aggregate([
+        { $match: { orgId: orgIdObj } },
+        {
+          $group: {
+            _id: null,
+            totalProjects: { $sum: 1 },
+            activeProjects: { $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] } },
+            completedProjects: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+            onTrackProjects: { $sum: 0 },
+            atRiskProjects: { $sum: 0 },
+            delayedProjects: { $sum: 0 },
+            totalBudget: { $sum: { $ifNull: ['$budget.total', 0] } },
+            spentBudget: { $sum: { $ifNull: ['$budget.spent', 0] } }
+          }
+        }
+      ]);
+    } catch (e) {
+      console.warn('Dashboard projectMetrics:', e?.message);
+    }
+
+    try {
+      sprintMetrics = await Sprint.aggregate([
+        { $match: { orgId: orgIdObj } },
+        {
+          $group: {
+            _id: null,
+            activeSprints: { $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] } },
+            completedSprints: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] } },
+            totalVelocity: { $avg: '$velocity' }
+          }
+        }
+      ]);
+    } catch (e) {
+      console.warn('Dashboard sprintMetrics:', e?.message);
+    }
+
+    try {
+      devMetrics = await DevelopmentMetrics.aggregate([
+        { $match: { orgId: orgIdObj } },
+        {
+          $group: {
+            _id: null,
+            avgCodeCoverage: { $avg: { $ifNull: ['$codeQuality.codeCoverage', 0] } },
+            avgClientSatisfaction: { $avg: { $ifNull: ['$clientSatisfaction.overallRating', 0] } },
+            totalBugs: { $sum: { $ifNull: ['$bugs.totalBugs', 0] } },
+            totalFeatures: { $sum: { $ifNull: ['$features.featuresDelivered', 0] } }
+          }
+        }
+      ]);
+    } catch (e) {
+      console.warn('Dashboard devMetrics:', e?.message);
+    }
+
+    try {
+      teamMetrics = await SoftwareHouseRole.aggregate([
+        { $match: { orgId: orgIdObj, isActive: true } },
+        { $group: { _id: null, totalTeamMembers: { $sum: 1 } } }
+      ]);
+    } catch (e) {
+      console.warn('Dashboard teamMetrics:', e?.message);
+    }
+
+    const dashboardData = {
+      tenant: {
+        name: tenantInfo.name,
+        erpCategory: tenantInfo.erpCategory,
+        erpModules: tenantInfo.erpModules,
+        softwareHouseConfig: tenantInfo.softwareHouseConfig
+      },
+      recentProjects,
+      activeSprints,
+      metrics: {
+        projects: projectMetrics[0] || safeDefaults.projects,
+        sprints: sprintMetrics[0] || safeDefaults.sprints,
+        development: devMetrics[0] || safeDefaults.development,
+        team: teamMetrics[0] || safeDefaults.team
+      }
+    };
+
+    return res.json({
+      success: true,
+      data: dashboardData
+    });
+  } catch (error) {
+    console.error('Software house dashboard error:', error?.message || error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to load dashboard',
+      error: error.message
+    });
+  }
+}));
+
+// Employee Portal: Get user's workspaces and projects
+router.get('/employee-portal/workspaces', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager', 'employee', 'contractor']), ErrorHandler.asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const orgId = req.user.orgId;
+
+    if (!userId || !orgId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID and Organization ID are required'
+      });
+    }
+
+    // 1. Get or create personal workspace
+    let personalWorkspace = await Workspace.findOne({
+      orgId,
+      ownerId: userId,
+      type: 'internal',
+      name: { $regex: /^Personal Workspace/i }
+    }).populate('ownerId', 'fullName email');
+
+    // If personal workspace doesn't exist, create it
+    if (!personalWorkspace) {
+      const user = await require('../../../models/User').findById(userId).select('fullName email');
+      const userName = user?.fullName || 'Employee';
+      
+      // Generate unique slug
+      let slug = `personal-${userId.toString().slice(-6)}`;
+      let counter = 1;
+      while (await Workspace.findOne({ slug, orgId })) {
+        slug = `personal-${userId.toString().slice(-6)}-${counter}`;
+        counter++;
+      }
+
+      personalWorkspace = new Workspace({
+        orgId,
+        ownerId: userId,
+        name: `Personal Workspace - ${userName}`,
+        slug,
+        description: 'Your personal workspace for managing tasks',
+        type: 'internal',
+        members: [{
+          userId,
+          role: 'owner',
+          status: 'active',
+          joinedAt: new Date()
+        }],
+        settings: {
+          allowMemberInvites: false,
+          clientVisible: false,
+          publicBoards: false
+        }
+      });
+      await personalWorkspace.save();
+      await personalWorkspace.populate('ownerId', 'fullName email');
+    }
+
+    // 2. Get company workspaces (internal workspaces where user is member but not owner, or owner but not personal)
+    const companyWorkspaces = await Workspace.find({
+      orgId,
+      type: 'internal',
+      status: 'active',
+      $or: [
+        { 'members.userId': userId, 'members.status': 'active' },
+        { ownerId: userId }
+      ],
+      _id: { $ne: personalWorkspace._id } // Exclude personal workspace
+    })
+      .populate('ownerId', 'fullName email')
+      .populate('members.userId', 'fullName email')
+      .sort({ updatedAt: -1 })
+      .limit(50);
+
+    // Filter to only include workspaces where user is actually a member or owner
+    const filteredCompanyWorkspaces = companyWorkspaces.filter(ws => {
+      const isOwner = ws.ownerId._id.toString() === userId.toString();
+      const isMember = ws.members.some(m => 
+        m.userId._id.toString() === userId.toString() && m.status === 'active'
+      );
+      return isOwner || isMember;
+    });
+
+    // 3. Get projects where user is a ProjectMember
+    const projectMemberships = await ProjectMember.find({
+      userId,
+      status: 'active'
+    }).select('projectId role').lean();
+
+    const projectIds = projectMemberships.map(pm => pm.projectId);
+
+    const companyProjects = await Project.find({
+      _id: { $in: projectIds },
+      orgId,
+      status: { $ne: 'archived' }
+    })
+      .populate('clientId', 'name email')
+      .select('name description status startDate endDate clientId')
+      .sort({ updatedAt: -1 })
+      .limit(50)
+      .lean();
+
+    return res.json({
+      success: true,
+      data: {
+        personalWorkspace,
+        companyWorkspaces: filteredCompanyWorkspaces,
+        companyProjects
+      }
+    });
+  } catch (error) {
+    console.error('Employee portal workspaces error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to load workspaces',
+      error: error.message
+    });
+  }
+}));
+
+// Employee Portal: Create personal workspace (if doesn't exist)
+router.post('/employee-portal/workspaces/personal', unifiedSoftwareHouseAuth, requireRole(['owner', 'admin', 'project_manager', 'employee', 'contractor']), ErrorHandler.asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id;
+    const orgId = req.user.orgId;
+
+    if (!userId || !orgId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID and Organization ID are required'
+      });
+    }
+
+    // Check if personal workspace already exists
+    let personalWorkspace = await Workspace.findOne({
+      orgId,
+      ownerId: userId,
+      type: 'internal',
+      name: { $regex: /^Personal Workspace/i }
+    }).populate('ownerId', 'fullName email');
+
+    if (personalWorkspace) {
+      return res.json({
+        success: true,
+        message: 'Personal workspace already exists',
+        data: { workspace: personalWorkspace }
+      });
+    }
+
+    // Create personal workspace
+    const User = require('../../../models/User');
+    const user = await User.findById(userId).select('fullName email');
+    const userName = user?.fullName || 'Employee';
+    
+    // Generate unique slug
+    let slug = `personal-${userId.toString().slice(-6)}`;
+    let counter = 1;
+    while (await Workspace.findOne({ slug, orgId })) {
+      slug = `personal-${userId.toString().slice(-6)}-${counter}`;
+      counter++;
+    }
+
+    personalWorkspace = new Workspace({
+      orgId,
+      ownerId: userId,
+      name: `Personal Workspace - ${userName}`,
+      slug,
+      description: 'Your personal workspace for managing tasks',
+      type: 'internal',
+      members: [{
+        userId,
+        role: 'owner',
+        status: 'active',
+        joinedAt: new Date()
+      }],
+      settings: {
+        allowMemberInvites: false,
+        clientVisible: false,
+        publicBoards: false
+      }
+    });
+    await personalWorkspace.save();
+    await personalWorkspace.populate('ownerId', 'fullName email');
+
+    return res.json({
+      success: true,
+      message: 'Personal workspace created successfully',
+      data: { workspace: personalWorkspace }
+    });
+  } catch (error) {
+    console.error('Create personal workspace error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to create personal workspace',
+      error: error.message
+    });
+  }
+}));
+
+
+module.exports = router;

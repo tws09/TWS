@@ -1,0 +1,439 @@
+================================================================================
+NUCLEUS PROJECT OS - PROJECT MANAGEMENT WORKFLOW (TEXT FORMAT)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PROJECT MANAGEMENT WORKFLOW                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+START
+  │
+  ├─► [1. PROJECT INITIATION]
+  │     │
+  │     ├─► User logs in
+  │     │     │
+  │     │     └─► System: Authenticate user
+  │     │
+  │     ├─► User creates Project
+  │     │     │
+  │     │     ├─► Option A: Use Template
+  │     │     │     │
+  │     │     │     ├─► Select Template (Website/Mobile App/Custom)
+  │     │     │     │     │
+  │     │     │     └─► System: Auto-create Project + Deliverables + Tasks
+  │     │     │
+  │     │     └─► Option B: Create Empty Project
+  │     │           │
+  │     │           └─► System: Create empty project
+  │     │
+  │     └─► Project Created
+  │
+  ├─► [2. DELIVERABLE PLANNING]
+  │     │
+  │     ├─► PM opens Project
+  │     │     │
+  │     │     └─► System: Show project dashboard
+  │     │
+  │     ├─► PM creates Deliverable
+  │     │     │
+  │     │     ├─► Enter: Name, Description, Start Date, Target Date
+  │     │     │     │
+  │     │     │     └─► System: Validate dates and required fields
+  │     │     │
+  │     │     ├─► Add Acceptance Criteria
+  │     │     │     │
+  │     │     │     └─► System: Store acceptance criteria
+  │     │     │
+  │     │     └─► Submit
+  │     │           │
+  │     │           └─► System: Create deliverable (status = 'created')
+  │     │
+  │     └─► Deliverable Created
+  │
+  ├─► [3. TASK MANAGEMENT]
+  │     │
+  │     ├─► PM/Team creates Tasks
+  │     │     │
+  │     │     ├─► Enter: Title, Description, Assignee, Due Date
+  │     │     │     │
+  │     │     │     └─► System: Validate task data
+  │     │     │
+  │     │     ├─► Link Task to Deliverable (optional)
+  │     │     │     │
+  │     │     │     └─► System: Set task.milestoneId = deliverableId
+  │     │     │
+  │     │     └─► Submit
+  │     │           │
+  │     │           └─► System: Create task + Auto-update deliverable progress
+  │     │
+  │     ├─► Team Member works on Task
+  │     │     │
+  │     │     ├─► Update Task Status: "In Progress"
+  │     │     │     │
+  │     │     │     └─► System: Update status + Recalculate deliverable progress
+  │     │     │
+  │     │     ├─► Complete Task: "Completed"
+  │     │     │     │
+  │     │     │     └─► System: Mark complete + Recalculate progress
+  │     │     │
+  │     │     └─► Check: All tasks complete?
+  │     │           │
+  │     │           ├─► YES ──► System: Auto-update deliverable status = 'ready_approval'
+  │     │           │
+  │     │           └─► NO ──► Continue working
+  │     │
+  │     └─► Tasks Complete
+  │
+  ├─► [4. APPROVAL WORKFLOW SETUP]
+  │     │
+  │     ├─► PM creates Approval Chain
+  │     │     │
+  │     │     ├─► Enter Approvers:
+  │     │     │     │
+  │     │     │     ├─► Dev Lead (Step 1)
+  │     │     │     ├─► QA Lead (Step 2)
+  │     │     │     └─► Client Email (Step 3)
+  │     │     │
+  │     │     └─► Submit
+  │     │           │
+  │     │           └─► System: Create sequential approval chain
+  │     │                 │
+  │     │                 ├─► Step 1: Dev Lead (order: 1, can_proceed: true)
+  │     │                 ├─► Step 2: QA Lead (order: 2, can_proceed: false)
+  │     │                 └─► Step 3: Client (order: 3, can_proceed: false)
+  │     │
+  │     └─► Approval Chain Created
+  │
+  ├─► [5. INTERNAL APPROVAL PROCESS]
+  │     │
+  │     ├─► Step 1: Dev Lead Approval
+  │     │     │
+  │     │     ├─► System: Notify Dev Lead
+  │     │     │
+  │     │     ├─► Dev Lead reviews Deliverable
+  │     │     │     │
+  │     │     │     └─► System: Show deliverable details + tasks
+  │     │     │
+  │     │     ├─► Dev Lead clicks "Approve"
+  │     │     │     │
+  │     │     │     ├─► System: Check previous step (none for Step 1)
+  │     │     │     ├─► System: Validate user can approve
+  │     │     │     ├─► System: Mark Step 1 as 'approved'
+  │     │     │     └─► System: Set Step 2 can_proceed = true
+  │     │     │
+  │     │     └─► System: Notify QA Lead
+  │     │
+  │     ├─► Step 2: QA Lead Approval
+  │     │     │
+  │     │     ├─► QA Lead receives notification
+  │     │     │
+  │     │     ├─► QA Lead reviews Deliverable
+  │     │     │
+  │     │     ├─► QA Lead clicks "Approve"
+  │     │     │     │
+  │     │     │     ├─► System: Check Step 1 approved? (YES)
+  │     │     │     ├─► System: Mark Step 2 as 'approved'
+  │     │     │     └─► System: Set Step 3 can_proceed = true
+  │     │     │
+  │     │     └─► System: Notify Client
+  │     │
+  │     └─► Internal Approvals Complete
+  │
+  ├─► [6. CLIENT APPROVAL PROCESS]
+  │     │
+  │     ├─► Client logs into Client Portal
+  │     │     │
+  │     │     └─► System: Verify client role and project access
+  │     │
+  │     ├─► Client views Deliverables
+  │     │     │
+  │     │     └─► System: Show deliverables (read-only, no internal tasks)
+  │     │
+  │     ├─► Client clicks on Deliverable
+  │     │     │
+  │     │     └─► System: Show deliverable details + approval status
+  │     │
+  │     ├─► Client sees "Approve" button
+  │     │     │
+  │     │     ├─► System: Check deliverable status = 'ready_approval'?
+  │     │     ├─► System: Check previous steps approved?
+  │     │     └─► System: Enable approve button if ready
+  │     │
+  │     ├─► Client clicks "Approve"
+  │     │     │
+  │     │     ├─► System: Mark client step as 'approved'
+  │     │     ├─► System: Check all steps approved? (YES)
+  │     │     └─► System: Update deliverable status = 'approved'
+  │     │
+  │     └─► System: Notify PM
+  │
+  ├─► [7. CHANGE REQUEST PROCESS]
+  │     │
+  │     ├─► Client submits Change Request
+  │     │     │
+  │     │     ├─► Client views Deliverable
+  │     │     │     │
+  │     │     │     └─► System: Show "Request Change" button
+  │     │     │
+  │     │     ├─► Client enters Change Description
+  │     │     │     │
+  │     │     │     └─► System: Validate input
+  │     │     │
+  │     │     └─► Submit
+  │     │           │
+  │     │           └─► System: Create change request (status = 'submitted')
+  │     │                 │
+  │     │                 └─► System: Notify PM via Slack
+  │     │
+  │     ├─► PM evaluates Change Request
+  │     │     │
+  │     │     ├─► PM opens Change Request
+  │     │     │     │
+  │     │     │     └─► System: Show change request details
+  │     │     │
+  │     │     ├─► PM clicks "Evaluate"
+  │     │     │     │
+  │     │     │     └─► System: Show evaluation form
+  │     │     │
+  │     │     ├─► PM enters:
+  │     │     │     │
+  │     │     │     ├─► Effort Days
+  │     │     │     ├─► Cost Impact
+  │     │     │     ├─► Timeline Impact (days)
+  │     │     │     └─► Recommendation (Accept/Reject)
+  │     │     │
+  │     │     └─► Submit
+  │     │           │
+  │     │           └─► System: Update status = 'evaluated' + Notify client
+  │     │
+  │     ├─► Client decides on Change Request
+  │     │     │
+  │     │     ├─► Client views Evaluation
+  │     │     │     │
+  │     │     │     └─► System: Show PM evaluation details
+  │     │     │
+  │     │     ├─► Client clicks "Accept" or "Reject"
+  │     │     │     │
+  │     │     │     ├─► If ACCEPT:
+  │     │     │     │     │
+  │     │     │     │     ├─► System: Update status = 'accepted'
+  │     │     │     │     ├─► System: Update deliverable target_date (+timeline impact)
+  │     │     │     │     └─► System: Recalculate at-risk status
+  │     │     │     │
+  │     │     │     └─► If REJECT:
+  │     │     │           │
+  │     │     │           └─► System: Update status = 'rejected'
+  │     │     │
+  │     │     └─► System: Notify PM
+  │     │
+  │     └─► Change Request Processed
+  │
+  ├─► [8. PROGRESS MONITORING]
+  │     │
+  │     ├─► PM views Analytics Dashboard
+  │     │     │
+  │     │     ├─► Project Statistics
+  │     │     │     │
+  │     │     │     └─► System: Calculate and display:
+  │     │     │           ├─► Total projects
+  │     │     │           ├─► Total deliverables
+  │     │     │           ├─► Completion rate
+  │     │     │           └─► On-time delivery rate
+  │     │     │
+  │     │     ├─► At-Risk Deliverables
+  │     │     │     │
+  │     │     │     └─► System: Find deliverables with:
+  │     │     │           ├─► Target date < 7 days away
+  │     │     │           └─► Progress < 50%
+  │     │     │
+  │     │     ├─► Pending Approvals
+  │     │     │     │
+  │     │     │     └─► System: Find deliverables with status = 'ready_approval'
+  │     │     │
+  │     │     └─► Project Metrics
+  │     │           │
+  │     │           └─► System: Calculate:
+  │     │                 ├─► Average approval time
+  │     │                 ├─► On-time delivery rate
+  │     │                 └─► Change request acceptance rate
+  │     │
+  │     └─► Analytics Displayed
+  │
+  ├─► [9. DELIVERABLE COMPLETION]
+  │     │
+  │     ├─► All approvals received
+  │     │     │
+  │     │     └─► System: Deliverable status = 'approved'
+  │     │
+  │     ├─► PM marks Deliverable as "Shipped"
+  │     │     │
+  │     │     └─► System: Update status = 'shipped'
+  │     │
+  │     └─► Deliverable Complete
+  │
+  └─► [10. PROJECT CLOSURE]
+        │
+        ├─► All deliverables completed
+        │     │
+        │     └─► System: Calculate project completion percentage
+        │
+        ├─► PM closes Project
+        │     │
+        │     └─► System: Archive project
+        │
+        └─► END
+
+================================================================================
+KEY DECISION POINTS
+================================================================================
+
+[1] User Authentication
+    ├─► Valid credentials? ──► YES ──► Continue
+    └─► NO ──► Show error, retry login
+
+[2] Template Selection
+    ├─► Use template? ──► YES ──► Auto-create deliverables + tasks
+    └─► NO ──► Create empty project
+
+[3] Task Completion
+    ├─► All tasks complete? ──► YES ──► Auto-update deliverable to 'ready_approval'
+    └─► NO ──► Continue working
+
+[4] Approval Sequence
+    ├─► Previous step approved? ──► YES ──► Allow approval
+    └─► NO ──► Error: "Previous step must be approved"
+
+[5] Deliverable Ready
+    ├─► Status = 'ready_approval'? ──► YES ──► Show approve button
+    └─► NO ──► Hide approve button
+
+[6] Change Request Decision
+    ├─► Client accepts? ──► YES ──► Update deliverable dates
+    └─► NO ──► Keep original dates
+
+================================================================================
+AUTOMATION POINTS
+================================================================================
+
+[AUTO-1] Task Status Change
+    └─► When task status changes
+        └─► System automatically recalculates deliverable progress
+
+[AUTO-2] All Tasks Complete
+    └─► When all tasks in deliverable are complete
+        └─► System automatically updates deliverable status to 'ready_approval'
+
+[AUTO-3] All Approvals Complete
+    └─► When all approval steps are approved
+        └─► System automatically updates deliverable status to 'approved'
+
+[AUTO-4] Change Request Accepted
+    └─► When client accepts change request
+        └─► System automatically updates deliverable target_date
+
+[AUTO-5] Approval Step Complete
+    └─► When approval step is approved
+        └─► System automatically unlocks next step and notifies next approver
+
+================================================================================
+STATUS FLOW
+================================================================================
+
+DELIVERABLE STATUS:
+    created → in_dev → ready_approval → approved → shipped
+                      ↓
+                  in_rework (if rejected)
+
+APPROVAL STATUS:
+    pending → approved → (unlocks next step)
+          ↓
+      rejected → in_rework
+
+CHANGE REQUEST STATUS:
+    submitted → evaluated → accepted → (deliverable updated)
+                          ↓
+                      rejected
+
+================================================================================
+USER ROLES & PERMISSIONS
+================================================================================
+
+PROJECT MANAGER (PM):
+    ✅ Create projects
+    ✅ Create deliverables
+    ✅ Link tasks to deliverables
+    ✅ Create approval chains
+    ✅ Evaluate change requests
+    ✅ View analytics
+    ✅ Batch operations
+    ✅ Update deliverable status
+
+TEAM MEMBER:
+    ✅ View assigned tasks
+    ✅ Update task status
+    ✅ Complete tasks
+    ✅ View deliverable progress
+    ❌ Cannot approve deliverables
+    ❌ Cannot create deliverables
+
+CLIENT:
+    ✅ View deliverables (read-only)
+    ✅ View Gantt chart (deliverables only)
+    ✅ Approve deliverables
+    ✅ Submit change requests
+    ✅ Decide on change requests
+    ❌ Cannot see internal tasks
+    ❌ Cannot modify deliverables
+
+================================================================================
+NOTIFICATION FLOW
+================================================================================
+
+[NOTIFY-1] Approval Chain Created
+    └─► System notifies Dev Lead (Step 1)
+
+[NOTIFY-2] Step 1 Approved
+    └─► System notifies QA Lead (Step 2)
+
+[NOTIFY-3] Step 2 Approved
+    └─► System notifies Client (Step 3)
+
+[NOTIFY-4] All Steps Approved
+    └─► System notifies PM
+
+[NOTIFY-5] Change Request Submitted
+    └─► System notifies PM via Slack
+
+[NOTIFY-6] Change Request Evaluated
+    └─► System notifies Client via Slack
+
+[NOTIFY-7] Change Request Decision
+    └─► System notifies PM via Slack
+
+================================================================================
+ERROR HANDLING
+================================================================================
+
+[ERROR-1] Cannot Approve - Previous Step Not Approved
+    Cause: Trying to approve Step 2 before Step 1
+    Solution: Approve steps in sequential order
+
+[ERROR-2] Access Denied - Not Project Member
+    Cause: User not added to project
+    Solution: Project manager must add user to project
+
+[ERROR-3] Deliverable Not Ready for Approval
+    Cause: Status not 'ready_approval'
+    Solution: PM must mark deliverable as ready
+
+[ERROR-4] Cannot Link Task - Task Not in Project
+    Cause: Task belongs to different project
+    Solution: Create task in same project first
+
+[ERROR-5] Invalid Status Transition
+    Cause: Trying to move from 'created' to 'approved' directly
+    Solution: Follow status flow: created → in_dev → ready_approval → approved
+
+================================================================================
+END OF WORKFLOW
+================================================================================

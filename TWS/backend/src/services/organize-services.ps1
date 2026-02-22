@@ -1,0 +1,120 @@
+# Service Reorganization Script
+# This script organizes services into proper folder structure with consistent naming
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "Starting service reorganization..." -ForegroundColor Green
+
+# Define service mappings: [sourceFile] = @{folder="targetFolder"; name="newName"}
+$serviceMappings = @{
+    # Core Services
+    "cacheService.js" = @{folder="core"; name="cache.service.js"}
+    "connectionPoolService.js" = @{folder="core"; name="connection-pool.service.js"}
+    "databaseProvisioningService.js" = @{folder="core"; name="database-provisioning.service.js"}
+    "encryptionService.js" = @{folder="core"; name="encryption.service.js"}
+    "e2eEncryptionService.js" = @{folder="core"; name="e2e-encryption.service.js"}
+    "redisService.js" = @{folder="core"; name="redis.service.js"}
+    "socketHandler.js" = @{folder="core"; name="socket-handler.service.js"}
+    
+    # Auth Services
+    "jwtService.js" = @{folder="auth"; name="jwt.service.js"}
+    "tokenBlacklistService.js" = @{folder="auth"; name="token-blacklist.service.js"}
+    
+    # Tenant Services
+    "tenantService.js" = @{folder="tenant"; name="tenant.service.js"}
+    "tenantLifecycleService.js" = @{folder="tenant"; name="tenant-lifecycle.service.js"}
+    "tenantSwitchingService.js" = @{folder="tenant"; name="tenant-switching.service.js"}
+    "tenantDataService.js" = @{folder="tenant"; name="tenant-data.service.js"}
+    "tenantOrgService.js" = @{folder="tenant"; name="tenant-org.service.js"}
+    "tenantConnectionPool.js" = @{folder="tenant"; name="tenant-connection-pool.service.js"}
+    "tenantModelService.js" = @{folder="tenant"; name="tenant-model.service.js"}
+    "selfServeSignupService.js" = @{folder="tenant"; name="self-serve-signup.service.js"}
+    "platformAdminAccessService.js" = @{folder="tenant"; name="platform-admin-access.service.js"}
+    
+    # Healthcare Services
+    "clinicalDecisionSupport.js" = @{folder="healthcare"; name="clinical-decision-support.service.js"}
+    "hl7Service.js" = @{folder="healthcare"; name="hl7.service.js"}
+    "patientPortalService.js" = @{folder="healthcare"; name="patient-portal.service.js"}
+    "healthcareAnalyticsService.js" = @{folder="healthcare"; name="healthcare-analytics.service.js"}
+    "healthcareDashboardService.js" = @{folder="healthcare"; name="healthcare-dashboard.service.js"}
+    "healthcareNotificationService.js" = @{folder="healthcare"; name="healthcare-notification.service.js"}
+    "healthcareOnboardingService.js" = @{folder="healthcare"; name="healthcare-onboarding.service.js"}
+    "claimsService.js" = @{folder="healthcare"; name="claims.service.js"}
+    
+    # Education Services
+    "gradeCalculationService.js" = @{folder="education"; name="grade-calculation.service.js"}
+    
+    # Integration Services
+    "calendarIntegration.js" = @{folder="integrations"; name="calendar-integration.service.js"}
+    "calendarService.js" = @{folder="integrations"; name="calendar.service.js"}
+    "emailService.js" = @{folder="integrations"; name="email.service.js"}
+    "emailValidationService.js" = @{folder="integrations"; name="email-validation.service.js"}
+    "emailVerificationService.js" = @{folder="integrations"; name="email-verification.service.js"}
+    "integrationService.js" = @{folder="integrations"; name="integration.service.js"}
+    "paymentService.js" = @{folder="integrations"; name="payment.service.js"}
+    "platformIntegration.js" = @{folder="integrations"; name="platform-integration.service.js"}
+    "portalERPIntegrationService.js" = @{folder="integrations"; name="portal-erp-integration.service.js"}
+    "projectIntegrationService.js" = @{folder="integrations"; name="project-integration.service.js"}
+    "slackService.js" = @{folder="integrations"; name="slack.service.js"}
+    "SlackIntegration.js" = @{folder="integrations"; name="slack-integration.service.js"}
+    "webrtcService.js" = @{folder="integrations"; name="webrtc.service.js"}
+    "timezoneService.js" = @{folder="integrations"; name="timezone.service.js"}
+    
+    # Analytics Services
+    "analyticsService.js" = @{folder="analytics"; name="analytics.service.js"}
+    "dataWarehouseService.js" = @{folder="analytics"; name="data-warehouse.service.js"}
+    "departmentDashboardService.js" = @{folder="analytics"; name="department-dashboard.service.js"}
+    "meetingAnalyticsService.js" = @{folder="analytics"; name="meeting-analytics.service.js"}
+    "metricsService.js" = @{folder="analytics"; name="metrics.service.js"}
+    "aiInsightsService.js" = @{folder="analytics"; name="ai-insights.service.js"}
+    
+    # Notification Services
+    "notificationService.js" = @{folder="notifications"; name="notification.service.js"}
+    "notificationBatchingService.js" = @{folder="notifications"; name="notification-batching.service.js"}
+    "messagingNotificationService.js" = @{folder="notifications"; name="messaging-notification.service.js"}
+    "meetingReminderService.js" = @{folder="notifications"; name="meeting-reminder.service.js"}
+    "pushNotificationService.js" = @{folder="notifications"; name="push-notification.service.js"}
+    
+    # Compliance Services
+    "auditService.js" = @{folder="compliance"; name="audit.service.js"}
+    "auditLogService.js" = @{folder="compliance"; name="audit-log.service.js"}
+    "complianceService.js" = @{folder="compliance"; name="compliance.service.js"}
+    "ferpaComplianceService.js" = @{folder="compliance"; name="ferpa-compliance.service.js"}
+    "gdprDataDeletionService.js" = @{folder="compliance"; name="gdpr-data-deletion.service.js"}
+    "gdprDataExportService.js" = @{folder="compliance"; name="gdpr-data-export.service.js"}
+    "retentionService.js" = @{folder="compliance"; name="retention.service.js"}
+}
+
+$servicesPath = $PSScriptRoot
+$movedCount = 0
+$skippedCount = 0
+
+foreach ($mapping in $serviceMappings.GetEnumerator()) {
+    $sourceFile = $mapping.Key
+    $targetFolder = $mapping.Value.folder
+    $newName = $mapping.Value.name
+    $sourcePath = Join-Path $servicesPath $sourceFile
+    $targetDir = Join-Path $servicesPath $targetFolder
+    $targetPath = Join-Path $targetDir $newName
+    
+    if (Test-Path $sourcePath) {
+        # Create target directory if it doesn't exist
+        if (-not (Test-Path $targetDir)) {
+            New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+            Write-Host "Created directory: $targetFolder" -ForegroundColor Yellow
+        }
+        
+        # Move file
+        Move-Item -Path $sourcePath -Destination $targetPath -Force
+        Write-Host "Moved: $sourceFile -> $targetFolder/$newName" -ForegroundColor Green
+        $movedCount++
+    } else {
+        Write-Host "Skipped: $sourceFile (not found)" -ForegroundColor Gray
+        $skippedCount++
+    }
+}
+
+Write-Host "`nReorganization complete!" -ForegroundColor Green
+Write-Host "Moved: $movedCount files" -ForegroundColor Green
+Write-Host "Skipped: $skippedCount files" -ForegroundColor Yellow
+Write-Host "`nNOTE: You need to update all require() statements in your codebase to use the new paths!" -ForegroundColor Red

@@ -1,0 +1,232 @@
+/**
+ * Tenant Portal Design Tokens
+ * 
+ * This file implements the Design Token Layer as recommended in the architecture evaluation.
+ * Tokens provide semantic abstraction between theme variables and components.
+ * 
+ * Token Hierarchy:
+ * 1. Theme Layer: --theme-primary, --theme-secondary, --theme-accent (base colors)
+ * 2. Token Layer: --token-button-primary-bg, --token-card-header-bg (semantic tokens)
+ * 3. Component Layer: Components consume tokens, not theme directly
+ * 
+ * Benefits:
+ * - Enables module-specific customization
+ * - Supports industry-specific UI patterns
+ * - Prepares for dark mode and accessibility themes
+ * - Reduces coupling between components and theme
+ */
+
+:root {
+  /* ============================================
+     BUTTON TOKENS
+     ============================================ */
+  
+  /* Primary Button */
+  --token-button-primary-bg: var(--theme-primary);
+  --token-button-primary-hover: var(--theme-primary-600);
+  --token-button-primary-active: var(--theme-primary-700);
+  --token-button-primary-text: white;
+  --token-button-primary-border: var(--theme-primary-600);
+  
+  /* Secondary Button */
+  --token-button-secondary-bg: var(--theme-secondary);
+  --token-button-secondary-hover: var(--theme-secondary-600);
+  --token-button-secondary-active: var(--theme-secondary-700);
+  --token-button-secondary-text: white;
+  --token-button-secondary-border: var(--theme-secondary-600);
+  
+  /* Accent Button */
+  --token-button-accent-bg: var(--theme-accent);
+  --token-button-accent-hover: var(--theme-accent-600);
+  --token-button-accent-active: var(--theme-accent-700);
+  --token-button-accent-text: white;
+  --token-button-accent-border: var(--theme-accent-600);
+  
+  /* Ghost/Outline Button */
+  --token-button-ghost-bg: transparent;
+  --token-button-ghost-hover: var(--theme-primary-50);
+  --token-button-ghost-active: var(--theme-primary-100);
+  --token-button-ghost-text: var(--theme-primary-700);
+  --token-button-ghost-border: var(--theme-primary-300);
+  
+  /* ============================================
+     CARD TOKENS
+     ============================================ */
+  
+  --token-card-bg: white;
+  --token-card-border: var(--theme-primary-200);
+  --token-card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --token-card-header-bg: var(--theme-primary-50);
+  --token-card-header-text: var(--theme-primary-900);
+  --token-card-body-text: var(--gray-700, #374151);
+  
+  /* ============================================
+     NAVIGATION TOKENS
+     ============================================ */
+  
+  /* Menu Items */
+  --token-menu-item-active-bg: var(--theme-primary-100);
+  --token-menu-item-active-text: var(--theme-primary-700);
+  --token-menu-item-active-border: var(--theme-primary-200);
+  --token-menu-item-hover-bg: var(--gray-100, #F3F4F6);
+  --token-menu-item-hover-text: var(--theme-primary-700);
+  --token-menu-item-icon-bg: var(--theme-primary);
+  --token-menu-item-icon-text: white;
+  
+  /* Navbar */
+  --token-navbar-bg: white;
+  --token-navbar-border: var(--theme-primary-200);
+  --token-navbar-icon-bg: var(--theme-primary);
+  --token-navbar-icon-text: white;
+  
+  /* ============================================
+     INPUT TOKENS
+     ============================================ */
+  
+  --token-input-bg: white;
+  --token-input-border: var(--gray-300, #D1D5DB);
+  --token-input-border-focus: var(--theme-primary-500);
+  --token-input-text: var(--gray-900, #111827);
+  --token-input-placeholder: var(--gray-400, #9CA3AF);
+  --token-input-error-border: var(--red-500, #EF4444);
+  --token-input-error-text: var(--red-600, #DC2626);
+  
+  /* ============================================
+     BADGE/STATUS TOKENS
+     ============================================ */
+  
+  --token-badge-success-bg: var(--theme-secondary-100);
+  --token-badge-success-text: var(--theme-secondary-700);
+  --token-badge-warning-bg: var(--yellow-100, #FEF3C7);
+  --token-badge-warning-text: var(--yellow-800, #92400E);
+  --token-badge-error-bg: var(--red-100, #FEE2E2);
+  --token-badge-error-text: var(--red-700, #B91C1C);
+  --token-badge-info-bg: var(--blue-100, #DBEAFE);
+  --token-badge-info-text: var(--blue-700, #1E40AF);
+  
+  /* ============================================
+     GRADIENT TOKENS
+     ============================================ */
+  
+  --token-gradient-primary: linear-gradient(to right, var(--theme-primary), var(--theme-accent));
+  --token-gradient-primary-br: linear-gradient(to bottom right, var(--theme-primary), var(--theme-accent));
+  --token-gradient-secondary: linear-gradient(to right, var(--theme-secondary), var(--theme-primary));
+  --token-gradient-accent: linear-gradient(to right, var(--theme-accent), var(--theme-primary));
+  
+  /* ============================================
+     SHADOW TOKENS
+     ============================================ */
+  
+  --token-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --token-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --token-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --token-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --token-shadow-primary: 0 10px 15px -3px var(--theme-primary-500);
+  --token-shadow-accent: 0 10px 15px -3px var(--theme-accent-500);
+}
+
+/* ============================================
+   DARK MODE TOKENS (Future Implementation)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode tokens will be added in Phase 5 */
+    /* For now, components will use light mode tokens */
+  }
+}
+
+/* ============================================
+   INDUSTRY-SPECIFIC TOKENS
+   ============================================ */
+
+/* Healthcare Industry Tokens */
+.tenant-portal[data-industry="healthcare"] {
+  --token-status-critical: #DC2626;
+  --token-status-warning: #F59E0B;
+  --token-status-stable: #10B981;
+  --token-status-info: #3B82F6;
+  --token-appointment-urgent: #EF4444;
+  --token-appointment-routine: #3B82F6;
+  --token-appointment-followup: #8B5CF6;
+  --token-medical-chart-bg: #F9FAFB;
+  --token-medical-chart-border: #E5E7EB;
+}
+
+/* Education Industry Tokens */
+.tenant-portal[data-industry="education"] {
+  --token-grade-a: #10B981;
+  --token-grade-b: #3B82F6;
+  --token-grade-c: #F59E0B;
+  --token-grade-d: #F97316;
+  --token-grade-f: #EF4444;
+  --token-attendance-present: #10B981;
+  --token-attendance-absent: #EF4444;
+  --token-attendance-late: #F59E0B;
+  --token-academic-calendar-bg: #F9FAFB;
+  --token-academic-calendar-border: #E5E7EB;
+}
+
+/* Software House Industry Tokens */
+.tenant-portal[data-industry="software_house"] {
+  --token-project-active: #10B981;
+  --token-project-pending: #F59E0B;
+  --token-project-completed: #6366F1;
+  --token-project-on-hold: #6B7280;
+  --token-sprint-active: #3B82F6;
+  --token-sprint-completed: #10B981;
+  --token-bug-critical: #DC2626;
+  --token-bug-high: #F59E0B;
+  --token-bug-medium: #3B82F6;
+  --token-bug-low: #6B7280;
+}
+
+/* ============================================
+   UTILITY CLASSES (Using Tokens)
+   ============================================ */
+
+.tenant-portal .btn-primary {
+  background-color: var(--token-button-primary-bg);
+  color: var(--token-button-primary-text);
+  border-color: var(--token-button-primary-border);
+}
+
+.tenant-portal .btn-primary:hover {
+  background-color: var(--token-button-primary-hover);
+}
+
+.tenant-portal .btn-primary:active {
+  background-color: var(--token-button-primary-active);
+}
+
+.tenant-portal .btn-secondary {
+  background-color: var(--token-button-secondary-bg);
+  color: var(--token-button-secondary-text);
+  border-color: var(--token-button-secondary-border);
+}
+
+.tenant-portal .btn-secondary:hover {
+  background-color: var(--token-button-secondary-hover);
+}
+
+.tenant-portal .card {
+  background-color: var(--token-card-bg);
+  border-color: var(--token-card-border);
+  box-shadow: var(--token-card-shadow);
+}
+
+.tenant-portal .card-header {
+  background-color: var(--token-card-header-bg);
+  color: var(--token-card-header-text);
+}
+
+.tenant-portal .menu-item-active {
+  background-color: var(--token-menu-item-active-bg);
+  color: var(--token-menu-item-active-text);
+  border-color: var(--token-menu-item-active-border);
+}
+
+.tenant-portal .menu-item-icon {
+  background: var(--token-menu-item-icon-bg);
+  color: var(--token-menu-item-icon-text);
+}

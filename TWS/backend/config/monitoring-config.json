@@ -1,0 +1,42 @@
+{
+  "timestamp": "2025-10-14T13:50:46.374Z",
+  "version": "1.0.0",
+  "monitoring": {
+    "healthChecks": {
+      "enabled": true,
+      "interval": 30000,
+      "endpoints": [
+        "/health",
+        "/api/supra-admin/system-health",
+        "/metrics"
+      ]
+    },
+    "logging": {
+      "level": "info",
+      "format": "json",
+      "includeRequestId": true,
+      "includeUserId": true,
+      "includeTenantId": true
+    },
+    "metrics": {
+      "enabled": true,
+      "collection": {
+        "requestDuration": true,
+        "requestCount": true,
+        "errorRate": true,
+        "memoryUsage": true,
+        "cpuUsage": true,
+        "databaseConnections": true
+      }
+    },
+    "alerts": {
+      "enabled": true,
+      "thresholds": {
+        "errorRate": 5,
+        "responseTime": 2000,
+        "memoryUsage": 80,
+        "cpuUsage": 80
+      }
+    }
+  }
+}

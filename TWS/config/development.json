@@ -1,0 +1,21 @@
+{
+  "NODE_ENV": "development",
+  "PORT": 5000,
+  "CORS_ORIGIN": "http://localhost:3000",
+  "SOCKET_CORS_ORIGIN": "http://localhost:3000",
+  "RATE_LIMIT_WINDOW_MS": 900000,
+  "RATE_LIMIT_MAX_REQUESTS": 1000,
+  "MAX_FILE_SIZE": "10mb",
+  "UPLOAD_PATH": "./uploads",
+  "LOG_LEVEL": "debug",
+  "ENABLE_BIOMETRIC": true,
+  "ENABLE_ANALYTICS": false,
+  "ENABLE_NOTIFICATIONS": true,
+  "ENABLE_FILE_UPLOAD": true,
+  "ENABLE_EMAIL_SERVICE": false,
+  "ENABLE_STRIPE": false,
+  "ENABLE_AWS": false,
+  "REDIS_DISABLED": false,
+  "BULLMQ_DISABLED": false,
+  "REDIS_VERSION_COMPATIBLE": true
+}

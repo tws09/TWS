@@ -1,0 +1,191 @@
+config:
+  target: 'http://localhost:5000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 50
+      name: "Ramp up load"
+    - duration: 300
+      arrivalRate: 100
+      name: "Sustained load"
+    - duration: 60
+      arrivalRate: 0
+      name: "Ramp down"
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+  plugins:
+    metrics-by-endpoint: {}
+  variables:
+    baseUrl: 'http://localhost:5000'
+    apiBase: 'http://localhost:5000/api'
+
+scenarios:
+  - name: "User Authentication Flow"
+    weight: 20
+    flow:
+      - post:
+          url: "{{ apiBase }}/auth/register"
+          json:
+            email: "artilleryuser{{ $randomInt(1, 1000) }}@test.com"
+            password: "password123"
+            name: "Artillery Test User {{ $randomInt(1, 1000) }}"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user._id"
+              as: "userId"
+      - post:
+          url: "{{ apiBase }}/auth/login"
+          json:
+            email: "artilleryuser{{ $randomInt(1, 1000) }}@test.com"
+            password: "password123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user._id"
+              as: "userId"
+      - get:
+          url: "{{ apiBase }}/auth/profile"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+
+  - name: "Messaging Operations"
+    weight: 40
+    flow:
+      - post:
+          url: "{{ apiBase }}/auth/login"
+          json:
+            email: "artilleryuser{{ $randomInt(1, 100) }}@test.com"
+            password: "password123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user._id"
+              as: "userId"
+      - post:
+          url: "{{ apiBase }}/messaging/chats"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            name: "Artillery Test Chat {{ $randomInt(1, 1000) }}"
+            type: "group"
+            members: ["{{ userId }}"]
+          capture:
+            - json: "$.data._id"
+              as: "chatId"
+      - post:
+          url: "{{ apiBase }}/messaging/chats/{{ chatId }}/messages"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            content: "Artillery test message {{ $randomInt(1, 1000) }}"
+            type: "text"
+      - get:
+          url: "{{ apiBase }}/messaging/chats/{{ chatId }}/messages?limit=20"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "{{ apiBase }}/messaging/chats"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+
+  - name: "File Upload Operations"
+    weight: 15
+    flow:
+      - post:
+          url: "{{ apiBase }}/auth/login"
+          json:
+            email: "artilleryuser{{ $randomInt(1, 100) }}@test.com"
+            password: "password123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user._id"
+              as: "userId"
+      - post:
+          url: "{{ apiBase }}/messaging/chats"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            name: "File Test Chat {{ $randomInt(1, 1000) }}"
+            type: "group"
+            members: ["{{ userId }}"]
+          capture:
+            - json: "$.data._id"
+              as: "chatId"
+      - post:
+          url: "{{ apiBase }}/files/upload"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          formData:
+            file: "@load-tests/test-file.txt"
+            chatId: "{{ chatId }}"
+      - get:
+          url: "{{ apiBase }}/files/chat/{{ chatId }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+
+  - name: "Analytics and Monitoring"
+    weight: 10
+    flow:
+      - post:
+          url: "{{ apiBase }}/auth/login"
+          json:
+            email: "admin@test.com"
+            password: "admin123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+      - get:
+          url: "{{ apiBase }}/analytics/dashboard"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "{{ apiBase }}/analytics/active-chats?timeframe=24h"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "{{ apiBase }}/analytics/user-activity?timeframe=24h"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "{{ apiBase }}/metrics"
+      - get:
+          url: "{{ baseUrl }}/health"
+
+  - name: "Compliance Operations"
+    weight: 10
+    flow:
+      - post:
+          url: "{{ apiBase }}/auth/login"
+          json:
+            email: "admin@test.com"
+            password: "admin123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+      - get:
+          url: "{{ apiBase }}/compliance/audit-logs?limit=50"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "{{ apiBase }}/compliance/retention-policy"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+      - get:
+          url: "{{ apiBase }}/compliance/retention-statistics"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+
+  - name: "System Health Checks"
+    weight: 5
+    flow:
+      - get:
+          url: "{{ baseUrl }}/health"
+      - get:
+          url: "{{ apiBase }}/metrics"
+      - get:
+          url: "{{ apiBase }}/metrics/health"

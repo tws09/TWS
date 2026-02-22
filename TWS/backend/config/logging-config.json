@@ -1,0 +1,44 @@
+{
+  "timestamp": "2025-10-14T13:50:46.377Z",
+  "version": "1.0.0",
+  "logging": {
+    "transports": [
+      {
+        "type": "console",
+        "level": "info",
+        "format": "combined"
+      },
+      {
+        "type": "file",
+        "level": "error",
+        "filename": "logs/error.log",
+        "maxsize": 10485760,
+        "maxFiles": 5
+      },
+      {
+        "type": "file",
+        "level": "info",
+        "filename": "logs/application.log",
+        "maxsize": 10485760,
+        "maxFiles": 10
+      }
+    ],
+    "structured": {
+      "enabled": true,
+      "fields": [
+        "timestamp",
+        "level",
+        "message",
+        "requestId",
+        "userId",
+        "tenantId",
+        "method",
+        "url",
+        "statusCode",
+        "responseTime",
+        "userAgent",
+        "ip"
+      ]
+    }
+  }
+}
