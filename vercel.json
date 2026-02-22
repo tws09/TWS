@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd TWS && npm run build:frontend",
+  "outputDirectory": "TWS/frontend/build",
+  "installCommand": "cd TWS && npm install",
+  "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
