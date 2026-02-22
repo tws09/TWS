@@ -277,11 +277,22 @@ git push heroku main
 
 1. **Connect the repo** in Railway (GitHub-connected repo; use the project directory that contains `TWS/` or the repo root).
 
-2. **Backend service**
-   - **Root Directory:** Set to the backend folder (e.g. `TWS/backend` or `backend` so that `package.json` and `server.js` are at the service root).
-   - **Start Command:** `npm start` (or `node server.js`).
-   - **Build Command:** Leave default (Railway runs `npm install`); the backend has no build step.
-   - **Health check:** Path `/health`; expect HTTP 200 and JSON with `status: 'OK'` when the database is connected.
+2. **Backend service – choose one of these:**
+
+   **Option A – Set Root Directory (recommended)**  
+   Railway must build from the backend folder, not the repo root. Otherwise you will see **"Railpack could not determine how to build the app"** and the build logs will show the whole repo (e.g. `TWS/`, `.gitignore`, many `.md` files).
+   - Open your **backend service** → **Settings**.
+   - Set **Root Directory** to **`TWS/backend`** (or `backend` if your connected path is already inside `TWS`). This makes `package.json` and `server.js` the service root.
+   - **Start Command:** `npm start` (or leave empty; `TWS/backend/railway.toml` sets it).
+   - **Health check:** Path `/health`.
+   - Redeploy.
+
+   **Option B – Use Dockerfile from repo root**  
+   If you prefer not to set Root Directory:
+   - In the backend service **Settings**, set **Builder** to **DOCKERFILE**.
+   - Set **Dockerfile path** to **`Dockerfile.backend`** (this file is at the repo root and builds `TWS/backend`).
+   - Leave **Root Directory** blank so the build context is the repo root.
+   - Redeploy.
 
 3. **Environment variables** (set in Railway dashboard or via CLI):
 
@@ -300,6 +311,9 @@ git push heroku main
    `PORT` is set by Railway automatically; do not set it manually.
 
 4. **Deploy:** Push to the connected branch; Railway builds and runs from the backend root. Confirm logs show "TWS Backend Server running on port &lt;PORT&gt;" and `GET /health` returns 200.
+
+**Troubleshooting – "Railpack could not determine how to build the app"**  
+If build logs show this and list repo contents (e.g. `./`, `├── TWS/`, `├── .gitignore`, many `.md` files), Railway is building from the **repo root** and Railpack does not see a Node app. Fix by either: (1) Setting **Root Directory** to **`TWS/backend`** in the backend service Settings (Option A above), or (2) Using **Dockerfile.backend** with Builder = DOCKERFILE (Option B above).
 
 ### **Option 3: Docker Deployment**
 

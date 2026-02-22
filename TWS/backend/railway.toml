@@ -1,0 +1,11 @@
+# Railway config for TWS backend (use when Root Directory is set to TWS/backend)
+# https://docs.railway.app/config-as-code
+
+[build]
+builder = "RAILPACK"
+# Default install is npm install; backend has no build step
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
