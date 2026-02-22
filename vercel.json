@@ -1,7 +1,10 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd TWS && npm install",
   "buildCommand": "cd TWS && npm run build:frontend",
   "outputDirectory": "TWS/frontend/build",
-  "installCommand": "cd TWS && npm install",
   "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/favicon.ico", "destination": "/favicon.svg" },
+    { "source": "/(.*)", "destination": "/index.html" }]
 }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+    <meta name="theme-color" content="#F59E0B" />
+    <meta name="description" content="WolfStack Project Management Portal - Empower Your Business with Comprehensive Project Management" />
+    <!-- CSP temporarily disabled for development - will be re-enabled for production -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="..." /> -->
+    <title>WolfStack Project Management Portal</title>
+    <script>
+      // Apply tenant theme immediately before React hydration to prevent flash
+      (function() {
+        try {
+          // Get tenant slug from URL
+          const pathMatch = window.location.pathname.match(/\/tenant\/([^\/]+)/);
+          const tenantSlug = pathMatch ? pathMatch[1] : null;
+          
+          if (tenantSlug) {
+            // Try to get cached theme from localStorage
+            const cachedThemeKey = 'tenant-theme-' + tenantSlug;
+            const cachedTheme = localStorage.getItem(cachedThemeKey);
+            
+            if (cachedTheme) {
+              try {
+                const themeData = JSON.parse(cachedTheme);
+                
+                // Get colors
+                const primaryColor = themeData.customColors?.primary || themeData.colors?.primary || '#6366F1';
+                const secondaryColor = themeData.customColors?.secondary || themeData.colors?.secondary || '#10B981';
+                const accentColor = themeData.customColors?.accent || themeData.colors?.accent || '#A855F7';
+                const headingFont = themeData.fonts?.heading || 'Geist';
+                const bodyFont = themeData.fonts?.body || 'Inter';
+                
+                // Apply basic theme variables immediately
+                const root = document.documentElement;
+                root.style.setProperty('--tenant-primary', primaryColor);
+                root.style.setProperty('--tenant-secondary', secondaryColor);
+                root.style.setProperty('--tenant-accent', accentColor);
+                root.style.setProperty('--tenant-heading-font', headingFont);
+                root.style.setProperty('--tenant-body-font', bodyFont);
+                
+                // Add tenant-portal class to body
+                document.body.classList.add('tenant-portal');
+              } catch (e) {
+                console.warn('Failed to apply cached theme:', e);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Theme initialization error:', e);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
