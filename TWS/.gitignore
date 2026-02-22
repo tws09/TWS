@@ -12,6 +12,8 @@ dist/
 
 # Environment variables
 .env
+.env*
+!.env.template
 .env.local
 .env.development.local
 .env.test.local
@@ -154,3 +156,6 @@ cypress/screenshots/
 
 # Local development
 .local/
+
+# Secrets
+secrets.json
