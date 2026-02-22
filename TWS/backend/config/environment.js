@@ -148,8 +148,18 @@ class BackendConfig {
       'ENCRYPTION_MASTER_KEY'
     ];
 
+    // In production, require explicit env vars (no defaults) so tokens/DB are stable
+    if (this.config.NODE_ENV === 'production') {
+      const missing = required.filter(key => !process.env[key] || String(process.env[key]).trim() === '');
+      if (missing.length > 0) {
+        console.error('❌ Production requires the following environment variables to be set:');
+        missing.forEach(key => console.error(`   - ${key}`));
+        console.error('Set them in your host (e.g. Railway dashboard) and redeploy.');
+        process.exit(1);
+      }
+    }
+
     const missing = required.filter(key => !this.config[key]);
-    
     if (missing.length > 0) {
       console.warn(`⚠️ Missing required configuration: ${missing.join(', ')}`);
     }

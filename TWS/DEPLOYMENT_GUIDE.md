@@ -273,6 +273,34 @@ cd ../frontend
 git push heroku main
 ```
 
+#### **Railway Deployment**
+
+1. **Connect the repo** in Railway (GitHub-connected repo; use the project directory that contains `TWS/` or the repo root).
+
+2. **Backend service**
+   - **Root Directory:** Set to the backend folder (e.g. `TWS/backend` or `backend` so that `package.json` and `server.js` are at the service root).
+   - **Start Command:** `npm start` (or `node server.js`).
+   - **Build Command:** Leave default (Railway runs `npm install`); the backend has no build step.
+   - **Health check:** Path `/health`; expect HTTP 200 and JSON with `status: 'OK'` when the database is connected.
+
+3. **Environment variables** (set in Railway dashboard or via CLI):
+
+   | Variable | Required | Notes |
+   |----------|----------|--------|
+   | `NODE_ENV` | Yes | `production` |
+   | `MONGO_URI` | Yes | MongoDB connection string (e.g. Atlas) |
+   | `JWT_SECRET` | Yes | Must be set in production (no default) |
+   | `JWT_REFRESH_SECRET` | Yes | Must be set in production |
+   | `ENCRYPTION_MASTER_KEY` | Yes | Must be set in production |
+   | `CORS_ORIGIN` | Recommended | Frontend URL (e.g. `https://your-app.up.railway.app`) |
+   | `SOCKET_CORS_ORIGIN` | Recommended | Same as CORS_ORIGIN for Socket.io |
+   | `REDIS_DISABLED` | Optional | `true` if not using Redis |
+   | `REDIS_HOST`, `REDIS_PORT` | Optional | If using Railway Redis plugin |
+
+   `PORT` is set by Railway automatically; do not set it manually.
+
+4. **Deploy:** Push to the connected branch; Railway builds and runs from the backend root. Confirm logs show "TWS Backend Server running on port &lt;PORT&gt;" and `GET /health` returns 200.
+
 ### **Option 3: Docker Deployment**
 
 ```bash
