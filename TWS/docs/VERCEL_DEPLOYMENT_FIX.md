@@ -24,7 +24,7 @@ So that the build runs even if `vercel.json` is ignored or missing:
    |--------------------|--------|
    | **Framework Preset** | **Other** (so Vercel doesn’t auto-detect and skip your commands). |
    | **Install Command**  | `cd TWS && npm install` |
-   | **Build Command**    | `cd TWS && node frontend/scripts/ensure-public-html.js && CI=false NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false npm run build:frontend` |
+   | **Build Command**    | `cd TWS && (cd frontend && node scripts/ensure-public-html.cjs) && CI=false NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false npm run build:frontend` |
    | **Output Directory**| `TWS/frontend/build` |
 
 4. Leave **Root Directory** empty (so the project root is the repo root and `cd TWS` works).
@@ -53,7 +53,7 @@ Root `vercel.json` should look like:
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd TWS && npm install",
-  "buildCommand": "cd TWS && node frontend/scripts/ensure-public-html.js && CI=false NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false npm run build:frontend",
+  "buildCommand": "cd TWS && (cd frontend && node scripts/ensure-public-html.cjs) && CI=false NODE_OPTIONS=--max-old-space-size=4096 GENERATE_SOURCEMAP=false npm run build:frontend",
   "outputDirectory": "TWS/frontend/build",
   "framework": null,
   "rewrites": [
@@ -91,10 +91,21 @@ Once the build runs and output is `TWS/frontend/build`, the 404 on `/` and “no
 
 This happens when `TWS/frontend/public` (or `index.html`) is missing in the deployed repo (e.g. not committed or different repo structure). The fix is already in the build command: **run the ensure script before building**:
 
-- In **vercel.json**: `buildCommand` must start with `cd TWS && node frontend/scripts/ensure-public-html.js && ...`
-- The script creates `frontend/public/index.html` (and a minimal `favicon.svg` if missing) so `craco build` always has the required file.
+- In **vercel.json**: `buildCommand` must include `cd TWS && (cd frontend && node scripts/ensure-public-html.cjs) && ...` so the script runs from `TWS/frontend` (avoids MODULE_NOT_FOUND on Vercel/Node 24).
+- The script (`.cjs` = always CommonJS) creates `frontend/public/index.html` and a minimal `favicon.svg` if missing so `craco build` always has the required file.
 
-Ensure the repo Vercel deploys has `TWS/frontend/scripts/ensure-public-html.js` committed. Then redeploy.
+Ensure the repo has `TWS/frontend/scripts/ensure-public-html.cjs` committed. Then redeploy.
+
+---
+
+## If the build fails: `MODULE_NOT_FOUND` when running the ensure script
+
+This can happen on Node 24 or when the script path is wrong. Fixes applied:
+
+1. **Use the `.cjs` script** – `ensure-public-html.cjs` so Node always runs it as CommonJS (no ESM/require issues).
+2. **Run from `TWS/frontend`** – Build command uses `(cd frontend && node scripts/ensure-public-html.cjs)` so the path is `scripts/ensure-public-html.cjs` relative to `TWS/frontend`, which is reliable on Vercel.
+
+If you still see MODULE_NOT_FOUND, confirm `TWS/frontend/scripts/ensure-public-html.cjs` exists in the repo Vercel is building and that the build command matches the one in this doc.
 
 ---
 

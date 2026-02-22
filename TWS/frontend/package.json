@@ -58,7 +58,7 @@
   "scripts": {
     "start": "craco start",
     "dev": "craco start",
-    "prebuild": "node scripts/ensure-public-html.js",
+    "prebuild": "node scripts/ensure-public-html.cjs",
     "build": "npm run prebuild && cross-env DISABLE_ESLINT_PLUGIN=true craco build",
     "test": "craco test",
     "test:watch": "craco test --watch",
