@@ -7,6 +7,9 @@ yarn-error.log*
 # Production builds
 build/
 dist/
+
+# Vercel
+.vercel/
 *.tgz
 *.tar.gz
 
