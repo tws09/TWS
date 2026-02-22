@@ -8,16 +8,18 @@ const { spawn } = require('child_process');
 const fileService = require('../services/file.service');
 const File = require('../models/File');
 
-// Redis connection
-const redis = new Redis({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: process.env.REDIS_PORT || 6379,
-  password: process.env.REDIS_PASSWORD,
-  db: process.env.REDIS_DB || 0,
-  maxRetriesPerRequest: null,
-  retryDelayOnFailover: 100,
-  lazyConnect: true
-});
+// Redis connection (skip when disabled so worker can run without Redis)
+const redis = process.env.REDIS_DISABLED === 'true'
+  ? null
+  : new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: process.env.REDIS_PORT || 6379,
+      password: process.env.REDIS_PASSWORD,
+      db: process.env.REDIS_DB || 0,
+      maxRetriesPerRequest: null,
+      retryDelayOnFailover: 100,
+      lazyConnect: true
+    });
 
 class FileProcessor {
   constructor() {
@@ -363,38 +365,42 @@ class FileProcessor {
   }
 }
 
-// Create worker
+// Create worker (only when Redis is available)
 const fileProcessor = new FileProcessor();
 
-const worker = new Worker('fileProcessor', async (job) => {
-  return fileProcessor.processFile(job);
-}, {
-  connection: redis,
-  concurrency: parseInt(process.env.FILE_PROCESSOR_CONCURRENCY) || 5,
-  limiter: {
-    max: 10, // Maximum 10 jobs per duration
-    duration: 60000 // 1 minute
-  }
-});
+let worker = null;
+if (redis) {
+  worker = new Worker('fileProcessor', async (job) => {
+    return fileProcessor.processFile(job);
+  }, {
+    connection: redis,
+    concurrency: parseInt(process.env.FILE_PROCESSOR_CONCURRENCY) || 5,
+    limiter: {
+      max: 10, // Maximum 10 jobs per duration
+      duration: 60000 // 1 minute
+    }
+  });
 
-// Worker event handlers
-worker.on('completed', (job, result) => {
-  console.log(`File processing completed for job ${job.id}:`, result);
-});
+  worker.on('completed', (job, result) => {
+    console.log(`File processing completed for job ${job.id}:`, result);
+  });
 
-worker.on('failed', (job, error) => {
-  console.error(`File processing failed for job ${job.id}:`, error);
-});
+  worker.on('failed', (job, error) => {
+    console.error(`File processing failed for job ${job.id}:`, error);
+  });
 
-worker.on('error', (error) => {
-  console.error('File processor worker error:', error);
-});
+  worker.on('error', (error) => {
+    console.error('File processor worker error:', error);
+  });
+} else {
+  console.log('File processor worker skipped (REDIS_DISABLED=true)');
+}
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Shutting down file processor worker...');
-  await worker.close();
-  await redis.disconnect();
+  if (worker) await worker.close();
+  if (redis) await redis.disconnect();
   process.exit(0);
 });
 

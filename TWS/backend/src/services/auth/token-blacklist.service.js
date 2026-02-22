@@ -6,6 +6,12 @@ const jwt = require('jsonwebtoken');
  */
 class TokenBlacklistService {
   constructor() {
+    this.tokenBlacklist = new Map();
+    if (process.env.REDIS_DISABLED === 'true') {
+      this.useRedis = false;
+      this.redisClient = null;
+      return;
+    }
     // Try to use Redis if available, otherwise use in-memory Map
     try {
       const redis = require('redis');
@@ -27,7 +33,7 @@ class TokenBlacklistService {
       });
     } catch (error) {
       this.useRedis = false;
-      this.tokenBlacklist = new Map();
+      this.redisClient = null;
       console.log('⚠️ Redis not available, using in-memory token blacklist');
     }
   }

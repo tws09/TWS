@@ -2,13 +2,32 @@ const Redis = require('ioredis');
 const envConfig = require('../config/environment');
 const auditService = require('./compliance/audit.service');
 
+// No-op Redis when REDIS_DISABLED - avoids ECONNREFUSED on Railway etc.
+const redisNoop = {
+  incr: async () => 1,
+  incrby: async () => 0,
+  expire: async () => 'OK',
+  sadd: async () => 1,
+  srem: async () => 0,
+  scard: async () => 0,
+  smembers: async () => [],
+  setex: async () => 'OK',
+  get: async () => null,
+  exists: async () => 0,
+  info: async () => '# Memory\nused_memory:0\n'
+};
+
 /**
  * WebSocket Rate Limiting Service
  * Implements rate limiting for WebSocket connections and events
  */
 class WebSocketRateLimitService {
   constructor() {
-    this.redis = new Redis(envConfig.getRedisConfig());
+    if (process.env.REDIS_DISABLED === 'true') {
+      this.redis = redisNoop;
+    } else {
+      this.redis = new Redis(envConfig.getRedisConfig());
+    }
     this.rateLimits = {
       // Connection limits
       connections: {

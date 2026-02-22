@@ -89,6 +89,9 @@ class ConnectionPoolService {
    * Initialize Redis connection pools
    */
   async initializeRedis() {
+    if (process.env.REDIS_DISABLED === 'true') {
+      return;
+    }
     try {
       const redisConfig = envConfig.getRedisConfig();
       

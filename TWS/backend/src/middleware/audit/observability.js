@@ -340,15 +340,19 @@ const healthCheck = async (req, res) => {
       state: mongoose.connection.readyState
     };
     
-    // Check Redis connection (if available)
-    try {
-      const Redis = require('ioredis');
-      const redis = new Redis(process.env.REDIS_HOST || 'localhost');
-      await redis.ping();
-      health.redis = { connected: true };
-      redis.disconnect();
-    } catch (error) {
-      health.redis = { connected: false, error: error.message };
+    // Check Redis connection (if available and not disabled)
+    if (process.env.REDIS_DISABLED === 'true') {
+      health.redis = { connected: false, disabled: true };
+    } else {
+      try {
+        const Redis = require('ioredis');
+        const redis = new Redis(process.env.REDIS_HOST || 'localhost');
+        await redis.ping();
+        health.redis = { connected: true };
+        redis.disconnect();
+      } catch (error) {
+        health.redis = { connected: false, error: error.message };
+      }
     }
     
     // Check Sentry

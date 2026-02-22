@@ -305,8 +305,8 @@ git push heroku main
    | `ENCRYPTION_MASTER_KEY` | Yes | Must be set in production |
    | `CORS_ORIGIN` | Recommended | Frontend URL (e.g. `https://your-app.up.railway.app`) |
    | `SOCKET_CORS_ORIGIN` | Recommended | Same as CORS_ORIGIN for Socket.io |
-   | `REDIS_DISABLED` | Optional | `true` if not using Redis |
-   | `REDIS_HOST`, `REDIS_PORT` | Optional | If using Railway Redis plugin |
+   | `REDIS_DISABLED` | **Recommended** | Set to `true` if you are not using Redis (avoids ECONNREFUSED on port 6379). Required when no Redis plugin is added. |
+   | `REDIS_HOST`, `REDIS_PORT` | Optional | Only if using Railway Redis plugin (leave REDIS_DISABLED unset or false). |
 
    `PORT` is set by Railway automatically; do not set it manually.
 
@@ -314,6 +314,9 @@ git push heroku main
 
 **Troubleshooting – "Railpack could not determine how to build the app"**  
 If build logs show this and list repo contents (e.g. `./`, `├── TWS/`, `├── .gitignore`, many `.md` files), Railway is building from the **repo root** and Railpack does not see a Node app. Fix by either: (1) Setting **Root Directory** to **`TWS/backend`** in the backend service Settings (Option A above), or (2) Using **Dockerfile.backend** with Builder = DOCKERFILE (Option B above).
+
+**Troubleshooting – "ECONNREFUSED 127.0.0.1:6379" or "ECONNREFUSED ::1:6379"**  
+The app is trying to connect to Redis on localhost; Railway has no Redis by default. Add variable **`REDIS_DISABLED`** = **`true`** in the backend service and redeploy. The backend will run without Redis (in-memory fallbacks for cache, token blacklist, and rate limiting).
 
 ### **Option 3: Docker Deployment**
 
