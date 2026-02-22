@@ -3,7 +3,8 @@
 
 [build]
 builder = "RAILPACK"
-buildCommand = "npm run build"
+# CI=false prevents "Treating warnings as errors" so lint/useEffect-deps warnings don't fail the build
+buildCommand = "CI=false npm run build"
 
 [deploy]
 startCommand = "npm run start:prod"

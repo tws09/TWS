@@ -61,6 +61,7 @@
     "start:prod": "serve -s build -l ${PORT:-3000}",
     "dev": "craco start",
     "build": "craco build",
+    "build:ci": "CI=false craco build",
     "test": "craco test",
     "test:watch": "craco test --watch",
     "test:coverage": "craco test --coverage",

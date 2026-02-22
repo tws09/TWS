@@ -322,6 +322,7 @@ git push heroku main
      - **`REACT_APP_API_URL`** = your **backend URL** from step 4 (e.g. `https://your-backend.up.railway.app`). No trailing slash.  
      This is baked in at build time, so set it before the first deploy and redeploy if you change the backend URL.
      - **`REACT_APP_WSL_URL`** (optional): If Railway suggests it, set it to the **same backend URL** as above. The app uses it as a fallback for API and WebSocket; you can set either or both.
+     - The frontend `railway.toml` uses `CI=false` for the build so lint warnings do not fail the build. If it still fails, add variable **`CI`** = **`false`** in the frontend service.
    - After deploy, open the frontend service’s **public URL** in the browser to use the portal.
 
    **Backend CORS:** In the **backend** service variables, set **`CORS_ORIGIN`** and **`SOCKET_CORS_ORIGIN`** to the frontend’s public URL (e.g. `https://your-frontend.up.railway.app`) so the API and Socket.io accept requests from the portal.
