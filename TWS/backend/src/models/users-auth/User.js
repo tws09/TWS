@@ -25,29 +25,18 @@ const userSchema = new mongoose.Schema({
       // Platform & Business Roles
       'super_admin', 'org_manager', 'owner', 'admin', 'ceo', 'cfo', 'pmo', 'project_manager',
       'department_lead', 'hr', 'finance', 'manager', 'employee', 'contributor',
-      'developer', 'engineer', 'programmer', 'contractor', 'auditor', 'client', 'reseller',
-      // Education Roles (Extended)
-      'principal', 'head_teacher', 'teacher', 'student',
-      // New Faculty Roles
-      'lab_instructor',      // Lab/workshop instructors
-      'counselor',           // Student counselors (privacy-sensitive)
-      'academic_coordinator', // Academic program coordinators
-      'assistant_teacher',   // Teaching assistants
-      'librarian',           // Library staff
-      'sports_coach',        // Sports coaching
-      'admin_staff'          // Administrative staff (non-teaching)
+      'developer', 'engineer', 'programmer', 'contractor', 'auditor', 'client', 'reseller'
     ],
     default: 'employee'
   },
-  // Multi-role support: Users can have multiple roles (e.g., teacher + sports_coach)
+  // Multi-role support: a User can hold more than one of the roles above.
   roles: [{
     role: {
       type: String,
       enum: [
-        // Education Roles
-        'principal', 'head_teacher', 'teacher', 'student',
-        'lab_instructor', 'counselor', 'academic_coordinator',
-        'assistant_teacher', 'librarian', 'sports_coach', 'admin_staff'
+        'super_admin', 'org_manager', 'owner', 'admin', 'ceo', 'cfo', 'pmo', 'project_manager',
+        'department_lead', 'hr', 'finance', 'manager', 'employee', 'contributor',
+        'developer', 'engineer', 'programmer', 'contractor', 'auditor', 'client', 'reseller'
       ]
     },
     assignedAt: {

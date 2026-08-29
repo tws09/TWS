@@ -22,30 +22,16 @@ class RBACMiddleware {
       org_manager: 80,    // Organization manager
       owner: 70,          // Business owner
       admin: 60,          // Tenant admin
-      
-      
-      // Education-specific roles (integrated into RBAC)
-      principal: 58,      // School principal (below admin, can manage school)
-      academic_coordinator: 52,  // Academic program coordinator (between principal and head_teacher)
-      
+
       moderator: 50,      // Content moderator
       hr: 45,             // HR manager
       finance: 45,        // Finance manager
       pmo: 40,            // Project management office
-      head_teacher: 35,   // Head teacher / Department head
       project_manager: 35, // Project manager
-      counselor: 32,      // Student counselor (special privacy permissions)
-      teacher: 30,        // Teacher (can manage classes)
-      lab_instructor: 28, // Lab/workshop instructor (similar to teacher but lab-specific)
       department_lead: 30, // Department lead
-      assistant_teacher: 25, // Teaching assistant (below teacher)
-      librarian: 25,      // Library staff
-      sports_coach: 25,   // Sports coach
       manager: 25,        // Team manager
-      admin_staff: 22,   // Administrative staff (non-teaching)
       employee: 20,       // Regular employee
       contributor: 15,    // External contributor
-      student: 10,        // Student (view own data only)
       contractor: 10,     // Contractor
       auditor: 5,         // Auditor (read-only)
       client: 3,          // Client access
@@ -88,134 +74,6 @@ class RBACMiddleware {
         'retention:read', 'retention:write',
         'reports:read', 'reports:generate',
         'tenant:*'  // Full tenant access
-      ],
-      
-      // Education role permissions
-      principal: [
-        'users:read',
-        // Messaging permissions removed - messaging system removed
-        'audit:read',
-        'tenant:students:*',        // Full student management
-        'tenant:teachers:read',     // View teachers
-        'tenant:teachers:update',   // Manage teacher assignments
-        'tenant:classes:*',         // Full class management
-        'tenant:grades:read',       // View all grades
-        'tenant:attendance:*',      // Attendance management
-        'tenant:exams:*',           // Exam management
-        'tenant:fees:*',            // Fee management
-        'tenant:reports:*',         // Generate reports
-        'tenant:timetable:*',       // Timetable management
-        'tenant:announcements:*'    // School announcements
-      ],
-      
-      head_teacher: [
-        // Messaging permissions removed - messaging system removed
-        'tenant:students:read',     // View students
-        'tenant:teachers:read',     // View teachers in dept
-        'tenant:classes:read',      // View classes
-        'tenant:grades:*',          // Manage dept grades
-        'tenant:attendance:*',      // Dept attendance
-        'tenant:homework:*',        // Dept homework
-        'tenant:exams:read',        // View exams
-        'tenant:timetable:read',    // View timetable
-        'tenant:department:manage'  // Manage department
-      ],
-      
-      teacher: [
-        // Messaging permissions removed - messaging system removed
-        'tenant:students:read',     // View assigned students
-        'tenant:classes:read',      // View assigned classes
-        'tenant:grades:create',     // Enter grades
-        'tenant:grades:read',       // View grades
-        'tenant:grades:update',     // Update grades
-        'tenant:attendance:create', // Mark attendance
-        'tenant:attendance:read',   // View attendance
-        'tenant:attendance:update', // Update attendance
-        'tenant:homework:create',   // Create homework
-        'tenant:homework:read',     // View homework
-        'tenant:homework:update',   // Update homework
-        'tenant:homework:grade',    // Grade submissions
-        'tenant:exams:read',        // View exam schedule
-        'tenant:timetable:read',    // View timetable
-        'tenant:announcements:read' // Read announcements
-      ],
-      
-      // New faculty role permissions
-      academic_coordinator: [
-        // Messaging permissions removed - messaging system removed
-        'tenant:students:read',      // View all students
-        'tenant:teachers:read',      // View all teachers
-        'tenant:classes:*',          // Full class management
-        'tenant:grades:read',        // View all grades
-        'tenant:attendance:read',    // View attendance
-        'tenant:exams:*',            // Full exam management
-        'tenant:programs:*',          // Program management
-        'tenant:reports:generate',    // Generate reports
-        'tenant:timetable:*'         // Timetable management
-      ],
-      
-      counselor: [
-        'messages:read', 'messages:write',
-        'chats:read', 'chats:write',
-        'tenant:students:read',      // View assigned students only (DB-filtered)
-        'tenant:students:counsel',   // Special counseling permission
-        'tenant:grades:read',        // View grades (for counseling, DB-filtered)
-        'tenant:attendance:read',    // View attendance (DB-filtered)
-        'tenant:reports:read',       // View reports (privacy-filtered)
-        // NO access to: exams, fees, other sensitive data
-      ],
-      
-      lab_instructor: [
-        'messages:read', 'messages:write',
-        'tenant:students:read',      // View assigned lab students
-        'tenant:classes:read',       // View lab classes
-        'tenant:attendance:mark',     // Mark lab attendance
-        'tenant:grades:create',      // Enter lab grades
-        'tenant:equipment:manage'     // Lab equipment management
-      ],
-      
-      assistant_teacher: [
-        'messages:read', 'messages:write',
-        'tenant:students:read',      // View assigned students
-        'tenant:classes:read',       // View assigned classes
-        'tenant:attendance:mark',    // Mark attendance
-        'tenant:homework:read',      // View homework
-        // NO access to: grades, exams (read-only)
-      ],
-      
-      librarian: [
-        'messages:read',
-        'tenant:students:read',      // View students (for library access)
-        'tenant:library:*',          // Full library management
-        'tenant:books:*'             // Book management
-      ],
-      
-      sports_coach: [
-        'messages:read', 'messages:write',
-        'tenant:students:read',      // View assigned students
-        'tenant:attendance:mark',    // Mark sports attendance
-        'tenant:sports:*'           // Sports management
-      ],
-      
-      admin_staff: [
-        'messages:read',
-        'tenant:students:read',      // View students (for admin tasks)
-        'tenant:fees:read',         // View fees (billing)
-        'tenant:reports:read',       // View reports
-        // NO access to: grades, exams, academic data
-      ],
-      
-      student: [
-        'messages:read', 'messages:write',
-        'chats:read', 'chats:write',
-        'tenant:student:profile:read',      // View own profile
-        'tenant:student:grades:read',       // View own grades
-        'tenant:student:attendance:read',   // View own attendance
-        'tenant:student:timetable:read',    // View own timetable
-        'tenant:student:homework:read',     // View assigned homework
-        'tenant:student:homework:submit',   // Submit homework
-        'tenant:student:fees:read',         // View fee status
-        'tenant:student:announcements:read' // Read announcements
       ],
       
       moderator: [

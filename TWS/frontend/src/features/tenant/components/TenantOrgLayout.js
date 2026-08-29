@@ -219,10 +219,11 @@ const TenantOrgLayout = ({ children }) => {
     // protected content before its redirect takes effect.
     if (!isAuthenticated) {
         return (
-            <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-clean-light-pure via-clean-light-soft to-primary-50/30 dark:from-glass-dark-deepest dark:via-glass-dark-deep dark:to-glass-dark-base ${themeTransition ? 'theme-transition' : ''}`}>
+            <div className={`tws-portal-loading min-h-screen flex items-center justify-center ${themeTransition ? 'theme-transition' : ''}`}>
                 <div className="text-center">
-                    <div className="tws-loading-pulse rounded-full h-12 w-12 border-2 border-t-transparent mx-auto" style={{ borderColor: themeStyles.getPrimaryColor(500) }} />
-                    <p className="mt-4 text-gray-600 dark:text-gray-300 font-normal">Loading…</p>
+                    <img className="tws-portal-loading__mark" src="/logo.svg" alt="" aria-hidden="true" />
+                    <div className="tws-loading-pulse mx-auto" />
+                    <p className="mt-4 font-medium">Opening your workspace…</p>
                 </div>
             </div>
         );
@@ -232,37 +233,32 @@ const TenantOrgLayout = ({ children }) => {
     return (
         <TenantThemeProvider>
         <div
-            className={`tenant-org-layout tenant-portal ${isSkyWorkspaceRoute ? 'projects-sky-shell' : ''} h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-clean-light-pure via-clean-light-soft to-primary-50/30 dark:from-glass-dark-deepest dark:via-glass-dark-deep dark:to-glass-dark-base ${themeTransition ? 'theme-transition' : ''}`}
+            className={`tenant-org-layout tenant-portal ${isSkyWorkspaceRoute ? 'projects-sky-shell' : ''} h-screen flex flex-col relative overflow-hidden ${themeTransition ? 'theme-transition' : ''}`}
             data-industry={tenant?.erpCategory || 'business'}
         >
-            {/* Subtle background pattern */}
-            <div className="absolute inset-0 hidden dark:block opacity-10 pointer-events-none z-0">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnptMC0xOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnpNMCA1NGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnptMTggMGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnoiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjEiLz48L2c+PC9zdmc+')] " />
-            </div>
+            <a className="skip-to-main" href="#main-content">Skip to main content</a>
 
             {/* ── Mobile sidebar sheet (hamburger → full module list) ─────────── */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                <SheetContent side="left" className="p-0 w-64 flex flex-col">
-                    <div className="flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-white/10">
+                <SheetContent side="left" className="tws-mobile-navigation p-0 w-72 flex flex-col">
+                    <div className="tws-mobile-navigation__brand flex items-center justify-between p-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">
-                                    {(tenant?.name || 'W').charAt(0).toUpperCase()}
-                                </span>
-                            </div>
+                            <span className="tws-mobile-navigation__mark"><img src="/logo.svg" alt="" aria-hidden="true" /></span>
                             <div>
-                                <p className="text-sm font-bold text-gray-900 dark:text-white">{tenant?.name || 'Organization'}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role?.replace('_', ' ') || 'Member'}</p>
+                                <p className="text-sm font-bold">{tenant?.name || 'Organization'}</p>
+                                <p className="text-xs capitalize">TWS · {user?.role?.replace(/_/g, ' ') || 'Member'}</p>
                             </div>
                         </div>
                     </div>
-                    <SidebarNav
-                        filteredMenuItems={filteredMenuItems}
-                        expandedMenus={expandedMenus}
-                        toggleMenuExpansion={toggleMenuExpansion}
-                        isDarkMode={isDarkMode}
-                        themeStyles={themeStyles}
-                    />
+                    <nav className="flex min-h-0 flex-1" aria-label="Mobile workspace navigation">
+                        <SidebarNav
+                            filteredMenuItems={filteredMenuItems}
+                            expandedMenus={expandedMenus}
+                            toggleMenuExpansion={toggleMenuExpansion}
+                            isDarkMode={isDarkMode}
+                            themeStyles={themeStyles}
+                        />
+                    </nav>
                     <div className="p-4 border-t border-gray-200/50 dark:border-white/10">
                         <button
                             onClick={logout}
@@ -277,7 +273,7 @@ const TenantOrgLayout = ({ children }) => {
 
             {/* ── Enterprise workspace: module sidebar + content ─────────────── */}
             <div className="flex flex-1 overflow-hidden relative">
-                <aside className={`tws-enterprise-sidebar hidden md:flex ${sidebarCollapsed ? 'is-collapsed' : ''}`}>
+                <aside className={`tws-enterprise-sidebar hidden md:flex ${sidebarCollapsed ? 'is-collapsed' : ''}`} aria-label="Workspace navigation">
                     <div className="tws-enterprise-sidebar__brand">
                         <button
                             type="button"
@@ -285,12 +281,10 @@ const TenantOrgLayout = ({ children }) => {
                             onClick={() => navigate(tenantPath(tenantSlug, 'org', 'home'))}
                             title={tenant?.name || 'Organization'}
                         >
-                            <span className="tws-enterprise-sidebar__mark">
-                                {(tenant?.name || 'W').charAt(0).toUpperCase()}
-                            </span>
+                            <span className="tws-enterprise-sidebar__mark"><img src="/logo.svg" alt="" aria-hidden="true" /></span>
                             <span className="tws-enterprise-sidebar__brand-copy">
                                 <strong>{tenant?.name || 'Organization'}</strong>
-                                <small>Software House OS</small>
+                                <small>TWS · Software House OS</small>
                             </span>
                         </button>
                         <button
@@ -306,14 +300,16 @@ const TenantOrgLayout = ({ children }) => {
                         </button>
                     </div>
                     <div className="tws-enterprise-sidebar__label">Workspace</div>
-                    <SidebarNav
-                        filteredMenuItems={filteredMenuItems}
-                        expandedMenus={expandedMenus}
-                        toggleMenuExpansion={toggleMenuExpansion}
-                        isDarkMode={isDarkMode}
-                        themeStyles={themeStyles}
-                        collapsed={sidebarCollapsed}
-                    />
+                    <nav className="flex min-h-0 flex-1" aria-label="Primary workspace navigation">
+                        <SidebarNav
+                            filteredMenuItems={filteredMenuItems}
+                            expandedMenus={expandedMenus}
+                            toggleMenuExpansion={toggleMenuExpansion}
+                            isDarkMode={isDarkMode}
+                            themeStyles={themeStyles}
+                            collapsed={sidebarCollapsed}
+                        />
+                    </nav>
                     {!sidebarCollapsed && favoriteApps.length > 0 && (
                         <div className="tws-enterprise-sidebar__favorites">
                             <BookmarkBar
@@ -404,10 +400,11 @@ const TenantOrgLayout = ({ children }) => {
                         />
                     </div>
                     <main
+                        id="main-content"
                         ref={mainContentRef}
-                        className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 bg-[#dce7ff]/52 dark:bg-transparent glass-scrollbar transition-all duration-500"
+                        className="tws-workspace-main flex-1 overflow-y-auto overflow-x-hidden relative z-10 glass-scrollbar transition-all duration-500"
                     >
-                        <div className="px-2 sm:px-3 md:px-4 lg:px-5 pb-2 sm:pb-3 md:pb-4 lg:pb-5 pt-0 relative animate-fade-in">
+                        <div className="tws-workspace-content relative animate-fade-in">
                             <TenantNavProvider value={{
                                 filteredMenuItems,
                                 activeAppKey,

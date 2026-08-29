@@ -10,7 +10,7 @@
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTenantSlug } from '../../../shared/hooks/useTenantSlug';
 import {
   MagnifyingGlassIcon,
@@ -62,7 +62,6 @@ const OdooTopBar = ({
   const initial      = (orgName  || 'O').charAt(0).toUpperCase();
   const userInitial  = (user?.fullName?.[0] ?? user?.email?.[0] ?? 'U').toUpperCase();
   const displayName  = user?.fullName || user?.email || 'User';
-  const isClientUser = ['client', 'customer'].includes(String(user?.role || '').toLowerCase());
   const isAdminUser = ['owner', 'admin', 'super_admin', 'org_manager', 'org_admin', 'tenant_owner']
     .includes(String(user?.role || '').toLowerCase());
   const [avatarError, setAvatarError] = useState(false);
@@ -102,7 +101,7 @@ const OdooTopBar = ({
   const appMeta = activeApp ? (APP_METADATA[activeApp.key] ?? null) : null;
 
   return (
-    <header className={`tws-command-nav ${isHome ? 'tws-command-nav--home' : ''} flex h-11 sm:h-12 shrink-0 items-center gap-1.5 sm:gap-2 border-b border-[#c9d6f4]/70 dark:border-gray-700/80 bg-[#dce7ff]/52 dark:bg-gray-900 px-2 sm:px-3 shadow-sm z-30 relative backdrop-blur-[2px]`}>
+    <header className={`tws-command-nav ${isHome ? 'tws-command-nav--home' : ''} flex h-14 shrink-0 items-center gap-1.5 sm:gap-2 px-2 sm:px-4 z-30 relative`}>
 
       {/* ── 1. Home / org logo ──────────────────────────────────────────── */}
       <button
@@ -136,21 +135,17 @@ const OdooTopBar = ({
             <Link
               to={activeApp.path}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-semibold shrink-0 transition-colors',
-                'text-[#0d0e24] dark:text-white hover:bg-[#e8eeff] dark:hover:bg-gray-800'
+                'tws-command-nav__app flex items-center gap-2 rounded-lg px-2.5 py-1 text-sm font-semibold shrink-0 transition-colors'
               )}
             >
               {/* App colour dot */}
               {appMeta && (
-                <span
-                  className={cn('h-2 w-2 rounded-full bg-gradient-to-br shrink-0', appMeta.gradient)}
-                  aria-hidden="true"
-                />
+                <span className="tws-command-nav__active-mark" aria-hidden="true" />
               )}
               {activeApp.label}
             </Link>
 
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+            <span className="tws-command-nav__context text-xs">
               {children.find(item => item.path === activeChildPath)?.label || 'Workspace'}
             </span>
           </>
@@ -189,7 +184,7 @@ const OdooTopBar = ({
           variant="ghost"
           size="sm"
           onClick={onSearch}
-          className="tws-nav-search hidden sm:flex h-7 w-7 lg:w-auto lg:px-2.5 items-center justify-center lg:justify-start gap-1.5 rounded-xl text-xs text-slate-500 dark:text-gray-500 bg-[#eef2ff] dark:bg-gray-800 border border-[#d2d6ee] dark:border-gray-700 hover:bg-[#e8eeff] dark:hover:bg-gray-700"
+            className="tws-nav-search hidden sm:flex h-9 w-9 lg:w-auto lg:min-w-[190px] lg:px-3 items-center justify-center lg:justify-start gap-2 rounded-lg text-xs"
         >
           <MagnifyingGlassIcon className="h-3.5 w-3.5 shrink-0" />
           <span className="hidden lg:inline">Search…</span>

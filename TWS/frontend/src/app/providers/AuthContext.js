@@ -45,9 +45,13 @@ export const AuthProvider = ({ children }) => {
       role: user.role,
       status: user.status,
       orgId: user.orgId,
-      permissions: user.permissions
+      permissions: user.permissions,
+      // Distinguishes a Supra Admin (TWSAdmin model) session from a tenant
+      // user — App.jsx's /supra-admin route guard reads this directly.
+      userType: user.userType,
+      tenantId: user.tenantId
     };
-  }, [user?.id, user?.role, user?.email, user?.fullName, user?.status, user?.orgId, user?.permissions]);
+  }, [user?.id, user?.role, user?.email, user?.fullName, user?.status, user?.orgId, user?.permissions, user?.userType, user?.tenantId]);
 
   // SECURITY FIX: Don't set Authorization header - cookies are sent automatically
   // Axios instance already configured with withCredentials: true

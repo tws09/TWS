@@ -294,6 +294,12 @@ function App() {
                 if (user.userType === 'twsAdmin' || user.role === 'super_admin') {
                   return <Navigate to="/supra-admin" replace />;
                 }
+                // admin.housesbase.com/login is the Supra Admin entry point only —
+                // a stray non-supra-admin session on this host (shared cookie domain)
+                // still gets the Supra Admin form, never the tenant login.
+                if (isAdminHost()) {
+                  return <SupraAdminLogin />;
+                }
                 try {
                   const td = JSON.parse(localStorage.getItem('tenantData'));
                   const slug =
@@ -313,7 +319,10 @@ function App() {
                 }
                 return <SoftwareHouseLogin />;
               })()
-              : (isSubdomain || isAdminHost() ? <SoftwareHouseLogin /> : <FindWorkspace />)
+              // admin.housesbase.com/login is Supra Admin only; every org
+              // (Software House Admin, employee, client) signs in on its own
+              // subdomain via the shared tenant login form.
+              : (isAdminHost() ? <SupraAdminLogin /> : (isSubdomain ? <SoftwareHouseLogin /> : <FindWorkspace />))
             }
           />
           <Route path="/software-house" element={<LegacyLandingRedirect />} />
@@ -345,6 +354,7 @@ function App() {
               <Route path="/product/nucleus" element={<ModulePage type="nucleus" />} />
               <Route path="/solutions/software-houses" element={<SolutionPage type="software" />} />
               <Route path="/solutions/digital-agencies" element={<SolutionPage type="agency" />} />
+              <Route path="/solutions/it-service-companies" element={<SolutionPage type="services" />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/resources" element={<ResourcesPage />} />
@@ -601,7 +611,21 @@ function App() {
           </Route>
 
           {/* ── Root redirect ─────────────────────────────────────────────── */}
-          {user ? (
+          {isAdminHost() ? (
+            // admin.housesbase.com is the Supra Admin host only — never the
+            // marketing site (its CTAs like "Get Started" → /signup are dead
+            // links here, since /signup only exists on the root domain).
+            <>
+              <Route
+                path="/"
+                element={
+                  <Navigate to={user?.userType === 'twsAdmin' || user?.role === 'super_admin' ? '/supra-admin' : '/login'} replace />
+                }
+              />
+              <Route path="/dashboard" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<PageNotFound />} />
+            </>
+          ) : user ? (
             allTenantRoles.includes(user.role) ? (
               <Route
                 path="/"

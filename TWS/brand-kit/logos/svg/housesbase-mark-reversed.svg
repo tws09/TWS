@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1448 1086" role="img" aria-labelledby="title desc">
+  <title id="title">HousesBase mark</title>
+  <desc id="desc">Refined white gateway with an orange center pane for dark backgrounds.</desc>
+  <!-- Self-contained production artwork. All visible lettering is outlined vector geometry. -->
+  
+  <path d="M260 64H1188V1024L984 918V264H824V406L624 512V264H464V918L260 1024Z" fill="#FFFFFF"/>
+  <path d="M624 568L824 458V950L624 870Z" fill="#F04E25"/>
+</svg>

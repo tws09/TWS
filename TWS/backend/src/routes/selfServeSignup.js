@@ -122,7 +122,13 @@ const rejectTenantSubdomainOrigin = (req, res, next) => {
   // Only flag hosts that are actually a subdomain of BASE_DOMAIN — not the
   // raw *.up.railway.app host the app can also be reached on (see the same
   // distinction in cookieSecurity.js's usesDomainCookie check).
-  const isTenantSubdomain = host.endsWith(`.${baseDomain}`) && !INFRA_SUBDOMAINS.has(host.split('.')[0]);
+  // 'admin' is excluded from INFRA_SUBDOMAINS' pass-through here even though
+  // it's an infra subdomain elsewhere: admin.housesbase.com is the Supra
+  // Admin host, not a valid signup origin — the frontend never renders the
+  // signup form there (App.jsx), so the backend must reject it too or the
+  // API is reachable directly even though the UI hides it.
+  const subdomain = host.split('.')[0];
+  const isTenantSubdomain = host.endsWith(`.${baseDomain}`) && (subdomain === 'admin' || !INFRA_SUBDOMAINS.has(subdomain));
   if (isTenantSubdomain) {
     return res.status(400).json({
       success: false,

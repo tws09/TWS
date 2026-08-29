@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="HousesBase logo decision preview comparing the current gateway, an optically refined gateway, and a refined gateway with a customized wordmark.">
+  <title>HousesBase — Logo Decision Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #103d67;
+      --navy-deep: #081f3a;
+      --orange: #f04e25;
+      --orange-text: #b83515;
+      --blue: #4f7ef7;
+      --ink: #0f172a;
+      --text: #334155;
+      --muted: #64748b;
+      --mist: #f4f8fd;
+      --surface: #ffffff;
+      --line: rgba(16, 61, 103, .14);
+      --canvas: #07111d;
+      --canvas-soft: #0b1b2c;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Geist, Inter, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, textarea { font: inherit; }
+    button:focus-visible, textarea:focus-visible, a:focus-visible {
+      outline: 3px solid var(--orange-text);
+      outline-offset: 3px;
+    }
+    svg { display: block; }
+    h1, h2, h3, .wordmark, .reverse-name { font-family: Manrope, Inter, Arial, sans-serif; }
+    .shell { width: min(1440px, calc(100% - 40px)); margin-inline: auto; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+    .eyebrow { margin: 0 0 18px; color: var(--orange-text); font: 700 11px/1.3 "JetBrains Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+    .hero .eyebrow, .fit-card.primary > span { color: #ff9b7f; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      background: rgba(7,17,29,.88);
+      backdrop-filter: blur(18px);
+    }
+    .topbar-inner { min-height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .decision-brand { display: flex; align-items: center; gap: 11px; color: #fff; font-weight: 800; letter-spacing: -.03em; }
+    .decision-brand svg { width: 31px; height: auto; color: #fff; }
+    .status { display: flex; align-items: center; gap: 9px; color: #b9c7d8; font: 600 11px "JetBrains Mono", monospace; }
+    .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 5px rgba(240,78,37,.15); }
+
+    .hero { position: relative; overflow: hidden; padding: 115px 0 105px; color: #fff; }
+    .hero::before { content: ""; position: absolute; width: 700px; height: 700px; right: -170px; top: -260px; border: 1px solid rgba(255,255,255,.08); border-radius: 50%; box-shadow: 0 0 0 110px rgba(79,126,247,.035), 0 0 0 220px rgba(79,126,247,.02); }
+    .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; align-items: end; gap: 80px; }
+    .hero h1 { max-width: 900px; margin: 0; font-size: clamp(58px, 8vw, 118px); line-height: .88; letter-spacing: -.075em; }
+    .hero h1 span { color: #8cb1e4; }
+    .hero-copy { max-width: 560px; padding-bottom: 8px; }
+    .hero-copy strong { display: block; margin-bottom: 18px; font-size: 21px; line-height: 1.2; }
+    .hero-copy p { margin: 0; color: #aebfd1; font-size: 15px; line-height: 1.7; }
+    .locked { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(255,255,255,.12); }
+    .locked div { min-height: 82px; padding: 15px; background: rgba(255,255,255,.045); }
+    .locked b { display: block; margin-bottom: 7px; color: #fff; font-size: 12px; }
+    .locked span { color: #8fa4ba; font: 500 9px/1.4 "JetBrains Mono", monospace; text-transform: uppercase; }
+
+    .board { padding: 85px 0 130px; background: var(--mist); }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 34px; }
+    .section-head h2 { max-width: 760px; margin: 0; font-size: clamp(42px, 5vw, 72px); line-height: .95; letter-spacing: -.06em; }
+    .section-head > p { max-width: 530px; margin: 0; color: var(--text); line-height: 1.65; }
+
+    .directions { display: grid; gap: 22px; }
+    .direction { overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: 0 24px 60px rgba(8,31,58,.07); }
+    .direction-head { display: grid; grid-template-columns: 110px 1fr auto; align-items: center; gap: 24px; min-height: 108px; padding: 20px 24px; border-bottom: 1px solid var(--line); }
+    .direction-no { width: 66px; height: 66px; display: grid; place-items: center; border-radius: 17px; color: var(--navy); background: #eaf3ff; font: 700 16px "JetBrains Mono", monospace; }
+    .direction-title h3 { margin: 0 0 7px; font-size: 25px; letter-spacing: -.04em; }
+    .direction-title p { margin: 0; color: var(--muted); font-size: 13px; }
+    .change-tag { padding: 9px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--navy); background: var(--mist); font: 700 9px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+
+    .direction-grid { display: grid; grid-template-columns: 1.35fr .65fr; min-height: 520px; }
+    .identity-stage { display: grid; grid-template-rows: 1fr 150px; border-right: 1px solid var(--line); }
+    .lockup-stage { display: grid; place-items: center; min-height: 365px; padding: 55px; background: #fff; }
+    .lockup { display: flex; align-items: center; gap: 30px; width: min(100%, 770px); }
+    .mark { flex: 0 0 auto; width: 142px; height: auto; }
+    .wordmark-wrap { min-width: 0; }
+    .wordmark { color: var(--navy); font-size: clamp(45px, 5vw, 76px); font-weight: 800; line-height: .93; letter-spacing: -.072em; white-space: nowrap; }
+    .descriptor { margin-top: 12px; color: var(--muted); font: 700 11px "JetBrains Mono", monospace; letter-spacing: .19em; text-transform: uppercase; }
+    .wordmark-vector { display: block; width: min(100%, 540px); height: auto; }
+    .reverse-lockup .wordmark-vector { width: min(100%, 290px); }
+
+    .reverse-stage { display: grid; grid-template-columns: 1fr 250px; align-items: center; gap: 20px; padding: 24px 34px; color: #fff; background: var(--navy-deep); }
+    .reverse-lockup { display: flex; align-items: center; gap: 15px; }
+    .reverse-lockup .mark { width: 64px; }
+    .reverse-name { font-size: 28px; font-weight: 750; letter-spacing: -.055em; }
+    .reverse-stage p { margin: 0; color: #a9bfd7; font: 500 10px/1.55 "JetBrains Mono", monospace; }
+
+    .tests { display: grid; grid-template-rows: auto 1fr; }
+    .micro-test { padding: 24px; border-bottom: 1px solid var(--line); background: #f8fbff; }
+    .test-label { display: flex; justify-content: space-between; margin-bottom: 22px; color: var(--muted); font: 600 9px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .size-row { min-height: 96px; display: flex; align-items: end; justify-content: space-around; gap: 18px; }
+    .size { display: grid; justify-items: center; gap: 10px; color: var(--muted); font: 500 9px "JetBrains Mono", monospace; }
+    .size svg { width: var(--size); height: auto; }
+    .context-tests { display: grid; gap: 12px; padding: 24px; }
+    .nav-test { height: 72px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 12px; color: #fff; background: var(--navy-deep); }
+    .nav-test svg { width: 32px; }
+    .nav-test b { font-size: 15px; letter-spacing: -.04em; }
+    .nav-test span { margin-left: auto; padding: 9px 12px; border-radius: 8px; background: var(--navy); font-size: 10px; }
+    .sidebar-test { min-height: 148px; display: grid; grid-template-columns: 55px 1fr; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; }
+    .sidebar-test aside { display: flex; flex-direction: column; align-items: center; gap: 13px; padding: 14px 8px; background: var(--navy-deep); }
+    .sidebar-test aside svg { width: 28px; }
+    .sidebar-test aside i { width: 25px; height: 25px; border-radius: 7px; background: rgba(255,255,255,.1); }
+    .sidebar-copy { padding: 18px; }
+    .sidebar-copy b { display: block; margin-bottom: 7px; font-size: 13px; }
+    .sidebar-copy p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .wordmark-size-test { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wordmark-size-test figure { min-width: 0; min-height: 88px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; margin: 0; padding: 14px; border: 1px solid var(--line); border-radius: 11px; background: #fff; }
+    .wordmark-size-test figure.dark { background: var(--navy-deep); }
+    .wordmark-size-test img { display: block; width: 100%; height: 40px; object-fit: contain; object-position: left center; }
+    .wordmark-size-test figcaption { color: var(--muted); font: 600 8px "JetBrains Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
+    .wordmark-size-test figure.dark figcaption { color: #b7c8d9; }
+
+    .direction-foot { display: grid; grid-template-columns: 1.2fr .8fr; border-top: 1px solid var(--line); }
+    .assessment { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); }
+    .assessment div { padding: 18px; background: #fff; }
+    .assessment span { display: block; margin-bottom: 7px; color: var(--muted); font: 600 8px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .assessment b { color: var(--navy); font-size: 14px; }
+    .select-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 22px; background: #f8fbff; }
+    .select-wrap span { color: var(--muted); font-size: 11px; }
+    .direction-radio { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+    .select-button { min-height: 42px; display: inline-flex; align-items: center; padding: 0 16px; border: 1px solid var(--navy); border-radius: 10px; color: var(--navy); background: #fff; font-weight: 750; cursor: pointer; }
+    .direction-radio:focus-visible + .select-button { outline: 3px solid var(--orange-text); outline-offset: 3px; }
+    .direction.is-selected { border-color: var(--navy); box-shadow: 0 0 0 2px var(--navy), 0 24px 60px rgba(8,31,58,.1); }
+    .direction.is-selected .select-button { color: #fff; background: var(--navy); }
+
+    .system-fit { margin-top: 100px; }
+    .fit-grid { display: grid; grid-template-columns: 1.2fr .8fr .8fr; gap: 14px; }
+    .fit-card { min-height: 300px; display: flex; flex-direction: column; overflow: hidden; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+    .fit-card.primary { color: #fff; background: var(--navy-deep); }
+    .fit-card > span { color: var(--orange-text); font: 700 9px "JetBrains Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+    .fit-card h3 { max-width: 470px; margin: auto 0 14px; font-size: 34px; line-height: 1.03; letter-spacing: -.05em; }
+    .fit-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .fit-card.primary p { color: #a9bfd7; }
+    .tenant-demo { margin-top: auto; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--mist); }
+    .tenant-demo b { display: block; margin-bottom: 5px; }.tenant-demo small { color: var(--muted); }
+    .nucleus-orb { width: 60px; height: 60px; display: grid; place-items: center; margin-top: 35px; border-radius: 18px; color: var(--navy-deep); background: #dfe8ff; font-weight: 800; box-shadow: 0 14px 32px rgba(79,126,247,.18); }
+
+    .notes { margin-top: 70px; display: grid; grid-template-columns: .7fr 1.3fr; gap: 38px; padding: 38px; border: 1px solid var(--line); border-radius: 20px; background: #fff; }
+    .notes h2 { margin: 0 0 12px; font-size: 34px; letter-spacing: -.05em; }
+    .notes p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .notes textarea { width: 100%; min-height: 150px; resize: vertical; padding: 16px; border: 2px solid #7b8ea5; border-radius: 12px; color: var(--ink); background: #f8fbff; line-height: 1.6; }
+    .notes-actions { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-top: 12px; }
+    .saved { color: var(--muted); font: 500 10px "JetBrains Mono", monospace; }
+    .save-button { min-height: 42px; padding: 0 16px; border: 0; border-radius: 10px; color: #fff; background: var(--navy); font-weight: 750; cursor: pointer; }
+
+    .next-step { margin-top: 22px; padding: 28px; border-radius: 18px; color: #fff; background: var(--navy); }
+    .next-step strong { display: block; margin-bottom: 7px; font-size: 17px; }
+    .next-step p { margin: 0; color: #c4ddff; font-size: 12px; }
+    .page-footer { padding: 34px 0 55px; color: #aebdcb; background: var(--canvas); font: 500 10px "JetBrains Mono", monospace; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 20px; }
+
+    @media (max-width: 1100px) {
+      .hero-grid, .direction-grid, .direction-foot, .notes { grid-template-columns: 1fr; }
+      .identity-stage { border-right: 0; border-bottom: 1px solid var(--line); }
+      .fit-grid { grid-template-columns: 1fr 1fr; }.fit-card.primary { grid-column: 1 / -1; }
+      .select-wrap { justify-content: flex-start; }
+    }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 28px, 640px); }
+      .hero { padding: 78px 0; }.hero-grid { gap: 45px; }.locked { grid-template-columns: 1fr; }
+      .section-head, .direction-head { align-items: start; grid-template-columns: 1fr; }.section-head { flex-direction: column; }
+      .direction-head { display: grid; gap: 15px; }.direction-no { width: 52px; height: 52px; }
+      .lockup-stage { min-height: 300px; padding: 35px 22px; }.lockup { gap: 18px; }.mark { width: 90px; }
+      .wordmark { font-size: 36px; }.descriptor { display: none; }
+      .reverse-stage { grid-template-columns: 1fr; }.assessment, .fit-grid { grid-template-columns: 1fr 1fr; }
+      .fit-card.primary { grid-column: 1 / -1; }.footer-inner { flex-direction: column; }
+    }
+    @media (max-width: 480px) {
+      .lockup { align-items: flex-start; flex-direction: column; }.assessment, .fit-grid { grid-template-columns: 1fr; }.fit-card.primary { grid-column: auto; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+    <defs>
+      <symbol id="mark-current" viewBox="0 0 1448 1086">
+        <path d="M273 64H1176V1027L976 921V260H821V401L626 503V260H473V921L273 1027Z" fill="currentColor"/>
+        <path d="M626 566L820 462V953L626 873Z" fill="var(--mark-accent, #F04E25)"/>
+      </symbol>
+      <symbol id="mark-refined" viewBox="0 0 1448 1086">
+        <path d="M260 64H1188V1024L984 918V264H824V406L624 512V264H464V918L260 1024Z" fill="currentColor"/>
+        <path d="M624 568L824 458V950L624 870Z" fill="var(--mark-accent, #F04E25)"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="decision-brand"><svg viewBox="0 0 1448 1086" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>Identity Decision Room</span></div>
+      <div class="status"><i></i><span>Preview only · no final assets replaced</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div>
+          <p class="eyebrow">HousesBase · Logo decision preview · 01</p>
+          <h1>One gateway.<br><span>Three levels of refinement.</span></h1>
+        </div>
+        <div class="hero-copy">
+          <strong>The concept stays. The decision is how far the execution should move.</strong>
+          <p>Every direction preserves the architectural gateway, the H-like silhouette, and favicon recognition. The comparison isolates symbol balance, wordmark character, and product-system fit.</p>
+          <div class="locked" aria-label="Approved brand foundations">
+            <div><b>HousesBase</b><span>Only public master brand</span></div>
+            <div><b>Software House OS</b><span>Full marketing lockups</span></div>
+            <div><b>Get started</b><span>Current approved CTA</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="board">
+      <div class="shell">
+        <div class="section-head">
+          <div><p class="eyebrow">Side-by-side review</p><h2>Choose the level of change that earns the name.</h2></div>
+          <p>Review the primary lockup, dark-background behavior, favicon sizes, navigation use, and product-sidebar use. Selection is stored only in this browser.</p>
+        </div>
+
+        <div class="directions" role="radiogroup" aria-label="Choose a HousesBase logo direction">
+          <article class="direction" data-direction="A">
+            <header class="direction-head">
+              <div class="direction-no">A</div>
+              <div class="direction-title"><h3>Current Gateway</h3><p>The exact existing symbol paired with a disciplined HousesBase lockup.</p></div>
+              <div class="change-tag">Wordmark change only</div>
+            </header>
+            <div class="direction-grid">
+              <div class="identity-stage">
+                <div class="lockup-stage">
+                  <div class="lockup">
+                    <svg class="mark" viewBox="0 0 1448 1086" style="color:#103D67" role="img" aria-label="Current gateway mark"><use href="#mark-current"/></svg>
+                    <div class="wordmark-wrap"><div class="wordmark">HousesBase</div><div class="descriptor">Software House OS</div></div>
+                  </div>
+                </div>
+                <div class="reverse-stage">
+                  <div class="reverse-lockup">
+                    <svg class="mark" viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-current"/></svg>
+                    <div class="reverse-name">HousesBase</div>
+                  </div>
+                  <p>Highest continuity. No geometric intervention. Public naming is corrected immediately.</p>
+                </div>
+              </div>
+              <div class="tests">
+                <div class="micro-test">
+                  <div class="test-label"><span>Small-size test</span><span>16–48 px</span></div>
+                  <div class="size-row">
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:16px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-current"/></svg><span>16</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:24px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-current"/></svg><span>24</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:32px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-current"/></svg><span>32</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:48px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-current"/></svg><span>48</span></div>
+                  </div>
+                </div>
+                <div class="context-tests">
+                  <div class="nav-test"><svg viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-current"/></svg><b>HousesBase</b><span>Get started</span></div>
+                  <div class="sidebar-test"><aside><svg viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-current"/></svg><i></i><i></i><i></i></aside><div class="sidebar-copy"><b>Compact product mark</b><p>No descriptor in navigation, app icons, favicons, or the product sidebar.</p></div></div>
+                </div>
+              </div>
+            </div>
+            <footer class="direction-foot">
+              <div class="assessment"><div><span>Continuity</span><b>Excellent</b></div><div><span>Optical balance</span><b>Good</b></div><div><span>Small size</span><b>Excellent</b></div><div><span>Visual distinctiveness</span><b>Moderate</b></div></div>
+              <div class="select-wrap"><span>Preserve the symbol exactly.</span><input class="direction-radio" type="radio" name="logoDirection" id="selectA" value="A"><label class="select-button" for="selectA">Select A</label></div>
+            </footer>
+          </article>
+
+          <article class="direction" data-direction="B">
+            <header class="direction-head">
+              <div class="direction-no">B</div>
+              <div class="direction-title"><h3>Balanced Gateway</h3><p>The existing idea with normalized outer proportions, openings, and center-pane alignment.</p></div>
+              <div class="change-tag">Optical refinement</div>
+            </header>
+            <div class="direction-grid">
+              <div class="identity-stage">
+                <div class="lockup-stage">
+                  <div class="lockup">
+                    <svg class="mark" viewBox="0 0 1448 1086" style="color:#103D67" role="img" aria-label="Optically refined gateway mark"><use href="#mark-refined"/></svg>
+                    <div class="wordmark-wrap"><div class="wordmark">HousesBase</div><div class="descriptor">Software House OS</div></div>
+                  </div>
+                </div>
+                <div class="reverse-stage">
+                  <div class="reverse-lockup">
+                    <svg class="mark" viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-refined"/></svg>
+                    <div class="reverse-name">HousesBase</div>
+                  </div>
+                  <p>Same silhouette and story. More deliberate spacing and steadier visual weight.</p>
+                </div>
+              </div>
+              <div class="tests">
+                <div class="micro-test">
+                  <div class="test-label"><span>Small-size test</span><span>16–48 px</span></div>
+                  <div class="size-row">
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:16px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>16</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:24px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>24</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:32px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>32</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:48px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>48</span></div>
+                  </div>
+                </div>
+                <div class="context-tests">
+                  <div class="nav-test"><svg viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-refined"/></svg><b>HousesBase</b><span>Get started</span></div>
+                  <div class="sidebar-test"><aside><svg viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-refined"/></svg><i></i><i></i><i></i></aside><div class="sidebar-copy"><b>Compact product mark</b><p>The gateway remains clear while the two openings feel more intentionally related.</p></div></div>
+                </div>
+              </div>
+            </div>
+            <footer class="direction-foot">
+              <div class="assessment"><div><span>Continuity</span><b>Very strong</b></div><div><span>Optical balance</span><b>Excellent</b></div><div><span>Small size</span><b>Excellent</b></div><div><span>Visual distinctiveness</span><b>Strong</b></div></div>
+              <div class="select-wrap"><span>Refine the mark, keep a classic wordmark.</span><input class="direction-radio" type="radio" name="logoDirection" id="selectB" value="B"><label class="select-button" for="selectB">Select B</label></div>
+            </footer>
+          </article>
+
+          <article class="direction" data-direction="C">
+            <header class="direction-head">
+              <div class="direction-no">C</div>
+              <div class="direction-title"><h3>Signature Base</h3><p>The refined gateway paired with a custom Houses/Base hinge and ownership detail.</p></div>
+              <div class="change-tag">Refined mark + wordmark</div>
+            </header>
+            <div class="direction-grid">
+              <div class="identity-stage">
+                <div class="lockup-stage">
+                  <div class="lockup">
+                    <svg class="mark" viewBox="0 0 1448 1086" style="color:#103D67" role="img" aria-label="Refined gateway mark with customized wordmark"><use href="#mark-refined"/></svg>
+                    <div class="wordmark-wrap"><img class="wordmark-vector" src="./refinement/svg/housesbase-signature-wordmark-light.svg" alt="HousesBase custom outlined wordmark"><div class="descriptor">Software House OS</div></div>
+                  </div>
+                </div>
+                <div class="reverse-stage">
+                  <div class="reverse-lockup">
+                    <svg class="mark" viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-refined"/></svg>
+                    <img class="wordmark-vector" src="./refinement/svg/housesbase-signature-wordmark-dark.svg" alt="HousesBase reversed custom outlined wordmark">
+                  </div>
+                  <p>The orange hinge makes the name structure visible without turning it into two brands.</p>
+                </div>
+              </div>
+              <div class="tests">
+                <div class="micro-test">
+                  <div class="test-label"><span>Small-size test</span><span>16–48 px</span></div>
+                  <div class="size-row">
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:16px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>16</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:24px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>24</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:32px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>32</span></div>
+                    <div class="size"><svg viewBox="0 0 1448 1086" style="--size:48px;color:#103D67" aria-hidden="true" focusable="false"><use href="#mark-refined"/></svg><span>48</span></div>
+                  </div>
+                </div>
+                <div class="context-tests">
+                  <div class="nav-test"><svg viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-refined"/></svg><b>HousesBase</b><span>Get started</span></div>
+                  <div class="sidebar-test"><aside><svg viewBox="0 0 1448 1086" style="color:#fff" aria-hidden="true"><use href="#mark-refined"/></svg><i></i><i></i><i></i></aside><div class="sidebar-copy"><b>Compact product mark</b><p>The custom wordmark is reserved for full lockups. Compact product surfaces stay quiet.</p></div></div>
+                  <div class="wordmark-size-test" aria-label="Signature wordmark marketing-size tests">
+                    <figure><img src="./refinement/svg/housesbase-signature-wordmark-light.svg" alt="Outlined HousesBase signature wordmark at a medium marketing size"><figcaption>Light · 320 px</figcaption></figure>
+                    <figure class="dark"><img src="./refinement/svg/housesbase-signature-wordmark-dark.svg" alt="Reversed outlined HousesBase signature wordmark at a small marketing size"><figcaption>Dark · 240 px</figcaption></figure>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <footer class="direction-foot">
+              <div class="assessment"><div><span>Continuity</span><b>Very strong</b></div><div><span>Optical balance</span><b>Excellent</b></div><div><span>Small size</span><b>Excellent</b></div><div><span>Visual distinctiveness</span><b>Highest</b></div></div>
+              <div class="select-wrap"><span>Build a more distinctive complete identity.</span><input class="direction-radio" type="radio" name="logoDirection" id="selectC" value="C"><label class="select-button" for="selectC">Select C</label></div>
+            </footer>
+          </article>
+        </div>
+
+        <section class="system-fit">
+          <div class="section-head">
+            <div><p class="eyebrow">Already approved</p><h2>The logo must belong to this system.</h2></div>
+            <p>These relationships stay fixed regardless of which logo direction is selected.</p>
+          </div>
+          <div class="fit-grid">
+            <article class="fit-card primary"><span>Public master brand</span><h3>Run projects, people, clients, and margin from one connected base.</h3><p>HousesBase is the only public master brand. The approved signature remains: One system for projects, people, and margin.</p></article>
+            <article class="fit-card"><span>Tenant relationship</span><div class="tenant-demo"><b>Northstar Software</b><small>Powered by HousesBase</small></div><p>The tenant identity leads inside its workspace. HousesBase appears as a discreet endorsement.</p></article>
+            <article class="fit-card"><span>Named capability</span><div class="nucleus-orb">N</div><h3>Nucleus</h3><p>A HousesBase capability using support blue—not an independent master brand.</p></article>
+          </div>
+        </section>
+
+        <section class="notes">
+          <div><p class="eyebrow">Decision notes</p><h2>Record what should change.</h2><p>Select a direction above, then note any preferred geometry, spacing, wordmark, descriptor, or application details. Your selection and notes stay in this browser.</p></div>
+          <div>
+            <label class="mono" for="reviewNotes" style="display:block;margin-bottom:9px;color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:.08em">Reviewer notes</label>
+            <textarea id="reviewNotes" placeholder="Example: Direction B mark, but explore a quieter wordmark between B and C..."></textarea>
+            <div class="notes-actions"><span class="saved" id="savedState" aria-live="polite">Not saved yet</span><button class="save-button" id="saveNotes" type="button">Save review</button></div>
+          </div>
+        </section>
+
+        <div class="next-step"><strong>Decision complete: Direction C — Signature Base.</strong><p>The approved lockups are now outlined, exported, accessibility-tested, and packaged in the HousesBase production brand kit.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer"><div class="shell footer-inner"><span>HousesBase identity decision preview</span><span>Manrope · Geist · JetBrains Mono · WCAG 2.2 AA target</span></div></footer>
+
+  <script>
+    const selectionKey = 'housesbase-logo-preview-selection';
+    const notesKey = 'housesbase-logo-preview-notes';
+    const directions = [...document.querySelectorAll('.direction')];
+    const radios = [...document.querySelectorAll('input[name="logoDirection"]')];
+    const notes = document.getElementById('reviewNotes');
+    const savedState = document.getElementById('savedState');
+    const memoryStore = new Map();
+
+    function readStoredValue(key) {
+      try {
+        return localStorage.getItem(key) ?? memoryStore.get(key) ?? null;
+      } catch (error) {
+        return memoryStore.get(key) ?? null;
+      }
+    }
+
+    function writeStoredValue(key, value) {
+      memoryStore.set(key, value);
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function applySelection(value) {
+      directions.forEach((direction) => direction.classList.toggle('is-selected', direction.dataset.direction === value));
+      radios.forEach((radio) => {
+        radio.checked = radio.value === value;
+        const label = document.querySelector(`label[for="${radio.id}"]`);
+        if (label) label.textContent = radio.checked ? `Selected ${radio.value}` : `Select ${radio.value}`;
+      });
+    }
+
+    radios.forEach((radio) => radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+      const persisted = writeStoredValue(selectionKey, radio.value);
+      applySelection(radio.value);
+      savedState.textContent = persisted ? `Direction ${radio.value} selected and saved` : `Direction ${radio.value} selected for this session`;
+    }));
+
+    document.getElementById('saveNotes').addEventListener('click', () => {
+      const persisted = writeStoredValue(notesKey, notes.value);
+      const selection = radios.find((radio) => radio.checked)?.value;
+      savedState.textContent = persisted ? `Direction ${selection} and notes saved` : `Direction ${selection} and notes retained for this session`;
+    });
+
+    const storedSelection = readStoredValue(selectionKey);
+    const storedNotes = readStoredValue(notesKey);
+    const initialSelection = ['A', 'B', 'C'].includes(storedSelection) ? storedSelection : 'C';
+    applySelection(initialSelection);
+    if (storedNotes !== null) notes.value = storedNotes;
+    savedState.textContent = storedSelection
+      ? `Restored Direction ${initialSelection}${storedNotes !== null ? ' and saved notes' : ''}`
+      : 'Direction C approved for production';
+  </script>
+</body>
+</html>

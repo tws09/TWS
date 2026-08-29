@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import TenantOrgLayout from '../TenantOrgLayout';
 
 // Mock dependencies
-jest.mock('../../../app/providers/TenantAuthContext', () => ({
+jest.mock('../../../../app/providers/TenantAuthContext', () => ({
   useTenantAuth: () => ({
     user: {
       id: '1',
@@ -26,12 +27,12 @@ jest.mock('../../../app/providers/TenantAuthContext', () => ({
       erpCategory: 'business'
     },
     isAuthenticated: true,
-    loading: false,
+    loading: true,
     logout: jest.fn()
   })
 }));
 
-jest.mock('../../../app/providers/ThemeContext', () => ({
+jest.mock('../../../../app/providers/ThemeContext', () => ({
   useTheme: () => ({
     theme: 'light',
     toggleTheme: jest.fn()
@@ -52,12 +53,13 @@ jest.mock('../CommandPalette', () => {
   };
 });
 
-jest.mock('../../../shared/components/navigation/ClickUpSidebar', () => {
-  return function ClickUpSidebar() {
-    return <div data-testid="clickup-sidebar">ClickUp Sidebar</div>;
-  };
-});
-
+jest.mock('../NucleusAgent', () => () => null);
+jest.mock('../IdleSessionGuard', () => () => null);
+jest.mock('../OdooTopBar', () => () => <header aria-label="Workspace utility bar" />);
+jest.mock('../../utils/useThemeStyles', () => ({
+  useThemeStyles: () => ({ getPrimaryColor: () => 'currentColor' })
+}));
+jest.mock('react-hot-toast', () => ({ Toaster: () => null }));
 describe('TenantOrgLayout', () => {
   beforeEach(() => {
     // Mock window.innerWidth for responsive tests

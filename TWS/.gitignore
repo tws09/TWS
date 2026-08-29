@@ -159,3 +159,6 @@ cypress/screenshots/
 
 # Secrets
 secrets.json
+
+# Unrelated local project (WhatsApp contact/chat scraper) — never belongs in this repo
+shippershubcontacts/

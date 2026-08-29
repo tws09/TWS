@@ -430,7 +430,7 @@ const verifyTenantOrgAccess = async (req, res, next) => {
           const userTenantId = user?.tenantId;
           
           if (user) {
-            const isOrgBasedUser = ['principal', 'head_teacher', 'teacher', 'student', 'owner', 'admin', 'org_manager'].includes(user.role);
+            const isOrgBasedUser = ['owner', 'admin', 'org_manager'].includes(user.role);
             
             console.log('🔍 User found:', {
               userId: user._id.toString(),

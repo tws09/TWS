@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MarketingLayout, PrimaryActions, Reveal } from '../components/MarketingShell';
+import PlatformWorkspacePicture from '../components/PlatformWorkspacePicture';
 import { modulePages, productGroups } from '../data/marketingData';
 
 const PageHero = ({ eyebrow, title, intro, actions = true, children }) => (
@@ -9,7 +10,7 @@ const PageHero = ({ eyebrow, title, intro, actions = true, children }) => (
 
 export const ProductOverview = () => (
   <MarketingLayout title="HousesBase Platform">
-    <PageHero eyebrow="HousesBase Platform" title="One platform for the business behind the software." intro="Connect delivery, people, clients, finance, knowledge and AI-assisted project work in one software-house workspace." />
+    <section className="mk-page-hero mk-product-hero"><div className="mk-shell mk-product-hero-grid"><Reveal><p className="mk-eyebrow">HousesBase Platform</p><h1>One platform for the business behind the software.</h1><p>Connect delivery, people, clients, finance, knowledge and AI-assisted project work in one software-house workspace.</p><PrimaryActions /></Reveal><Reveal className="mk-product-frame"><PlatformWorkspacePicture priority /></Reveal></div></section>
     <section className="mk-section"><div className="mk-shell"><div className="mk-product-index">{productGroups.slice(0, 4).map((group) => <Reveal key={group.title}><h2>{group.title}</h2>{group.items.slice(0, 4).map(([label, href, copy]) => <Link key={label} to={href}><span>{label}</span><p>{copy}</p><b aria-hidden="true">→</b></Link>)}</Reveal>)}</div></div></section>
     <section className="mk-section mk-connected"><div className="mk-shell mk-workspace-grid"><Reveal><h2>Connected workflows, clear responsibility.</h2><p>Role-aware access gives people the right view of the same company system.</p></Reveal><Reveal className="mk-system-path">Projects <span>→</span> People <span>→</span> Clients <span>→</span> Finance <span>→</span> Knowledge <span>→</span> Nucleus</Reveal></div></section>
     <FinalBlock />
@@ -40,6 +41,12 @@ const solutionContent = {
     intro: 'Coordinate multiple clients, simultaneous projects, teams, time, billing, documents and internal operations.',
     pain: 'Client work moves quickly. Your operating picture should keep up.',
     points: ['Keep every client connected to delivery', 'Coordinate teams across active accounts', 'Bring time and billing closer to projects', 'Organize approval and client context', 'Keep portfolio material ready', 'Run internal operations beside client work'],
+  },
+  services: {
+    eyebrow: 'Built for IT service companies', title: 'Service delivery needs operational context.',
+    intro: 'Connect client requests, delivery teams, recurring work, people operations and finance in one company workspace.',
+    pain: 'Service work becomes harder to manage when clients, teams and business operations live in separate systems.',
+    points: ['Connect every client with active service work', 'Coordinate specialists across simultaneous engagements', 'Keep documents and delivery context together', 'Bring time and billing closer to service activity', 'Give leadership a shared operating picture', 'Run people operations beside delivery'],
   },
 };
 

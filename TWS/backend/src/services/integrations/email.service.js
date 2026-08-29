@@ -4,8 +4,8 @@ const { getSanitizedBaseDomain } = require('../../utils/baseDomain');
 const { renderEmailShell, renderButton, renderCard, renderRow, renderNotice, renderBadge, COLORS } = require('./emailTemplates');
 
 /**
- * Email Service for Education System
- * Handles all email notifications for students, teachers, and parents
+ * Email Service
+ * Handles all transactional and system emails via Resend.
  */
 
 class EmailService {
@@ -169,45 +169,6 @@ class EmailService {
     const html = renderEmailShell({ preheader: `The link to your ${org.name} workspace.`, bodyHtml: body });
 
     return await this.sendEmail(user.email, subject, html);
-  }
-
-  /**
-   * Teacher Notification - New Homework Submission
-   */
-  async sendTeacherHomeworkNotification(teacher, student, homework) {
-    const subject = `New Homework Submission - ${student.firstName} ${student.lastName}`;
-    
-    const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: #6366f1; padding: 20px; text-align: center;">
-          <h2 style="color: white; margin: 0;">📝 New Homework Submission</h2>
-        </div>
-        <div style="padding: 30px; background: #f9fafb;">
-          <p style="font-size: 16px; color: #374151;">Dear ${teacher.firstName},</p>
-          
-          <p style="font-size: 14px; color: #6b7280;">
-            A student has submitted homework that requires your review.
-          </p>
-          
-          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #1f2937; margin-top: 0;">Submission Details:</h3>
-            <p><strong>Student:</strong> ${student.firstName} ${student.lastName} (${student.studentId})</p>
-            <p><strong>Assignment:</strong> ${homework.title}</p>
-            <p><strong>Subject:</strong> ${homework.subjectId?.subjectName || 'N/A'}</p>
-            <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
-          </div>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${envConfig.get('FRONTEND_URL')}/teacher/homework" 
-               style="background: #6366f1; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block;">
-              Review Submission
-            </a>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    return await this.sendEmail(teacher.email, subject, html);
   }
 
   /**

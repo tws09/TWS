@@ -2,7 +2,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { ScrollArea } from '../../../components/ui/ScrollArea/ScrollArea';
-import { Separator } from '../../../components/ui/Separator/Separator';
 import { cn } from '../../../lib/utils';
 import { SIDEBAR_SECTIONS } from '../../../constants/navigationConstants';
 
@@ -21,8 +20,6 @@ const SidebarNav = ({
   filteredMenuItems = [],
   expandedMenus = {},
   toggleMenuExpansion,
-  isDarkMode,
-  themeStyles,
   collapsed = false,
 }) => {
   const navigate = useNavigate();
@@ -77,6 +74,9 @@ const SidebarNav = ({
           onClick={handleClick}
           data-nav-key={item.key}
           data-active={highlight ? 'true' : 'false'}
+          aria-current={highlight ? 'page' : undefined}
+          aria-expanded={hasSubmenu ? isExpanded : undefined}
+          title={collapsed ? item.label : undefined}
           className={cn(
             'tws-sidebar-nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200',
             collapsed && 'is-collapsed',
@@ -84,26 +84,12 @@ const SidebarNav = ({
               ? 'text-white shadow-sm'
               : 'bg-transparent hover:bg-gray-100/60 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300'
           )}
-          style={highlight ? {
-            backgroundColor: isDarkMode
-              ? `${themeStyles.getPrimaryColor(900)}66`
-              : `${themeStyles.getPrimaryColor(100)}CC`,
-            color: isDarkMode
-              ? themeStyles.getPrimaryColor(300)
-              : themeStyles.getPrimaryColor(700),
-            borderColor: isDarkMode
-              ? `${themeStyles.getPrimaryColor(700)}80`
-              : `${themeStyles.getPrimaryColor(200)}80`,
-            borderWidth: '1px',
-            borderStyle: 'solid',
-          } : {}}
         >
           <div
             className={cn(
               'tws-sidebar-nav-icon w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all',
               highlight ? 'text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
             )}
-            style={highlight ? { background: themeStyles.primaryGradientBr } : {}}
           >
             {Icon && <Icon className="w-4 h-4" />}
           </div>
@@ -129,14 +115,7 @@ const SidebarNav = ({
                         ? 'font-semibold'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'
                     )}
-                    style={childActive ? {
-                      backgroundColor: isDarkMode
-                        ? `${themeStyles.getPrimaryColor(900)}4D`
-                        : themeStyles.getPrimaryColor(100),
-                      color: isDarkMode
-                        ? themeStyles.getPrimaryColor(300)
-                        : themeStyles.getPrimaryColor(700),
-                    } : {}}
+                    aria-current={childActive ? 'page' : undefined}
                   >
                     {child.label}
                   </button>

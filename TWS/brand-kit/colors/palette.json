@@ -1,0 +1,32 @@
+{
+  "brand": "HousesBase",
+  "descriptor": "Software House OS",
+  "version": "1.0",
+  "colors": {
+    "brand": {
+      "primaryNavy": "#103D67",
+      "deepNavy": "#081F3A",
+      "accentOrange": "#F04E25",
+      "supportBlue": "#4F7EF7",
+      "successGreen": "#10B981"
+    },
+    "accessibleText": {
+      "orange": "#B83515",
+      "blue": "#2449A8",
+      "green": "#047857"
+    },
+    "neutral": {
+      "ink": "#0F172A",
+      "mist": "#F4F8FD",
+      "white": "#FFFFFF",
+      "border": "#7B8EA5"
+    }
+  },
+  "rules": {
+    "primaryButton": "White text on primary navy",
+    "orange": "Gateway pane, hinge, dot, icons, borders, and decorative graphics",
+    "orangeText": "Use #B83515 for small text on light surfaces",
+    "supportBlue": "Nucleus and informational artwork; do not use white normal text on #4F7EF7"
+  }
+}
+

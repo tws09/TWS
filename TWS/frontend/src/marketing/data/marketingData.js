@@ -57,7 +57,7 @@ export const solutionGroups = [
     items: [
       ['Software Houses', '/solutions/software-houses', 'Built around software-company workflows.'],
       ['Digital Agencies', '/solutions/digital-agencies', 'Connect clients, delivery and operations.'],
-      ['IT Service Companies', '/solutions/software-houses', 'Coordinate people, delivery and business.'],
+      ['IT Service Companies', '/solutions/it-service-companies', 'Coordinate people, delivery and business.'],
     ],
   },
   {
@@ -74,7 +74,7 @@ export const solutionGroups = [
 
 export const footerNavigation = [
   ['Product', [['Overview', '/product'], ['Projects', '/product/projects'], ['People & HR', '/product/people'], ['Finance', '/product/finance'], ['Clients', '/product/clients'], ['Documents & Sheets', '/product/documents'], ['Nucleus', '/product/nucleus']]],
-  ['Solutions', [['Software Houses', '/solutions/software-houses'], ['Digital Agencies', '/solutions/digital-agencies']]],
+  ['Solutions', [['Software Houses', '/solutions/software-houses'], ['Digital Agencies', '/solutions/digital-agencies'], ['IT Service Companies', '/solutions/it-service-companies']]],
   ['Resources', [['Resources', '/resources'], ['Changelog', '/changelog'], ['Security', '/security']]],
   ['Company', [['About', '/about'], ['Contact', '/contact']]],
   ['Account', [['Log in', '/login'], ['Find workspace', '/login']]],
@@ -173,4 +173,5 @@ export const pageMetadata = {
   '/security': ['HousesBase Security | Security designed into the platform', 'Learn how security is considered across authentication, authorization, workspace isolation, validation and monitoring.'],
   '/about': ['About HousesBase | One base for software companies', 'Learn why HousesBase brings the business behind software delivery into one operational platform.'],
   '/contact': ['Contact HousesBase', 'Talk with HousesBase about how your software company operates.'],
+  '/solutions/it-service-companies': ['HousesBase for IT Service Companies', 'Connect service delivery, people, clients, finance and company operations in one workspace.'],
 };

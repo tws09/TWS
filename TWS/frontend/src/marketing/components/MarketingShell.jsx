@@ -169,10 +169,10 @@ export const MarketingLayout = ({ children, title, description }) => {
     meta.content = fallback[1];
   }, [location.pathname, title, description]);
 
-  return <div className="mk-site"><MarketingNav /><main>{children}</main><MarketingFooter /></div>;
+  return <div className="mk-site"><a className="mk-skip-link" href="#main-content">Skip to content</a><MarketingNav /><main id="main-content">{children}</main><MarketingFooter /></div>;
 };
 
-export const PrimaryActions = ({ secondary = 'Explore HousesBase', secondaryTo = '/product' }) => (
+export const PrimaryActions = ({ secondary = 'Explore Platform', secondaryTo = '/product' }) => (
   <div className="mk-actions">
     <Link className="mk-button mk-button-primary" to="/signup">Get Started <span aria-hidden="true">→</span></Link>
     <Link className="mk-button mk-button-secondary" to={secondaryTo}>{secondary}</Link>

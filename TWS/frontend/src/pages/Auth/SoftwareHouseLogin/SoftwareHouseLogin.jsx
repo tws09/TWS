@@ -14,10 +14,10 @@ import {
     ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import BrandMark from '../../../shared/components/ui/BrandMark';
-import { getTenantWorkspaceUrl, navigateTo, isAdminHost, isSubdomainContext, getSubdomainSlug } from '../../../shared/utils/subdomain';
+import { getTenantWorkspaceUrl, navigateTo, isSubdomainContext, getSubdomainSlug } from '../../../shared/utils/subdomain';
 
 const SoftwareHouseLogin = () => {
-    const { login, loginSupraAdmin, logout } = useAuth();
+    const { login, logout } = useAuth();
     const { isDarkMode } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
@@ -87,13 +87,9 @@ const SoftwareHouseLogin = () => {
         }
     }, [error]);
 
-    // admin.housesbase.com is the Software House Admin's own dedicated login
-    // host — there's no employee/client ambiguity there, so it gets distinct
-    // copy and skips the portal selector and org-signup link entirely.
-    const isAdmin = isAdminHost();
     // /signup only renders on the root domain (App.jsx) — on a tenant
-    // subdomain or admin host, "Create account" would be a dead link.
-    const canSignUp = !isAdmin && !isSubdomainContext();
+    // subdomain, "Create account" would be a dead link.
+    const canSignUp = !isSubdomainContext();
 
     const portals = [
         { id: 'admin',    icon: ShieldCheckIcon,    title: 'Admin' },
@@ -128,25 +124,7 @@ const SoftwareHouseLogin = () => {
         setInfoMessage('');
         setFieldErrors({});
         try {
-            // admin.housesbase.com/login is the single entry point for both
-            // Software House Admins (User model) and the platform Supra Admin
-            // (TWSAdmin model — a completely separate collection/auth route).
-            // Try the tenant-admin login first; only on a credential failure,
-            // silently retry against the Supra Admin endpoint so one URL works
-            // for both without merging the two auth flows on the backend.
-            let result = await login(trimmedEmail, trimmedPassword, {
-                silent: isAdmin,
-                portal: isAdmin ? 'admin' : selectedPortal,
-            });
-            if (!result.success && isAdmin && /invalid email or password/i.test(result.error || '')) {
-                const supraResult = await loginSupraAdmin(trimmedEmail, trimmedPassword);
-                if (supraResult.success) {
-                    navigate('/supra-admin');
-                    setLoading(false);
-                    return;
-                }
-                result = supraResult;
-            }
+            const result = await login(trimmedEmail, trimmedPassword, { portal: selectedPortal });
             if (result.success) {
                 const userRole = result.user?.role;
                 const employeeRoles = ['employee', 'staff', 'developer', 'engineer', 'programmer', 'project_manager', 'manager', 'ceo', 'cfo', 'finance', 'hr', 'department_lead', 'pmo', 'contributor', 'contractor'];
@@ -241,31 +219,24 @@ const SoftwareHouseLogin = () => {
                     </div>
 
                     <h1 className="sh-heading">
-                        {isAdmin
-                            ? 'Sign in to HousesBase Admin'
-                            : workspaceName
-                                ? `Sign in to ${workspaceName}\u2019s workspace`
-                                : 'Sign in'}
+                        {workspaceName
+                            ? `Sign in to ${workspaceName}’s workspace`
+                            : 'Sign in'}
                     </h1>
 
-                    {/* Portal selector — only relevant on a tenant subdomain
-                        (admin/employee/client all share that login form);
-                        admin.housesbase.com is admin-only, so skip it. */}
-                    {!isAdmin && (
-                        <div className="sh-portal-row">
-                            {portals.map((portal) => (
-                                <button
-                                    key={portal.id}
-                                    type="button"
-                                    onClick={() => selectPortal(portal.id)}
-                                    className={`sh-portal-btn${selectedPortal === portal.id ? ' active' : ''}`}
-                                >
-                                    <portal.icon style={{ width: 18, height: 18 }} />
-                                    {portal.title}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    <div className="sh-portal-row">
+                        {portals.map((portal) => (
+                            <button
+                                key={portal.id}
+                                type="button"
+                                onClick={() => selectPortal(portal.id)}
+                                className={`sh-portal-btn${selectedPortal === portal.id ? ' active' : ''}`}
+                            >
+                                <portal.icon style={{ width: 18, height: 18 }} />
+                                {portal.title}
+                            </button>
+                        ))}
+                    </div>
 
                     {infoMessage && (
                         <div className="sh-info-box" role="status" aria-live="polite">{infoMessage}</div>

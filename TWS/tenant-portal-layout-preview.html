@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TWS Tenant Portal — Layout Preview</title>
+  <style>
+    :root {
+      --navy: #103d67;
+      --navy-deep: #0a2746;
+      --navy-ink: #061a2d;
+      --orange: #f04e25;
+      --orange-soft: #fff1ee;
+      --blue: #4f7ef7;
+      --green: #10b981;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --mist: #f4f8fd;
+      --white: #ffffff;
+      --line: rgba(16, 61, 103, .12);
+      --sidebar: 264px;
+      --shadow: 0 18px 50px rgba(16, 61, 103, .09);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { color-scheme: light; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100dvh;
+      overflow: hidden;
+      background: var(--mist);
+      color: var(--ink);
+      font-family: Manrope, "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--orange);
+      outline-offset: 2px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: -70px;
+      left: 16px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      background: var(--orange);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: top .18s ease;
+    }
+
+    .skip-link:focus { top: 12px; }
+
+    .portal {
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      min-height: 100dvh;
+      transition: grid-template-columns .24s cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .portal.collapsed { --sidebar: 76px; }
+
+    .sidebar {
+      position: relative;
+      z-index: 20;
+      display: flex;
+      min-width: 0;
+      min-height: 100dvh;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--navy);
+      box-shadow: 12px 0 30px rgba(6, 26, 45, .1);
+      color: var(--white);
+    }
+
+    .brand {
+      display: flex;
+      min-height: 72px;
+      align-items: center;
+      gap: 11px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 7px;
+      background: var(--white);
+      box-shadow: 0 7px 18px rgba(5, 26, 45, .14);
+    }
+
+    .brand-mark img {
+      width: 23px;
+      height: 23px;
+      object-fit: contain;
+    }
+
+    .brand-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .brand-copy strong,
+    .brand-copy small { display: block; }
+
+    .brand-copy strong {
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 750;
+      letter-spacing: -.01em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .brand-copy small {
+      margin-top: 4px;
+      color: rgba(255, 255, 255, .58);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .collapse-button {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .13);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .08);
+      color: rgba(255, 255, 255, .72);
+      transition: background-color .18s ease, color .18s ease;
+    }
+
+    .collapse-button:hover {
+      background: rgba(255, 255, 255, .15);
+      color: var(--white);
+    }
+
+    .nav-label {
+      padding: 18px 17px 7px;
+      color: rgba(255, 255, 255, .48);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .navigation {
+      flex: 1;
+      min-height: 0;
+      padding: 4px 11px 16px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, .24) transparent;
+    }
+
+    .nav-group { margin-bottom: 16px; }
+
+    .nav-group-title {
+      padding: 7px 10px;
+      color: rgba(255, 255, 255, .42);
+      font-size: 9px;
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      position: relative;
+      display: flex;
+      width: 100%;
+      min-height: 42px;
+      align-items: center;
+      gap: 10px;
+      margin: 2px 0;
+      padding: 5px 9px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: rgba(255, 255, 255, .75);
+      text-align: left;
+      transition: background-color .18s ease, color .18s ease, transform .18s ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, .075);
+      color: var(--white);
+      transform: translateX(2px);
+    }
+
+    .nav-item.active {
+      border-color: rgba(255, 255, 255, .09);
+      background: rgba(255, 255, 255, .11);
+      box-shadow: inset 3px 0 0 var(--orange);
+      color: var(--white);
+    }
+
+    .nav-icon {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .07);
+      color: rgba(255, 255, 255, .76);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .nav-item.active .nav-icon {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    .nav-text {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 650;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .account {
+      display: flex;
+      min-height: 56px;
+      align-items: center;
+      gap: 9px;
+      margin: 5px 10px 8px;
+      padding: 8px 7px;
+      border: 0;
+      border-top: 1px solid rgba(255, 255, 255, .12);
+      background: transparent;
+      color: var(--white);
+      text-align: left;
+    }
+
+    .avatar {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, .1);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .account-copy { min-width: 0; flex: 1; }
+    .account-copy strong, .account-copy small { display: block; }
+
+    .account-copy strong {
+      overflow: hidden;
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .account-copy small {
+      margin-top: 3px;
+      color: rgba(255, 255, 255, .5);
+      font-size: 9px;
+      text-transform: capitalize;
+    }
+
+    .portal.collapsed .brand-copy,
+    .portal.collapsed .nav-label,
+    .portal.collapsed .nav-group-title,
+    .portal.collapsed .nav-text,
+    .portal.collapsed .account-copy,
+    .portal.collapsed .account-chevron { display: none; }
+
+    .portal.collapsed .brand { justify-content: center; padding-inline: 10px; }
+    .portal.collapsed .brand-mark { width: 34px; height: 34px; }
+    .portal.collapsed .collapse-button { position: absolute; top: 21px; right: -13px; background: var(--navy-deep); }
+    .portal.collapsed .navigation { padding-inline: 10px; }
+    .portal.collapsed .nav-item { justify-content: center; padding-inline: 6px; }
+    .portal.collapsed .account { justify-content: center; margin-inline: 10px; padding-inline: 6px; }
+
+    .workspace {
+      display: grid;
+      min-width: 0;
+      min-height: 100dvh;
+      grid-template-rows: 56px minmax(0, 1fr);
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      box-shadow: 0 1px 0 rgba(16, 61, 103, .035);
+      backdrop-filter: blur(14px);
+    }
+
+    .mobile-menu {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--mist);
+      color: var(--navy);
+      font-size: 18px;
+    }
+
+    .module {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .active-mark {
+      width: 7px;
+      height: 15px;
+      flex: 0 0 auto;
+      border-radius: 2px;
+      background: var(--orange);
+    }
+
+    .module strong { color: var(--navy); font-size: 14px; }
+    .module span:last-child { color: var(--muted); font-size: 12px; }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .search {
+      display: flex;
+      width: min(240px, 22vw);
+      height: 36px;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid rgba(16, 61, 103, .13);
+      border-radius: 8px;
+      background: var(--mist);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .search kbd {
+      margin-left: auto;
+      color: #94a3b8;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+    }
+
+    .role-switcher {
+      display: flex;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--mist);
+    }
+
+    .role-button {
+      min-height: 28px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .role-button.active {
+      background: var(--white);
+      box-shadow: 0 2px 8px rgba(16, 61, 103, .1);
+      color: var(--navy);
+    }
+
+    .main {
+      min-height: 0;
+      overflow-y: auto;
+      background-color: var(--mist);
+      background-image:
+        linear-gradient(rgba(16, 61, 103, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 61, 103, .025) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .content {
+      width: min(100%, 1440px);
+      margin: 0 auto;
+      padding: 28px 28px 44px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-heading h1 {
+      max-width: 760px;
+      margin: 0;
+      color: var(--navy-deep);
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight: 780;
+      letter-spacing: -.045em;
+      line-height: 1.02;
+      text-wrap: balance;
+    }
+
+    .page-heading p {
+      max-width: 56ch;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .date-block {
+      min-width: 148px;
+      padding-left: 18px;
+      border-left: 2px solid var(--orange);
+      text-align: left;
+    }
+
+    .date-block span, .date-block strong { display: block; }
+    .date-block span { color: var(--muted); font-size: 10px; }
+    .date-block strong { margin-top: 4px; color: var(--navy); font-size: 13px; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-bottom: 22px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 20px;
+      border-right: 1px solid var(--line);
+    }
+
+    .metric:last-child { border-right: 0; }
+    .metric-label { color: var(--muted); font-size: 10px; font-weight: 700; }
+
+    .metric-value {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-value strong { font-size: 27px; letter-spacing: -.04em; }
+    .metric-value span { color: var(--green); font-size: 10px; font-weight: 750; }
+    .metric-value span.attention { color: var(--orange); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+      gap: 22px;
+    }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--white);
+      box-shadow: 0 12px 34px rgba(16, 61, 103, .06);
+    }
+
+    .panel-head {
+      display: flex;
+      min-height: 58px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 { margin: 0; color: var(--navy-deep); font-size: 14px; }
+    .panel-head a { color: var(--navy); font-size: 10px; font-weight: 750; text-decoration: none; }
+    .panel-head a:hover { color: var(--orange); }
+
+    .project-table { width: 100%; border-collapse: collapse; }
+    .project-table th, .project-table td { padding: 14px 18px; text-align: left; }
+    .project-table th { color: #94a3b8; font-size: 9px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    .project-table td { border-top: 1px solid rgba(16, 61, 103, .08); color: var(--muted); font-size: 11px; }
+    .project-table td:first-child { color: var(--ink); font-weight: 700; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .status::before { width: 6px; height: 6px; border-radius: 50%; background: var(--green); content: ""; }
+    .status.review::before { background: var(--orange); }
+
+    .progress {
+      width: 86px;
+      height: 5px;
+      overflow: hidden;
+      border-radius: 3px;
+      background: #e8eef5;
+    }
+
+    .progress i { display: block; height: 100%; background: var(--navy); }
+
+    .activity-list { padding: 4px 18px 10px; }
+
+    .activity {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto;
+      gap: 11px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(16, 61, 103, .08);
+    }
+
+    .activity:last-child { border-bottom: 0; }
+
+    .activity-icon {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border-radius: 8px;
+      background: #eef6ff;
+      color: var(--navy);
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .activity-copy strong, .activity-copy small { display: block; }
+    .activity-copy strong { color: var(--ink); font-size: 11px; }
+    .activity-copy small { margin-top: 4px; color: var(--muted); font-size: 9px; }
+    .activity time { color: #94a3b8; font-size: 9px; white-space: nowrap; }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .quick-action {
+      min-height: 76px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .75);
+      color: var(--navy);
+      text-align: left;
+      transition: border-color .18s ease, background-color .18s ease, transform .18s ease;
+    }
+
+    .quick-action:hover {
+      border-color: rgba(16, 61, 103, .26);
+      background: var(--white);
+      transform: translateY(-2px);
+    }
+
+    .quick-action strong, .quick-action small { display: block; }
+    .quick-action strong { font-size: 11px; }
+    .quick-action small { margin-top: 6px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+
+    .role-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 14px;
+      padding: 7px 9px;
+      border: 1px solid #ffc3b0;
+      border-radius: 7px;
+      background: var(--orange-soft);
+      color: #962a12;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .role-note::before { width: 5px; height: 5px; background: var(--orange); content: ""; }
+
+    .nav-item[hidden], .role-content[hidden] { display: none !important; }
+
+    .mobile-backdrop { display: none; }
+
+    /* Refined navbar palette: mist surface, navy structure, orange selection. */
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, .97);
+      box-shadow: 10px 0 30px rgba(16, 61, 103, .055);
+      color: var(--ink);
+    }
+
+    .brand {
+      border-color: var(--line);
+      background: var(--mist);
+    }
+
+    .brand-copy strong { color: var(--navy); }
+    .brand-copy small { color: var(--muted); }
+
+    .collapse-button,
+    .portal.collapsed .collapse-button {
+      border-color: var(--line);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .collapse-button:hover {
+      border-color: #c4ddff;
+      background: #eef6ff;
+      color: var(--navy);
+    }
+
+    .nav-label,
+    .nav-group-title { color: #7d8fa1; }
+    .navigation { scrollbar-color: rgba(16, 61, 103, .2) transparent; }
+
+    .nav-item { color: #526579; }
+
+    .nav-item:hover {
+      background: #eef6ff;
+      color: var(--navy);
+    }
+
+    .nav-item.active {
+      border-color: #dfeeff;
+      background: #eef6ff;
+      box-shadow: inset 3px 0 0 var(--orange);
+      color: var(--navy);
+    }
+
+    .nav-icon {
+      background: rgba(16, 61, 103, .06);
+      color: var(--navy);
+    }
+
+    .nav-item.active .nav-icon {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    .account {
+      border-color: var(--line);
+      color: var(--navy);
+    }
+
+    .account:hover { background: #eef6ff; }
+
+    .avatar {
+      border-color: #dfeeff;
+      background: #eef6ff;
+      color: var(--navy);
+    }
+
+    .account-copy small { color: var(--muted); }
+    .account-chevron { color: #94a3b8; }
+
+    @media (max-width: 1050px) {
+      .role-button { padding-inline: 7px; }
+      .search { width: 42px; justify-content: center; padding: 0; }
+      .search span, .search kbd { display: none; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metric:nth-child(2) { border-right: 0; }
+      .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      body { overflow: auto; }
+      .portal, .portal.collapsed { display: block; }
+      .workspace { min-height: 100dvh; }
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: min(292px, 86vw);
+        min-height: 100dvh;
+        transform: translateX(-105%);
+        transition: transform .22s ease;
+      }
+      .portal.mobile-open .sidebar { transform: translateX(0); }
+      .portal.collapsed .brand { justify-content: flex-start; padding-inline: 14px; }
+      .portal.collapsed .brand-copy,
+      .portal.collapsed .nav-label,
+      .portal.collapsed .nav-group-title,
+      .portal.collapsed .nav-text,
+      .portal.collapsed .account-copy,
+      .portal.collapsed .account-chevron { display: block; }
+      .portal.collapsed .collapse-button { position: static; }
+      .portal.collapsed .navigation { padding-inline: 11px; }
+      .portal.collapsed .nav-item { justify-content: flex-start; padding-inline: 9px; }
+      .portal.collapsed .account { justify-content: flex-start; }
+      .collapse-button { display: none; }
+      .mobile-backdrop {
+        position: fixed;
+        z-index: 15;
+        inset: 0;
+        border: 0;
+        background: rgba(6, 26, 45, .48);
+        backdrop-filter: blur(2px);
+      }
+      .portal.mobile-open .mobile-backdrop { display: block; }
+      .mobile-menu { display: grid; place-items: center; }
+      .topbar { padding-inline: 10px; }
+      .module span:last-child { display: none; }
+      .role-switcher { display: none; }
+      .content { padding: 24px 14px 34px; }
+      .page-heading { align-items: flex-start; flex-direction: column; }
+      .date-block { display: none; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .metric { padding: 16px; }
+      .metric-value strong { font-size: 23px; }
+      .project-table th:nth-child(2), .project-table td:nth-child(2) { display: none; }
+      .project-table th, .project-table td { padding-inline: 13px; }
+      .quick-actions { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .metrics { grid-template-columns: 1fr; }
+      .metric { border-right: 0; border-bottom: 1px solid var(--line); }
+      .metric:last-child { border-bottom: 0; }
+      .page-heading h1 { font-size: 30px; }
+      .topbar { gap: 8px; }
+      .module strong { font-size: 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <div class="portal" id="portal">
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <div class="brand">
+        <span class="brand-mark"><img src="frontend/public/logo.svg" alt=""></span>
+        <span class="brand-copy">
+          <strong>Northstar Digital</strong>
+          <small>TWS · Software House OS</small>
+        </span>
+        <button class="collapse-button" id="collapseButton" type="button" aria-label="Collapse navigation" title="Collapse navigation">‹</button>
+      </div>
+
+      <div class="nav-label">Workspace</div>
+      <nav class="navigation" aria-label="Primary workspace navigation">
+        <div class="nav-group">
+          <div class="nav-group-title">Overview</div>
+          <button class="nav-item active" type="button" data-roles="admin,employee,client"><span class="nav-icon">HM</span><span class="nav-text">Home</span></button>
+          <button class="nav-item" type="button" data-roles="admin,employee"><span class="nav-icon">MW</span><span class="nav-text">My work</span></button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-title">Delivery</div>
+          <button class="nav-item" type="button" data-roles="admin,employee,client"><span class="nav-icon">PR</span><span class="nav-text">Projects</span></button>
+          <button class="nav-item" type="button" data-roles="admin,employee"><span class="nav-icon">TM</span><span class="nav-text">Time tracking</span></button>
+          <button class="nav-item" type="button" data-roles="admin,employee,client"><span class="nav-icon">DC</span><span class="nav-text">Documents</span></button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-title">Organization</div>
+          <button class="nav-item" type="button" data-roles="admin"><span class="nav-icon">CL</span><span class="nav-text">Clients</span></button>
+          <button class="nav-item" type="button" data-roles="admin"><span class="nav-icon">PP</span><span class="nav-text">People</span></button>
+          <button class="nav-item" type="button" data-roles="admin"><span class="nav-icon">FN</span><span class="nav-text">Finance</span></button>
+          <button class="nav-item" type="button" data-roles="admin"><span class="nav-icon">AN</span><span class="nav-text">Analytics</span></button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-title">System</div>
+          <button class="nav-item" type="button" data-roles="admin"><span class="nav-icon">ST</span><span class="nav-text">Settings</span></button>
+          <button class="nav-item" type="button" data-roles="client"><span class="nav-icon">SP</span><span class="nav-text">Support</span></button>
+        </div>
+      </nav>
+
+      <button class="account" type="button">
+        <span class="avatar" id="avatarInitials">AK</span>
+        <span class="account-copy"><strong id="accountName">Ayesha Khan</strong><small id="accountRole">Organization admin</small></span>
+        <span class="account-chevron">›</span>
+      </button>
+    </aside>
+
+    <button class="mobile-backdrop" id="mobileBackdrop" type="button" aria-label="Close navigation"></button>
+
+    <section class="workspace">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" type="button" aria-label="Open navigation">≡</button>
+        <div class="module"><span class="active-mark"></span><strong>Home</strong><span>Workspace overview</span></div>
+        <div class="topbar-actions">
+          <button class="search" type="button" aria-label="Search workspace"><b>⌕</b><span>Search workspace</span><kbd>⌘K</kbd></button>
+          <div class="role-switcher" aria-label="Preview role">
+            <button class="role-button active" type="button" data-role="admin">Admin</button>
+            <button class="role-button" type="button" data-role="employee">Employee</button>
+            <button class="role-button" type="button" data-role="client">Client</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main" id="main-content">
+        <div class="content">
+          <div class="role-note">Previewing <span id="roleNote">organization admin</span> access</div>
+          <header class="page-heading">
+            <div>
+              <h1 id="greeting">Good morning, Ayesha.</h1>
+              <p id="intro">Projects, people, and margin are aligned. Here is what needs your attention across Northstar Digital today.</p>
+            </div>
+            <div class="date-block"><span>Friday</span><strong>21 August 2026</strong></div>
+          </header>
+
+          <section class="metrics" aria-label="Workspace metrics">
+            <article class="metric"><div class="metric-label" id="metricOneLabel">Active projects</div><div class="metric-value"><strong id="metricOneValue">18</strong><span>+2 this month</span></div></article>
+            <article class="metric"><div class="metric-label" id="metricTwoLabel">Team utilization</div><div class="metric-value"><strong id="metricTwoValue">82.4%</strong><span>On target</span></div></article>
+            <article class="metric"><div class="metric-label" id="metricThreeLabel">Pending approvals</div><div class="metric-value"><strong id="metricThreeValue">7</strong><span class="attention">Needs review</span></div></article>
+            <article class="metric"><div class="metric-label" id="metricFourLabel">Forecast margin</div><div class="metric-value"><strong id="metricFourValue">31.8%</strong><span>+1.6%</span></div></article>
+          </section>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head"><h2 id="primaryPanelTitle">Project pulse</h2><a href="#projects">View all projects →</a></div>
+              <table class="project-table">
+                <thead><tr><th>Project</th><th>Client</th><th>Status</th><th>Progress</th></tr></thead>
+                <tbody>
+                  <tr><td>Atlas commerce rebuild</td><td>Atlas Retail Group</td><td><span class="status">On track</span></td><td><div class="progress" aria-label="74 percent"><i style="width:74%"></i></div></td></tr>
+                  <tr><td>Helio mobile banking</td><td>Helio Finance</td><td><span class="status review">Review</span></td><td><div class="progress" aria-label="58 percent"><i style="width:58%"></i></div></td></tr>
+                  <tr><td>Portwell operations hub</td><td>Portwell Logistics</td><td><span class="status">On track</span></td><td><div class="progress" aria-label="86 percent"><i style="width:86%"></i></div></td></tr>
+                  <tr><td>Formline design system</td><td>Formline Studio</td><td><span class="status">On track</span></td><td><div class="progress" aria-label="43 percent"><i style="width:43%"></i></div></td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head"><h2>Recent activity</h2><a href="#activity">Open activity →</a></div>
+              <div class="activity-list">
+                <article class="activity"><span class="activity-icon">AP</span><span class="activity-copy"><strong>Budget change approved</strong><small>Atlas commerce rebuild</small></span><time>12 min</time></article>
+                <article class="activity"><span class="activity-icon">DC</span><span class="activity-copy"><strong>Proposal v4 uploaded</strong><small>Helio mobile banking</small></span><time>38 min</time></article>
+                <article class="activity"><span class="activity-icon">TM</span><span class="activity-copy"><strong>Weekly time submitted</strong><small>12 team members</small></span><time>1 hr</time></article>
+                <article class="activity"><span class="activity-icon">MS</span><span class="activity-copy"><strong>Milestone completed</strong><small>Portwell operations hub</small></span><time>3 hr</time></article>
+              </div>
+            </section>
+          </div>
+
+          <section class="quick-actions" aria-label="Quick actions">
+            <button class="quick-action" type="button"><strong id="actionOne">Create project</strong><small id="actionOneCopy">Set the scope, team, and delivery dates.</small></button>
+            <button class="quick-action" type="button"><strong id="actionTwo">Review approvals</strong><small id="actionTwoCopy">Resolve requests waiting for a decision.</small></button>
+            <button class="quick-action" type="button"><strong id="actionThree">Open reports</strong><small id="actionThreeCopy">Check delivery health and financial position.</small></button>
+          </section>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const portal = document.getElementById('portal');
+    const collapseButton = document.getElementById('collapseButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileBackdrop = document.getElementById('mobileBackdrop');
+    const roleButtons = document.querySelectorAll('.role-button');
+    const roleNavItems = document.querySelectorAll('.nav-item[data-roles]');
+
+    const roleData = {
+      admin: {
+        note: 'organization admin', name: 'Ayesha Khan', initials: 'AK', role: 'Organization admin',
+        greeting: 'Good morning, Ayesha.',
+        intro: 'Projects, people, and margin are aligned. Here is what needs your attention across Northstar Digital today.',
+        metrics: [['Active projects', '18'], ['Team utilization', '82.4%'], ['Pending approvals', '7'], ['Forecast margin', '31.8%']],
+        panel: 'Project pulse', actions: [['Create project', 'Set the scope, team, and delivery dates.'], ['Review approvals', 'Resolve requests waiting for a decision.'], ['Open reports', 'Check delivery health and financial position.']]
+      },
+      employee: {
+        note: 'employee', name: 'Hassan Mirza', initials: 'HM', role: 'Product designer',
+        greeting: 'Good morning, Hassan.',
+        intro: 'Your current work, upcoming dates, and team activity are gathered here for a focused start.',
+        metrics: [['Assigned tasks', '12'], ['This week', '31.5h'], ['Open reviews', '3'], ['Completed', '86%']],
+        panel: 'My active work', actions: [['Open my work', 'Continue tasks assigned across active projects.'], ['Log time', 'Record today’s project and task hours.'], ['Request leave', 'Submit dates to your team lead.']]
+      },
+      client: {
+        note: 'client', name: 'Mariam Shah', initials: 'MS', role: 'Client stakeholder',
+        greeting: 'Welcome back, Mariam.',
+        intro: 'Review delivery progress, shared documents, and decisions requested from your team.',
+        metrics: [['Active engagements', '3'], ['Milestones delivered', '14'], ['Awaiting review', '2'], ['Overall progress', '72%']],
+        panel: 'Engagement overview', actions: [['Review milestone', 'Open the latest delivery for approval.'], ['Open documents', 'View proposals, reports, and shared files.'], ['Contact team', 'Send a message to the delivery team.']]
+      }
+    };
+
+    function setRole(role) {
+      const data = roleData[role];
+      roleButtons.forEach(button => button.classList.toggle('active', button.dataset.role === role));
+      roleNavItems.forEach(item => { item.hidden = !item.dataset.roles.split(',').includes(role); });
+
+      document.getElementById('roleNote').textContent = data.note;
+      document.getElementById('accountName').textContent = data.name;
+      document.getElementById('avatarInitials').textContent = data.initials;
+      document.getElementById('accountRole').textContent = data.role;
+      document.getElementById('greeting').textContent = data.greeting;
+      document.getElementById('intro').textContent = data.intro;
+      document.getElementById('primaryPanelTitle').textContent = data.panel;
+
+      const metricIds = ['One', 'Two', 'Three', 'Four'];
+      data.metrics.forEach((metric, index) => {
+        document.getElementById(`metric${metricIds[index]}Label`).textContent = metric[0];
+        document.getElementById(`metric${metricIds[index]}Value`).textContent = metric[1];
+      });
+
+      const actionIds = ['One', 'Two', 'Three'];
+      data.actions.forEach((action, index) => {
+        document.getElementById(`action${actionIds[index]}`).textContent = action[0];
+        document.getElementById(`action${actionIds[index]}Copy`).textContent = action[1];
+      });
+    }
+
+    collapseButton.addEventListener('click', () => {
+      const collapsed = portal.classList.toggle('collapsed');
+      collapseButton.textContent = collapsed ? '›' : '‹';
+      collapseButton.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+      collapseButton.title = collapsed ? 'Expand navigation' : 'Collapse navigation';
+    });
+
+    function closeMobileNavigation() { portal.classList.remove('mobile-open'); }
+    mobileMenu.addEventListener('click', () => portal.classList.add('mobile-open'));
+    mobileBackdrop.addEventListener('click', closeMobileNavigation);
+    roleButtons.forEach(button => button.addEventListener('click', () => setRole(button.dataset.role)));
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMobileNavigation(); });
+  </script>
+</body>
+</html>

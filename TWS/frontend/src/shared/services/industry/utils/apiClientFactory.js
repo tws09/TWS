@@ -12,15 +12,15 @@ import { getAuthHeaders } from './tokenUtils';
 /**
  * Creates a standard CRUD API client for a given resource path
  * 
- * @param {string} basePath - Base API path (e.g., 'tenant/students')
+ * @param {string} basePath - Base API path (e.g., 'tenant/clients')
  * @param {Object} options - Configuration options
  * @param {boolean} options.requireAuth - Whether authentication is required (default: true)
  * @param {number} options.timeout - Request timeout in milliseconds (default: 30000)
  * @returns {Object} - API client with CRUD methods
- * 
+ *
  * @example
- * const studentsApi = createCrudClient('tenant/students');
- * await studentsApi.getAll('school-slug', { page: 1, limit: 10 });
+ * const clientsApi = createCrudClient('tenant/clients');
+ * await clientsApi.getAll('tenant-slug', { page: 1, limit: 10 });
  */
 export const createCrudClient = (basePath, options = {}) => {
   const { requireAuth = true, timeout = 30000 } = options;
@@ -171,9 +171,9 @@ export const createCrudClient = (basePath, options = {}) => {
  * @returns {Object} - Extended API client
  * 
  * @example
- * const studentsApi = createCustomClient('tenant/students', {
- *   register: (tenantSlug, data) => axiosInstance.post(`/api/tenant/${tenantSlug}/tenant/students/register`, data, getRequestConfig()),
- *   bulkImport: (tenantSlug, students) => axiosInstance.post(`/api/tenant/${tenantSlug}/tenant/students/bulk-import`, { students }, getRequestConfig())
+ * const clientsApi = createCustomClient('tenant/clients', {
+ *   archive: (tenantSlug, id) => axiosInstance.post(`/api/tenant/${tenantSlug}/tenant/clients/${id}/archive`, {}, getRequestConfig()),
+ *   bulkImport: (tenantSlug, clients) => axiosInstance.post(`/api/tenant/${tenantSlug}/tenant/clients/bulk-import`, { clients }, getRequestConfig())
  * });
  */
 export const createCustomClient = (basePath, customMethods = {}, options = {}) => {

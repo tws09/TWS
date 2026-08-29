@@ -1,0 +1,41 @@
+:root {
+  --housesbase-navy: #103d67;
+  --housesbase-navy-deep: #081f3a;
+  --housesbase-orange: #f04e25;
+  --housesbase-orange-text: #b83515;
+  --housesbase-blue: #4f7ef7;
+  --housesbase-blue-text: #2449a8;
+  --housesbase-green: #10b981;
+  --housesbase-green-text: #047857;
+  --housesbase-ink: #0f172a;
+  --housesbase-mist: #f4f8fd;
+  --housesbase-white: #ffffff;
+
+  --housesbase-color-primary: var(--housesbase-navy);
+  --housesbase-color-primary-hover: var(--housesbase-navy-deep);
+  --housesbase-color-accent-artwork: var(--housesbase-orange);
+  --housesbase-color-accent-text: var(--housesbase-orange-text);
+  --housesbase-color-focus: var(--housesbase-orange-text);
+  --housesbase-color-info-artwork: var(--housesbase-blue);
+  --housesbase-color-info-text: var(--housesbase-blue-text);
+  --housesbase-color-success-artwork: var(--housesbase-green);
+  --housesbase-color-success-text: var(--housesbase-green-text);
+  --housesbase-color-text: var(--housesbase-ink);
+  --housesbase-color-background: var(--housesbase-mist);
+  --housesbase-color-surface: var(--housesbase-white);
+  --housesbase-color-border: #7b8ea5;
+}
+
+[data-theme="dark"] {
+  --housesbase-color-primary: #9fc1f7;
+  --housesbase-color-primary-hover: #c4ddff;
+  --housesbase-color-accent-text: #ff9b7f;
+  --housesbase-color-focus: #ff9b7f;
+  --housesbase-color-info-text: #b9cbff;
+  --housesbase-color-success-text: #6ee7b7;
+  --housesbase-color-text: #edf4ff;
+  --housesbase-color-background: #07111d;
+  --housesbase-color-surface: #0b1b2c;
+  --housesbase-color-border: #7f93aa;
+}
+

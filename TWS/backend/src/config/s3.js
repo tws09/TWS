@@ -7,7 +7,7 @@ const envConfig = require('./environment');
 
 /**
  * AWS S3 Configuration for File Uploads
- * Supports homework submissions, documents, and other tenant materials
+ * Supports document, media, and other tenant material uploads
  */
 
 // Initialize an AWS S3 or S3-compatible client (for example Railway Buckets).
@@ -59,7 +59,7 @@ const uploadToS3 = multer({
     files: 1 // Max 1 file per request
   },
   fileFilter: (req, file, cb) => {
-    // Allowed file types for homework submissions
+    // Allowed file types for tenant uploads
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
