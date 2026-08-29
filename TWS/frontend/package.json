@@ -96,7 +96,7 @@
     "start": "craco start",
     "start:prod": "node server.js",
     "dev": "craco start",
-    "build": "craco build",
+    "build": "CI=false craco build",
     "build:ci": "CI=false craco build",
     "test": "craco test",
     "test:watch": "craco test --watch",

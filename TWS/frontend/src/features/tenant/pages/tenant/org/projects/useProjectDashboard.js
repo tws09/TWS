@@ -116,7 +116,6 @@ export function useProjectDashboard() {
       completedTasks: 0,
       completionRate: 0,
       activeSprints: 0,
-      totalSprints: 0,
       totalMilestones: 0,
       completedMilestones: 0,
       totalEstimatedHours: 0,
