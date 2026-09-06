@@ -16,6 +16,10 @@ require('dotenv').config();
 
 console.log('🚀 Starting TWS Backend Server...');
 
+// WP1: install global Mongoose plugins (tenant-scope query isolation) BEFORE any
+// model is compiled. `mongoose.plugin()` only applies to later-compiled schemas.
+require('./src/models/registerPlugins');
+
 // Load TWS Configuration System
 const config = require('./src/config/environment');
 
@@ -96,10 +100,14 @@ app.use('/api/', limiter);
 
 console.log('✅ Global rate limiting ENABLED');
 
-// Query Filter Middleware
-const { autoInjectOrgFilter } = require('./src/middleware/security/queryFilterMiddleware');
-app.use('/api/', autoInjectOrgFilter);
-console.log('✅ Query filter middleware ENABLED to prevent data leakage (Issue #9.2 Fix)');
+// WP1: per-request tenant context (AsyncLocalStorage). Runs EARLY and installs
+// write-through accessors on `req`, so once a route's auth middleware populates
+// `req.orgId` / `req.user` the resolved org lands in the ALS context that the
+// `tenantScope` Mongoose plugin reads at query time. Replaces the old global
+// query-filter monkey-patch (deleted), which no-op'd in production.
+const tenantContextRun = require('./src/middleware/tenant/tenantContextRun');
+app.use('/api/', tenantContextRun);
+console.log('✅ Tenant context (ALS) middleware ENABLED — query-time tenant isolation active');
 
 // Logging
 app.use(morgan('combined'));
