@@ -270,6 +270,35 @@ Before every frontend deploy, verify:
 - Cross-tenant data access is a critical bug; any query touching tenant-scoped data must scope to the verified tenant ID from the JWT/session.
 - Supra Admin routes are completely separate from tenant routes and require their own auth middleware.
 
+### Query-time tenant isolation (enforcement mechanism)
+
+- **Context:** `backend/src/middleware/tenant/tenantContextRun.js` opens an
+  `AsyncLocalStorage` scope (`backend/src/config/requestContext.js`) per request.
+  It runs early (`app.use('/api/', ...)`) and installs write-through accessors on
+  `req`, so when a route's auth middleware sets `req.orgId` / `req.user` the
+  resolved org id lands in the live context. A populated `req.user.orgId`
+  Document is normalised to a 24-char hex string.
+- **Enforcement:** `backend/src/models/plugins/tenantScope.js` is registered
+  globally (`backend/src/models/registerPlugins.js`, required before any model).
+  For every covered schema it merges `{ orgId: <context orgId> }` into `find*`,
+  `count*`, `distinct`, `updateOne/Many`, `deleteOne/Many`, `replaceOne`,
+  `findOneAndUpdate/Delete` filters and prepends a `$match` to `aggregate`.
+  Models on `organizationId` (`finance/Expense`, `hr-payroll/Attendance*`) are
+  auto-detected; `tenantId`-only models scope by context `tenantId`.
+- **The plugin is a strict no-op when** there is no request context (background
+  jobs, pre-auth), the actor `isPlatformAdmin()`, the query already constrains
+  `orgId`/`organizationId`/`tenantId` (incl. inside `$and`/`$or`/`$nor`), or the
+  model is on the plugin's opt-out list (`User`, `Session`, `Tenant`,
+  `Organization`, `TWSAdmin`, `SupraAdmin`, `TenantUser`, `TenantRole`, ...).
+- **Sanctioned escape hatches ONLY:** `Query#byPassTenantScope()` (or
+  `.setOptions({ bypassTenantScope: true })`; aggregate:
+  `.option({ bypassTenantScope: true })`) for deliberate cross-tenant service
+  code, and the `isPlatformAdmin` context flag (set for `/api/supra-admin/*` and
+  `/api/admin/*` paths, TWS-admin / platform-admin roles). Do **not** add manual
+  `orgId` filters in route handlers as a substitute — the plugin owns scoping.
+- The plugin does NOT stamp `orgId` on inserts — creators still set it explicitly.
+- Feature flag `TENANT_SCOPE_ENFORCE` (default on; `false` = log-only rollback).
+
 ---
 
 ## What Not to Do
