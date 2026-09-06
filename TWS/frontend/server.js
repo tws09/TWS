@@ -53,10 +53,11 @@ function proxyToBackend(req, res) {
     headers: {
       ...req.headers,
       host: target.host,
-      // Preserve the browser's original Host (e.g. a tenant subdomain) —
-      // the line above overwrites `host` with the backend's own upstream
-      // address, so without this the backend can never tell which
-      // subdomain a request actually came in on.
+      // The line above overwrites `host` with the backend's own upstream
+      // address; forward the browser's original Host separately so backend
+      // logging / security middleware can still see where the request
+      // actually originated. (Tenancy is path-based — the tenant slug is in
+      // the URL, not the host.)
       'x-forwarded-host': req.headers.host,
     },
   };

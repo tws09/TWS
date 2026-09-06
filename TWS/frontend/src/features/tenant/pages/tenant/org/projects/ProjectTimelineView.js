@@ -24,12 +24,6 @@ const STATUS_FILL = {
   under_review: 'bg-amber-500',
   completed:    'bg-emerald-500',
 };
-const STATUS_BG = {
-  todo:         'bg-gray-100   dark:bg-gray-800',
-  in_progress:  'bg-blue-50   dark:bg-blue-900/20',
-  under_review: 'bg-amber-50  dark:bg-amber-900/20',
-  completed:    'bg-emerald-50 dark:bg-emerald-900/20',
-};
 const STATUS_LABEL = {
   todo: 'To Do', in_progress: 'Started', under_review: 'Review', completed: 'Done',
 };

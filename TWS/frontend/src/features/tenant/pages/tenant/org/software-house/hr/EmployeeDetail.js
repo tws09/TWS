@@ -10,7 +10,6 @@ import {
   BriefcaseIcon,
   ArrowLeftIcon,
   BuildingOfficeIcon,
-  CurrencyDollarIcon,
   MapPinIcon,
   ClockIcon,
   CodeBracketIcon

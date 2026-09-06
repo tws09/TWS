@@ -47,7 +47,8 @@ const { verifyTLS, checkTLSConfiguration } = require('./src/middleware/security/
 app.use(verifyTLS);
 checkTLSConfiguration();
 
-// CORS configuration — allow root domain + all tenant subdomains
+// CORS configuration — tenancy is path-based, so the app is served from ONE
+// origin (the root domain). No wildcard subdomain matching.
 // Read env vars with .trim() so Railway trailing newlines/spaces don't break comparisons.
 // Also strip protocol and trailing slashes so BASE_DOMAIN can be used as a bare hostname.
 const baseDomain = (process.env.BASE_DOMAIN || 'housesbase.com')
@@ -62,10 +63,11 @@ const explicitOrigin = (process.env.CORS_ORIGIN || '')
 const allowOrigin = (origin, callback) => {
   if (!origin) return callback(null, true); // server-to-server / health checks
   if (
+    origin === 'http://localhost:3000' ||
     origin === 'http://localhost:4000' ||
     origin === `https://${baseDomain}` ||
     origin === `http://${baseDomain}` ||
-    origin.endsWith(`.${baseDomain}`)
+    origin === `https://www.${baseDomain}`
   ) {
     return callback(null, true);
   }

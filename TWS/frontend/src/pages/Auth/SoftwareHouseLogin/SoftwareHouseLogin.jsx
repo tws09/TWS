@@ -14,10 +14,10 @@ import {
     ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import BrandMark from '../../../shared/components/ui/BrandMark';
-import { getTenantWorkspaceUrl, navigateTo, isSubdomainContext, getSubdomainSlug } from '../../../shared/utils/subdomain';
+import { getTenantWorkspaceUrl, navigateTo } from '../../../shared/utils/tenantRoutes';
 
 const SoftwareHouseLogin = () => {
-    const { login, logout } = useAuth();
+    const { login } = useAuth();
     const { isDarkMode } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
@@ -28,7 +28,6 @@ const SoftwareHouseLogin = () => {
     const [fieldErrors, setFieldErrors] = useState({});
     const [infoMessage, setInfoMessage] = useState(location.state?.signupSuccess ? 'Account created successfully. Please sign in.' : '');
     const [selectedPortal, setSelectedPortal] = useState('admin');
-    const [workspaceName, setWorkspaceName] = useState('');
     const validationBlockedRef = useRef(false);
     const emailInputRef = useRef(null);
     const passwordInputRef = useRef(null);
@@ -40,33 +39,6 @@ const SoftwareHouseLogin = () => {
         return () => {
             document.title = previousTitle;
         };
-    }, []);
-
-    useEffect(() => {
-        const tenantSlug = getSubdomainSlug();
-        if (!tenantSlug) return undefined;
-
-        const controller = new AbortController();
-
-        const loadWorkspaceName = async () => {
-            try {
-                const response = await fetch(`/api/tenant/${encodeURIComponent(tenantSlug)}/info`, {
-                    signal: controller.signal,
-                });
-                if (!response.ok) return;
-
-                const result = await response.json();
-                const name = String(result?.data?.name || '').trim();
-                if (name) setWorkspaceName(name);
-            } catch (fetchError) {
-                if (fetchError.name !== 'AbortError') {
-                    console.warn('Unable to load workspace name for sign-in page.');
-                }
-            }
-        };
-
-        loadWorkspaceName();
-        return () => controller.abort();
     }, []);
 
     useEffect(() => {
@@ -86,10 +58,6 @@ const SoftwareHouseLogin = () => {
             errorBoxRef.current.focus();
         }
     }, [error]);
-
-    // /signup only renders on the root domain (App.jsx) — on a tenant
-    // subdomain, "Create account" would be a dead link.
-    const canSignUp = !isSubdomainContext();
 
     const portals = [
         { id: 'admin',    icon: ShieldCheckIcon,    title: 'Admin' },
@@ -205,7 +173,7 @@ const SoftwareHouseLogin = () => {
 
     return (
         <div className={`sh-login-container${!isDarkMode ? ' day-mode' : ''}`}>
-            <AuthMarketingNav compact={!canSignUp} />
+            <AuthMarketingNav />
 
             <div className="sh-login-stage">
                 <div className="sh-form-wrapper">
@@ -218,11 +186,7 @@ const SoftwareHouseLogin = () => {
                         <div style={{ fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.04em' }}>HousesBase</div>
                     </div>
 
-                    <h1 className="sh-heading">
-                        {workspaceName
-                            ? `Sign in to ${workspaceName}’s workspace`
-                            : 'Sign in'}
-                    </h1>
+                    <h1 className="sh-heading">Sign in</h1>
 
                     <div className="sh-portal-row">
                         {portals.map((portal) => (
@@ -315,7 +279,8 @@ const SoftwareHouseLogin = () => {
 
                     <div className="sh-footer-row">
                         <Link to="/forgot-password" className="sh-footer-link">Forgot password?</Link>
-                        {canSignUp && <Link to="/signup" className="sh-footer-link">Create account</Link>}
+                        <Link to="/find-workspace" className="sh-footer-link">Find your workspace</Link>
+                        <Link to="/signup" className="sh-footer-link">Create account</Link>
                     </div>
                 </div>
             </div>

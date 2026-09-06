@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  PlusIcon, 
-  PlayIcon, 
-  StopIcon,
+  PlusIcon,
+  PlayIcon,
   CalendarIcon,
   UserGroupIcon,
   ChartBarIcon,
   ClockIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
-  ArrowTrendingUpIcon
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import tenantProjectApiService from './services/tenantProjectApiService';
-import tenantApiService from '../../../../../../shared/services/tenant/tenant-api.service';
 import { SPRINT_STATUS } from './constants/projectConstants';
 import CreateSprintModal from './components/CreateSprintModal';
 import { showSuccess, showError } from './utils/toastNotifications';
@@ -123,17 +120,6 @@ const SprintManagement = () => {
   const calculateCompletionRate = (sprint) => {
     if (sprint.capacity?.committedStoryPoints === 0 || !sprint.capacity?.committedStoryPoints) return 0;
     return (sprint.capacity.completedStoryPoints / sprint.capacity.committedStoryPoints) * 100;
-  };
-
-  const handleCalculateVelocity = async (sprintId) => {
-    try {
-      await tenantApiService.calculateSprintVelocity(tenantSlug, sprintId);
-      showSuccess('Velocity calculated successfully!');
-      fetchSprints();
-    } catch (error) {
-      console.error('Error calculating velocity:', error);
-      showError(error.message || 'Failed to calculate velocity. Please try again.');
-    }
   };
 
   const handleSprintCreated = () => {
@@ -296,8 +282,7 @@ const SprintManagement = () => {
           {sprints.length > 0 ? (
             sprints.map((sprint) => {
               const completionRate = calculateCompletionRate(sprint);
-              const progress = calculateProgress(sprint);
-              
+
               return (
                 <div 
                   key={sprint._id || sprint.id} 

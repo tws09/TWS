@@ -6,7 +6,6 @@ import { tenantApiService } from '../../../../../../../shared/services/tenant/te
 import {
   ClockIcon,
   CheckCircleIcon,
-  XCircleIcon,
   CalendarIcon,
   PlayIcon,
   StopIcon,

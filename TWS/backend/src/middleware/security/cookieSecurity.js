@@ -10,23 +10,17 @@
 const getSecureCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === 'production';
   const isHTTPS = process.env.FORCE_HTTPS === 'true' || process.env.HTTPS_ENABLED === 'true';
-  // Strip protocol, trailing slashes, and any whitespace (Railway env vars can have trailing \n)
-  const rawDomain = process.env.BASE_DOMAIN || 'housesbase.com';
-  const baseDomain = rawDomain.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '').trim();
 
-  // Only set a domain cookie when the host has real subdomains (not on *.railway.app).
-  // On Railway the app lives at the root of a single hostname with no tenant subdomains,
-  // so setting domain=.tws.up.railway.app is harmless but setting an invalid domain
-  // (e.g. the full URL) would cause the cookie serializer to throw a 500.
-  const usesDomainCookie = isProduction && !baseDomain.endsWith('.railway.app');
-
+  // Host-only cookie (no `domain` attribute). Tenancy is path-based, so the app
+  // is served from a single hostname — there are no sibling subdomains that need
+  // to share the auth cookie, and scoping it to the exact host is the safer
+  // default.
   return {
     httpOnly: true,
     secure: isProduction || isHTTPS,
     sameSite: 'lax',
     maxAge: 15 * 60 * 1000,
     path: '/',
-    ...(usesDomainCookie && { domain: `.${baseDomain}` }),
   };
 };
 
@@ -92,15 +86,11 @@ const setRefreshTokenCookie = (res, name, value, options = {}) => {
  */
 const clearSecureCookie = (res, name) => {
   const isProduction = process.env.NODE_ENV === 'production';
-  const rawDomain = process.env.BASE_DOMAIN || 'housesbase.com';
-  const baseDomain = rawDomain.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '').trim();
-  const usesDomainCookie = isProduction && !baseDomain.endsWith('.railway.app');
   res.clearCookie(name, {
     httpOnly: true,
     secure: isProduction,
     sameSite: 'lax',
     path: '/',
-    ...(usesDomainCookie && { domain: `.${baseDomain}` }),
   });
 };
 

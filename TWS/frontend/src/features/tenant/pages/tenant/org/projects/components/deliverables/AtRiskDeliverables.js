@@ -11,7 +11,6 @@ import {
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 import tenantProjectApiService from '../../services/tenantProjectApiService';
-import { handleApiError } from '../../utils/errorHandler';
 import { useTenantSlug } from '../../../../../../../../shared/hooks/useTenantSlug';
 
 const AtRiskDeliverables = ({ projectId }) => {

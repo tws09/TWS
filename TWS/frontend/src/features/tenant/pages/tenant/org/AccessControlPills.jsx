@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTenantSlug } from '../../../../../shared/hooks/useTenantSlug';
-import { getTenantWorkspaceUrl, navigateTo } from '../../../../../shared/utils/subdomain';
+import { getTenantWorkspaceUrl, navigateTo } from '../../../../../shared/utils/tenantRoutes';
 import { useTenantAuth } from '../../../../../app/providers/TenantAuthContext';
 
 const sections = [

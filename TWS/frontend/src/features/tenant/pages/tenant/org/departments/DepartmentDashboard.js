@@ -4,12 +4,8 @@ import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';
 import {
   BuildingOfficeIcon,
   ClipboardDocumentListIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  UserGroupIcon,
   ChartBarIcon,
-  ArrowLeftIcon,
-  CalendarDaysIcon
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 import tenantApiService from '../../../../../../shared/services/tenant/tenant-api.service';
 import toast from 'react-hot-toast';

@@ -6,8 +6,6 @@ import {
   PencilIcon,
   TrashIcon,
   CurrencyDollarIcon,
-  CalendarIcon,
-  ClockIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,

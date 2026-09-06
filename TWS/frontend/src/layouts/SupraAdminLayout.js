@@ -5,10 +5,8 @@ import {
   HomeIcon,
   BuildingOffice2Icon,
   CurrencyDollarIcon,
-  ChartBarIcon,
   CogIcon,
   UserGroupIcon,
-  DocumentTextIcon,
   BellIcon,
   Bars3Icon,
   XMarkIcon,
@@ -17,7 +15,6 @@ import {
   ServerIcon,
   CloudIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
   ShieldCheckIcon,
   BuildingOfficeIcon,
   ChartPieIcon,
@@ -26,8 +23,7 @@ import {
   UserCircleIcon,
   Cog6ToothIcon,
   ArrowsPointingOutIcon,
-  ArrowsPointingInIcon,
-  SparklesIcon
+  ArrowsPointingInIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../app/providers/AuthContext';
 import ThemeToggle from '../shared/components/ui/ThemeToggle';
@@ -204,7 +200,7 @@ const SupraAdminLayout = ({ children }) => {
     return initialExpanded;
   });
   // useFullscreen hook — replaces 95-line copy-pasted fullscreen boilerplate
-  const { isFullscreen, requestFullscreen, exitFullscreen, toggleFullscreen } = useFullscreen();
+  const { isFullscreen, requestFullscreen, exitFullscreen } = useFullscreen();
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef(null);
 

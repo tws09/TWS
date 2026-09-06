@@ -5,8 +5,6 @@ import {
   UserIcon,
   ClockIcon,
   CurrencyDollarIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
   PlusIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';

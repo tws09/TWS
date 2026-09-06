@@ -5,7 +5,6 @@ import {
   StopIcon,
   ChartBarIcon,
   CalendarIcon,
-  UserIcon,
   BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import { tenantApiService } from '../../../../../../shared/services/tenant/tenant-api.service';

@@ -22,11 +22,6 @@ export const useMenuFiltering = (menuItems, user, tenant, userDepartments, userP
     const alwaysVisible = isClientUser
       ? ['dashboard', 'rulebook']
       : ['dashboard', 'rulebook'];
-    const tenantModules = tenant?.erpModules || [];
-    const deptModules = userDepartments
-      .map(dept => dept.module || dept.department?.toLowerCase())
-      .filter(Boolean);
-    const allAvailableModules = [...new Set([...tenantModules, ...deptModules])];
     const permModules = userPermissions?.modules;
     const hasAdminModuleAccess = Boolean(
       permModules?.settings?.admin ||

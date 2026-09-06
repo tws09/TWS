@@ -3,7 +3,7 @@
  * Draws connecting lines between dependent tasks
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 const GanttDependencyLine = ({
   sourceTask,
@@ -17,10 +17,6 @@ const GanttDependencyLine = ({
   zoomLevel
 }) => {
   if (!sourceTask || !targetTask) return null;
-
-  const sourceStart = sourceTask.startDate ? new Date(sourceTask.startDate) : null;
-  const sourceEnd = sourceTask.endDate || sourceTask.dueDate ? new Date(sourceTask.endDate || sourceTask.dueDate) : null;
-  const targetStart = targetTask.startDate ? new Date(targetTask.startDate) : null;
 
   const getColumnWidth = () => {
     const baseWidth = viewType === 'daily' ? 60 : viewType === 'weekly' ? 80 : viewType === 'monthly' ? 120 : 150;
@@ -56,9 +52,7 @@ const GanttDependencyLine = ({
 
   // Calculate line coordinates
   const sourceX = sourcePos.left + (dependencyType === 'finish-to-start' || dependencyType === 'finish-to-finish' ? sourcePos.width : 0);
-  const sourceY = 25; // Middle of task row (50px height / 2)
   const targetX = targetPos.left + (dependencyType === 'start-to-start' || dependencyType === 'finish-to-start' ? 0 : targetPos.width);
-  const targetY = 25;
 
   // Calculate row positions
   const rowHeight = 50;

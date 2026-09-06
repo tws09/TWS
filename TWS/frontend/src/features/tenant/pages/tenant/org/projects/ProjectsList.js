@@ -3,12 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   PlusIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
   Squares2X2Icon,
   ListBulletIcon,
   EyeIcon,
-  PencilIcon,
-  TrashIcon,
   CalendarDaysIcon,
   UserGroupIcon,
   CurrencyDollarIcon,
@@ -16,8 +13,6 @@ import {
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import tenantProjectApiService from './services/tenantProjectApiService';
-import { tenantApiService } from '../../../../../../shared/services/tenant/tenant-api.service';
-import { PROJECT_STATUS, PROJECT_TYPE } from './constants/projectConstants';
 import CreateProjectModal from './components/CreateProjectModal';
 import toast from 'react-hot-toast';
 import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';

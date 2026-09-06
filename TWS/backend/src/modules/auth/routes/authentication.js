@@ -439,8 +439,8 @@ router.post('/login',
  *     summary: Look up a user's organization by email and send them their workspace link
  *     description: >
  *       Does not authenticate or return any session data. Sends an email containing
- *       the tenant subdomain URL for the org the given email belongs to. Rate limited
- *       to 5 requests/15min/IP.
+ *       the path-based workspace URL (housesbase.com/<slug>/org/...) for the org the
+ *       given email belongs to. Rate limited to 5 requests/15min/IP.
  *     tags: [Authentication]
  *     requestBody:
  *       required: true

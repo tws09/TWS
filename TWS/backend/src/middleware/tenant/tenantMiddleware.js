@@ -8,21 +8,21 @@ const jwt = require('jsonwebtoken');
 class TenantMiddleware {
   
   /**
-   * Extract tenant information from request
-   * Supports multiple methods: subdomain, header, JWT token, or URL parameter
+   * Extract tenant information from request.
+   * Tenancy is PATH-BASED (housesbase.com/<slug>/...) — the tenant is taken
+   * from the URL parameter, the X-Tenant-ID header, the JWT, or a query param.
+   * There is no subdomain resolution.
    */
   static extractTenant(req, res, next) {
     try {
       let tenantId = null;
       let tenant = null;
 
-      // Method 1: Extract from subdomain (e.g., tenant1.tws.com)
-      const host = req.get('host');
-      if (host && host.includes('.')) {
-        const subdomain = host.split('.')[0];
-        if (subdomain !== 'www' && subdomain !== 'api' && subdomain !== 'admin') {
-          tenantId = subdomain;
-        }
+      // Method 1: Extract from URL parameter (path-based routing — primary)
+      if (req.params.tenantSlug) {
+        tenantId = req.params.tenantSlug;
+      } else if (req.params.tenantId) {
+        tenantId = req.params.tenantId;
       }
 
       // Method 2: Extract from X-Tenant-ID header
@@ -43,12 +43,7 @@ class TenantMiddleware {
         }
       }
 
-      // Method 4: Extract from URL parameter
-      if (!tenantId && req.params.tenantId) {
-        tenantId = req.params.tenantId;
-      }
-
-      // Method 5: Extract from query parameter
+      // Method 4: Extract from query parameter
       if (!tenantId && req.query.tenantId) {
         tenantId = req.query.tenantId;
       }
@@ -56,7 +51,7 @@ class TenantMiddleware {
       if (!tenantId) {
         return res.status(400).json({
           success: false,
-          message: 'Tenant ID is required. Provide via subdomain, X-Tenant-ID header, JWT token, or URL parameter.'
+          message: 'Tenant is required. Provide via the URL path, X-Tenant-ID header, JWT token, or query parameter.'
         });
       }
 

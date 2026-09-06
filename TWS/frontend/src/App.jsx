@@ -4,8 +4,7 @@ import { useAuth } from './app/providers/AuthContext';
 import { ThemeProvider } from './app/providers/ThemeContext';
 import { SocketProvider } from './app/providers/SocketContext';
 import { setupGlobalErrorHandling } from './shared/utils/errorHandler';
-import { tenantPath } from './shared/utils/tenantRoutes';
-import { getSubdomainSlug, getTenantWorkspaceUrl, isAdminHost } from './shared/utils/subdomain';
+import { getTenantWorkspaceUrl } from './shared/utils/tenantRoutes';
 
 import './assets/software-house-premium.css';
 
@@ -204,26 +203,12 @@ function LegacyLandingRedirect() {
   return <Navigate to={{ pathname: '/', hash: location.hash }} replace />;
 }
 
-// On subdomain, catch any old-style /:slug/org/* navigate() call and
-// strip the prefix so the URL becomes the clean /path version.
-function SubdomainOldPathRedirect() {
-  const { '*': rest } = useParams();
-  return <Navigate to={`/${rest || ''}`} replace />;
-}
-
-// Handles redirects from School ERP's SlugRouter:
-// swh.housesbase.com/org/beaconhouse → swh.housesbase.com/beaconhouse/org
+// Handles legacy /org/:slug links (e.g. from School ERP's SlugRouter):
+// /org/beaconhouse → /beaconhouse/org
 function OrgPathRedirect() {
   const { tenantSlug, '*': rest } = useParams();
   const dest = `/${tenantSlug}/org${rest ? `/${rest}` : ''}`;
   return <Navigate to={dest} replace />;
-}
-
-// Hard-navigate for cross-subdomain redirects; React Router Navigate otherwise.
-function SmartRedirect({ to, replace }) {
-  useEffect(() => { if (to.startsWith('http')) window.location.href = to; }, [to]);
-  if (to.startsWith('http')) return null;
-  return <Navigate to={to} replace={replace} />;
 }
 
 function getTenantSlugFromUser(user) {
@@ -260,7 +245,7 @@ function App() {
   if (loading) return <LoadingSpinner />;
 
   const tenantSlug = user ? getTenantSlugFromUser(user) : null;
-  const isSubdomain = Boolean(getSubdomainSlug());
+  const isSupraAdmin = user?.userType === 'twsAdmin' || user?.role === 'super_admin';
   const clientRoles = ['client', 'customer'];
   const employeeRoles = [
     'admin', 'finance_manager', 'finance', 'project_manager', 'owner', 'org_manager',
@@ -286,19 +271,12 @@ function App() {
             path="/login"
             element={
               user ? (() => {
-                // A TWSAdmin (Supra Admin) session has no tenant to redirect to — send
-                // it straight to the admin portal instead of falling through to the
-                // tenant-slug lookup below, which would otherwise chase whatever stale
-                // tenantData/tenantId this browser happens to have lying around from an
-                // unrelated tenant session (shared cookie domain across *.housesbase.com).
-                if (user.userType === 'twsAdmin' || user.role === 'super_admin') {
+                // A Supra Admin session has no tenant to redirect to — send it
+                // straight to the admin portal instead of falling through to the
+                // tenant-slug lookup below, which would otherwise chase whatever
+                // stale tenantData/tenantId this browser happens to have.
+                if (isSupraAdmin) {
                   return <Navigate to="/supra-admin" replace />;
-                }
-                // admin.housesbase.com/login is the Supra Admin entry point only —
-                // a stray non-supra-admin session on this host (shared cookie domain)
-                // still gets the Supra Admin form, never the tenant login.
-                if (isAdminHost()) {
-                  return <SupraAdminLogin />;
                 }
                 try {
                   const td = JSON.parse(localStorage.getItem('tenantData'));
@@ -312,62 +290,57 @@ function App() {
                     const dest = clientRoles.includes(user?.role)
                       ? getTenantWorkspaceUrl(slug, 'org', 'client-portal')
                       : getTenantWorkspaceUrl(slug, 'org', 'home');
-                    return <SmartRedirect to={dest} replace />;
+                    return <Navigate to={dest} replace />;
                   }
                 } catch (e) {
                   console.error('Error determining software house redirect:', e);
                 }
                 return <SoftwareHouseLogin />;
               })()
-              // admin.housesbase.com/login is Supra Admin only; every org
-              // (Software House Admin, employee, client) signs in on its own
-              // subdomain via the shared tenant login form.
-              : (isAdminHost() ? <SupraAdminLogin /> : (isSubdomain ? <SoftwareHouseLogin /> : <FindWorkspace />))
+              // Logged out: the shared login form. It resolves the user's org
+              // from their credentials and redirects to /:slug/org/... on success
+              // — no per-tenant login URL. /find-workspace still helps a user who
+              // has forgotten their workspace slug.
+              : <SoftwareHouseLogin />
             }
           />
           <Route path="/software-house" element={<LegacyLandingRedirect />} />
-          {/* Password recovery is about regaining access to an existing
-              account, not creating a new org — unlike /signup, it's fine
-              (and necessary) everywhere, including admin.housesbase.com. */}
+          <Route path="/find-workspace" element={user ? <Navigate to="/login" replace /> : <FindWorkspace />} />
           <Route
             path="/forgot-password"
             element={user ? <Navigate to="/" replace /> : <SoftwareHouseForgotPassword />}
           />
           <Route path="/software-house-forgot-password" element={<Navigate to="/forgot-password" replace />} />
-          {!isSubdomain && !isAdminHost() && (
-            <>
-              <Route
-                path="/signup"
-                element={user ? <Navigate to="/" replace /> : <SoftwareHouseSignup />}
-              />
-              <Route path="/software-house-signup" element={<Navigate to="/signup" replace />} />
-              <Route path="/finance" element={<FinanceSystemPage />} />
-              <Route path="/hrm" element={<HRMSystemPage />} />
-              <Route path="/projects" element={<ProjectSystemPage />} />
-              <Route path="/changelog" element={<Changelog />} />
-              <Route path="/product" element={<ProductOverview />} />
-              <Route path="/product/projects" element={<ModulePage type="projects" />} />
-              <Route path="/product/people" element={<ModulePage type="people" />} />
-              <Route path="/product/finance" element={<ModulePage type="finance" />} />
-              <Route path="/product/clients" element={<ModulePage type="clients" />} />
-              <Route path="/product/documents" element={<ModulePage type="documents" />} />
-              <Route path="/product/nucleus" element={<ModulePage type="nucleus" />} />
-              <Route path="/solutions/software-houses" element={<SolutionPage type="software" />} />
-              <Route path="/solutions/digital-agencies" element={<SolutionPage type="agency" />} />
-              <Route path="/solutions/it-service-companies" element={<SolutionPage type="services" />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/security" element={<SecurityPage />} />
-              <Route path="/resources" element={<ResourcesPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/privacy" element={<LegalPage type="privacy" />} />
-              <Route path="/terms" element={<LegalPage type="terms" />} />
-              <Route path="/software-house/finance" element={<Navigate to="/finance" replace />} />
-              <Route path="/software-house/hrm" element={<Navigate to="/hrm" replace />} />
-              <Route path="/software-house/projects" element={<Navigate to="/projects" replace />} />
-              <Route path="/software-house/analytics" element={<Navigate to="/projects" replace />} />
-            </>
-          )}
+          <Route
+            path="/signup"
+            element={user ? <Navigate to="/" replace /> : <SoftwareHouseSignup />}
+          />
+          <Route path="/software-house-signup" element={<Navigate to="/signup" replace />} />
+          <Route path="/finance" element={<FinanceSystemPage />} />
+          <Route path="/hrm" element={<HRMSystemPage />} />
+          <Route path="/projects" element={<ProjectSystemPage />} />
+          <Route path="/changelog" element={<Changelog />} />
+          <Route path="/product" element={<ProductOverview />} />
+          <Route path="/product/projects" element={<ModulePage type="projects" />} />
+          <Route path="/product/people" element={<ModulePage type="people" />} />
+          <Route path="/product/finance" element={<ModulePage type="finance" />} />
+          <Route path="/product/clients" element={<ModulePage type="clients" />} />
+          <Route path="/product/documents" element={<ModulePage type="documents" />} />
+          <Route path="/product/nucleus" element={<ModulePage type="nucleus" />} />
+          <Route path="/solutions/software-houses" element={<SolutionPage type="software" />} />
+          <Route path="/solutions/digital-agencies" element={<SolutionPage type="agency" />} />
+          <Route path="/solutions/it-service-companies" element={<SolutionPage type="services" />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/security" element={<SecurityPage />} />
+          <Route path="/resources" element={<ResourcesPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy" element={<LegalPage type="privacy" />} />
+          <Route path="/terms" element={<LegalPage type="terms" />} />
+          <Route path="/software-house/finance" element={<Navigate to="/finance" replace />} />
+          <Route path="/software-house/hrm" element={<Navigate to="/hrm" replace />} />
+          <Route path="/software-house/projects" element={<Navigate to="/projects" replace />} />
+          <Route path="/software-house/analytics" element={<Navigate to="/projects" replace />} />
           <Route path="/access-denied" element={<AccessDenied />} />
           <Route path="/landing" element={<Navigate to="/" replace />} />
           <Route path="/monitoring-status" element={<MonitoringSystemStatus />} />
@@ -421,23 +394,14 @@ function App() {
             <Route path="settings" element={<Suspense fallback={<LoadingSpinner />}><SupraSettings /></Suspense>} />
           </Route>
 
-          {/* ── /org/:slug — entry point from School ERP's SlugRouter redirect ── */}
-          {!isSubdomain && (
-            <Route path="/org/:tenantSlug/*" element={<OrgPathRedirect />} />
-          )}
+          {/* ── /org/:slug — legacy entry point, redirects to /:slug/org ──── */}
+          <Route path="/org/:tenantSlug/*" element={<OrgPathRedirect />} />
 
           {/* ── Tenant dashboard (legacy) ─────────────────────────────────── */}
           <Route path="/:tenantSlug/dashboard" element={<TenantDashboard />} />
 
-          {/* ── Subdomain: redirect old /:slug/org/* paths to clean /path ── */}
-          {isSubdomain && (
-            <Route path="/:tenantSlug/org/*" element={<SubdomainOldPathRedirect />} />
-          )}
-
-          {/* ── Tenant Org workspace ──────────────────────────────────────── */}
-          {/* On subdomain (acme.housesbase.com): routes live at /home, /projects, etc.
-              On root domain: routes live at /:tenantSlug/org/home, etc.         */}
-          <Route path={isSubdomain ? '/' : '/:tenantSlug/org'} element={<TenantOrg />}>
+          {/* ── Tenant Org workspace — path-based: /:tenantSlug/org/home, etc. ── */}
+          <Route path="/:tenantSlug/org" element={<TenantOrg />}>
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<HomeRoute />} />
             <Route path="dashboard" element={<DynamicDashboard />} />
@@ -611,28 +575,20 @@ function App() {
           </Route>
 
           {/* ── Root redirect ─────────────────────────────────────────────── */}
-          {isAdminHost() ? (
-            // admin.housesbase.com is the Supra Admin host only — never the
-            // marketing site (its CTAs like "Get Started" → /signup are dead
-            // links here, since /signup only exists on the root domain).
-            <>
-              <Route
-                path="/"
-                element={
-                  <Navigate to={user?.userType === 'twsAdmin' || user?.role === 'super_admin' ? '/supra-admin' : '/login'} replace />
-                }
-              />
-              <Route path="/dashboard" element={<Navigate to="/" replace />} />
-              <Route path="*" element={<PageNotFound />} />
-            </>
-          ) : user ? (
-            allTenantRoles.includes(user.role) ? (
+          {user ? (
+            isSupraAdmin ? (
+              <>
+                <Route path="/" element={<Navigate to="/supra-admin" replace />} />
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<PageNotFound />} />
+              </>
+            ) : allTenantRoles.includes(user.role) ? (
               <Route
                 path="/"
                 element={(() => {
                   const subPath = clientRoles.includes(user.role) ? 'client-portal' : 'home';
                   const dest = getTenantWorkspaceUrl(tenantSlug || 'demo', 'org', subPath);
-                  return <SmartRedirect to={dest} replace />;
+                  return <Navigate to={dest} replace />;
                 })()}
               />
             ) : (

@@ -8,11 +8,7 @@ import {
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
   CalendarIcon,
-  ChartBarIcon,
-  Cog6ToothIcon,
-  FunnelIcon,
-  UserGroupIcon,
-  Squares2X2Icon
+  FunnelIcon
 } from '@heroicons/react/24/outline';
 
 const GanttChartHeader = ({

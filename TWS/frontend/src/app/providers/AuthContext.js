@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   // SECURITY FIX: Don't initialize from localStorage - tokens are in HttpOnly cookies
-  const [token, setToken] = useState(null);
+  const [, setToken] = useState(null);
 
   // Memoize user object to prevent unnecessary re-renders
   const memoizedUser = useMemo(() => {

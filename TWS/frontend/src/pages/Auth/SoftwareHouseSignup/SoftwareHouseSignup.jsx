@@ -12,15 +12,11 @@ import {
   BuildingOfficeIcon,
   UserIcon,
   EnvelopeIcon,
-  LockClosedIcon,
-  BriefcaseIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  SquaresPlusIcon
+  LockClosedIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { getTenantSubdomainUrl, navigateTo, BASE_DOMAIN } from '../../../shared/utils/subdomain';
+import { BASE_DOMAIN } from '../../../shared/utils/tenantRoutes';
 
 const ModuleMockup = ({ moduleKey }) => {
   const renderMockup = () => {
@@ -343,10 +339,8 @@ const SoftwareHouseSignup = () => {
       if (response.data.success) {
         setSuccess(true);
         toast.success('Account and workspace created!');
-        const slug = formData.organizationSlug.trim();
         setTimeout(() => {
-          const loginUrl = getTenantSubdomainUrl(slug, '/login');
-          navigateTo(loginUrl, (path) => navigate(path, { state: { signupSuccess: true, email: formData.email } }));
+          navigate('/login', { state: { signupSuccess: true, email: formData.email } });
         }, 1800);
       } else {
         setOtpError(response.data.message || 'Verification failed.');
@@ -588,8 +582,8 @@ const SoftwareHouseSignup = () => {
             <div>
               <label className="sh-signup-label">Workspace URL *</label>
               <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
-                <input ref={orgSlugInputRef} name="organizationSlug" value={formData.organizationSlug} onChange={handleSlugChange} required placeholder="acme" className="sh-signup-input" style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0 }} aria-invalid={Boolean(fieldErrors.organizationSlug)} aria-describedby={[fieldErrors.organizationSlug ? 'sh-signup-org-slug-error' : '', error ? 'sh-signup-form-error' : ''].filter(Boolean).join(' ') || undefined} />
-                <div className="sh-signup-input-suffix">.{BASE_DOMAIN}</div>
+                <div className="sh-signup-input-prefix">{BASE_DOMAIN}/</div>
+                <input ref={orgSlugInputRef} name="organizationSlug" value={formData.organizationSlug} onChange={handleSlugChange} required placeholder="acme" className="sh-signup-input" style={{ flex: 1, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }} aria-invalid={Boolean(fieldErrors.organizationSlug)} aria-describedby={[fieldErrors.organizationSlug ? 'sh-signup-org-slug-error' : '', error ? 'sh-signup-form-error' : ''].filter(Boolean).join(' ') || undefined} />
               </div>
               {fieldErrors.organizationSlug && <div id="sh-signup-org-slug-error" className="sh-signup-field-error">{fieldErrors.organizationSlug}</div>}
               <div style={{ fontSize: '0.75rem', minHeight: 20, marginBottom: '1rem' }}>

@@ -156,6 +156,18 @@
     border-bottom-right-radius: 8px;
 }
 
+.sh-signup-input-prefix {
+    padding: 0.875rem 1rem;
+    background: var(--sh-signup-mockup-bg);
+    border: 1px solid var(--sh-signup-input-border);
+    border-right: none;
+    color: var(--sh-signup-secondary);
+    font-size: 0.875rem;
+    white-space: nowrap;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
 .sh-signup-submit-btn {
     width: 100%;
     padding: 1rem;

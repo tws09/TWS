@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import ThemeToggle from '../../../shared/components/ui/ThemeToggle';
 import BrandMark from '../../../shared/components/ui/BrandMark';
-import { isSubdomainContext, isAdminHost } from '../../../shared/utils/subdomain';
+import { isTenantWorkspacePath } from '../../../shared/utils/tenantRoutes';
 import './SoftwareHouseNavbar.css';
 
 const SoftwareHouseNavbar = ({
@@ -33,11 +33,12 @@ const SoftwareHouseNavbar = ({
 
   const isPublicShell = location.pathname.startsWith('/software-house');
 
-  // On a tenant subdomain or admin.housesbase.com, none of the marketing
-  // links (Story/Platform/Projects/HRM/Finance) or Sign in/Start free make
-  // sense — Projects/Finance in particular route into the tenant's real
-  // internal modules, not a marketing page, when mounted on a subdomain.
-  const isTenantOrAdminContext = isSubdomainContext() || isAdminHost();
+  // Inside a tenant workspace (/:slug/org/...) or the Supra Admin area, none of
+  // the marketing links (Story/Platform/Projects/HRM/Finance) or Sign in/Start
+  // free make sense — Projects/Finance in particular collide with the tenant's
+  // real internal modules.
+  const isTenantOrAdminContext =
+    isTenantWorkspacePath(location.pathname) || location.pathname.startsWith('/supra-admin');
 
   return (
     <header className={`sh-nav-shell ${fixed ? 'sh-nav-fixed' : ''} ${isPublicShell ? 'sh-nav-landing' : ''} ${className}`.trim()}>

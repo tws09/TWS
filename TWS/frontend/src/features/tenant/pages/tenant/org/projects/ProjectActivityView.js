@@ -8,13 +8,11 @@ import { useParams } from 'react-router-dom';
 import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';
 import {
   BoltIcon,
-  CheckCircleIcon,
   PlusCircleIcon,
   ArrowPathIcon,
   FlagIcon,
   DocumentTextIcon,
   ClockIcon,
-  UserCircleIcon,
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';

@@ -214,8 +214,8 @@ const TenantOrgLayout = ({ children }) => {
     // ── Handlers ──────────────────────────────────────────────────────────────
     // ── Loading guard (must be after all hooks) ───────────────────────────────
     // Only ever render the dashboard shell once isAuthenticated is confirmed
-    // true — never on "still loading" or "not authenticated" (including an
-    // org/subdomain mismatch), so a wrong or expired session can't flash
+    // true — never on "still loading" or "not authenticated" (including a
+    // session/URL org mismatch), so a wrong or expired session can't flash
     // protected content before its redirect takes effect.
     if (!isAuthenticated) {
         return (

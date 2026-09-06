@@ -58,7 +58,7 @@ const ERPManagement = () => {
 
       // Try to fetch data, but provide fallback if API fails
       try {
-        const [statsResponse, tenantsResponse] = await Promise.all([
+        const [, tenantsResponse] = await Promise.all([
           axiosInstance.get('/api/supra-admin/erp/stats'),
           axiosInstance.get('/api/supra-admin/tenants?limit=100')
         ]);

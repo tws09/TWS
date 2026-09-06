@@ -8,7 +8,6 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   FunnelIcon,
-  CheckCircleIcon,
   ClockIcon,
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline';

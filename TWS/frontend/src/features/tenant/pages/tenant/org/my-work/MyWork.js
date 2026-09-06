@@ -14,7 +14,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';
 import {
   ClipboardDocumentCheckIcon,

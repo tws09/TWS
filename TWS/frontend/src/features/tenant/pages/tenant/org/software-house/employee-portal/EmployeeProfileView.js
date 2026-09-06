@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
 import { useTenantSlug } from '../../../../../../../shared/hooks/useTenantSlug';
 import { useTenantAuth } from '../../../../../../../app/providers/TenantAuthContext';
 import toast from 'react-hot-toast';

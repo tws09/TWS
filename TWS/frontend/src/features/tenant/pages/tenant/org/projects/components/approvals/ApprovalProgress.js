@@ -6,14 +6,8 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import {
-  CheckCircleIcon as CheckCircleIconSolid
-} from '@heroicons/react/24/solid';
 import tenantProjectApiService from '../../services/tenantProjectApiService';
 import { handleApiError } from '../../utils/errorHandler';
 import { showSuccess, showError } from '../../utils/toastNotifications';
@@ -113,32 +107,6 @@ const ApprovalProgress = ({ deliverableId, isClientView = false, onApprovalChang
       4: 'Client'
     };
     return stepNames[stepNumber] || approverType.replace('_', ' ').toUpperCase();
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'approved':
-        return <CheckCircleIconSolid className="w-6 h-6 text-green-500" />;
-      case 'rejected':
-        return <XCircleIcon className="w-6 h-6 text-red-500" />;
-      case 'pending':
-        return <ClockIcon className="w-6 h-6 text-gray-400" />;
-      default:
-        return <ClockIcon className="w-6 h-6 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-      case 'pending':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
   };
 
   if (loading) {

@@ -1,5 +1,4 @@
-﻿import { API_BASE_URL } from '../../../constants/apiEndpoints';
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const MonitoringSystemStatus = () => {

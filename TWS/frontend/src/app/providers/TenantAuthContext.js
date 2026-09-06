@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getSubdomainSlug, getForeignTenantWorkspaceUrl, navigateTo } from '../../shared/utils/subdomain';
+import { getTenantWorkspaceUrl, navigateTo } from '../../shared/utils/tenantRoutes';
 
 const TenantAuthContext = createContext();
 
@@ -29,13 +28,10 @@ export const TenantAuthProvider = ({ children }) => {
   const pathParts = location.pathname.split('/').filter(Boolean);
   const firstSegment = pathParts[0];
   const secondSegment = pathParts[1];
-  // Tenant workspace routes: /:slug/org/... or /:slug/dashboard
+  // Tenant workspace routes: /:slug/org/... or /:slug/dashboard — path-based, the
+  // slug is always the first path segment.
   const isTenantPath = secondSegment === 'org' || secondSegment === 'dashboard';
-  // In subdomain mode (acme.housesbase.com) the path is /home, /users, etc. — no slug in URL
-  let tenantSlug = (isTenantPath && firstSegment ? firstSegment : null) || getSubdomainSlug();
-  
-  // Check if tenantSlug is an ObjectId (24 hex characters) - if so, we need to get the actual slug
-  const isObjectId = tenantSlug && /^[0-9a-f]{24}$/i.test(tenantSlug);
+  let tenantSlug = isTenantPath && firstSegment ? firstSegment : null;
 
   const normalizeProfilePicUrl = (url) => {
     if (!url || typeof url !== 'string') return null;
@@ -251,13 +247,13 @@ export const TenantAuthProvider = ({ children }) => {
             }
           }
           if (userTenantSlug && tenantSlug && userTenantSlug !== tenantSlug && !isOnLoginPage) {
-            // This session belongs to a different org than the subdomain we're
-            // on (e.g. a shared *.housesbase.com cookie from a prior visit to a
-            // different tenant). Never render this tenant's dashboard for it —
-            // send the browser to the org the session actually belongs to.
+            // This session belongs to a different org than the /:slug/ in the URL
+            // (e.g. a stale cookie from a prior visit to another tenant). Never
+            // render this tenant's dashboard for it — send the browser to the
+            // org the session actually belongs to.
             setLoading(false);
             setIsAuthenticated(false);
-            navigateTo(getForeignTenantWorkspaceUrl(userTenantSlug, 'home'), navigate);
+            navigateTo(getTenantWorkspaceUrl(userTenantSlug, 'org', 'home'), navigate);
             return;
           }
         } catch (e) {

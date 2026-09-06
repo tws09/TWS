@@ -7,6 +7,7 @@ const emailVerificationService = require('../services/integrations/email-verific
 const emailValidationService = require('../services/integrations/email-validation.service');
 const ErrorHandler = require('../utils/errorHandler');
 const rateLimit = require('express-rate-limit');
+const { isReservedSlug } = require('../constants/reservedSlugs');
 
 // Rate limiting - request-otp (stricter, allows validation retries)
 const signupLimiter = rateLimit({
@@ -101,49 +102,11 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Infra subdomains that are NOT tenant slugs — must match
-// frontend/src/shared/utils/subdomain.js's getSubdomainSlug() list.
-const INFRA_SUBDOMAINS = new Set(['www', 'api', 'admin', 'mail', 'smtp', 'app', 'swh', 'edu']);
-
-// New-org signup (request-otp / resend-otp / check-slug-availability / complete)
-// only makes sense from the root domain — never from inside an existing
-// tenant's subdomain. The frontend route table already hides these forms
-// there, but the server must be the real authority (client checks are UX only).
-const rejectTenantSubdomainOrigin = (req, res, next) => {
-  // In production, traffic reaches this server via frontend/server.js's
-  // proxy, which rewrites `Host` to the backend's own upstream address and
-  // forwards the browser's real host as `x-forwarded-host` instead — so
-  // that must take priority, or every request looks like it came from the
-  // backend's own address and this guard never fires.
-  const host = String(req.get('x-forwarded-host') || req.get('host') || '')
-    .split(',')[0].trim().split(':')[0].toLowerCase();
-  const baseDomain = (process.env.BASE_DOMAIN || 'housesbase.com')
-    .trim().replace(/^https?:\/\//, '').replace(/\/+$/, '').toLowerCase();
-  // Only flag hosts that are actually a subdomain of BASE_DOMAIN — not the
-  // raw *.up.railway.app host the app can also be reached on (see the same
-  // distinction in cookieSecurity.js's usesDomainCookie check).
-  // 'admin' is excluded from INFRA_SUBDOMAINS' pass-through here even though
-  // it's an infra subdomain elsewhere: admin.housesbase.com is the Supra
-  // Admin host, not a valid signup origin — the frontend never renders the
-  // signup form there (App.jsx), so the backend must reject it too or the
-  // API is reachable directly even though the UI hides it.
-  const subdomain = host.split('.')[0];
-  const isTenantSubdomain = host.endsWith(`.${baseDomain}`) && (subdomain === 'admin' || !INFRA_SUBDOMAINS.has(subdomain));
-  if (isTenantSubdomain) {
-    return res.status(400).json({
-      success: false,
-      message: 'Please sign up from housesbase.com.'
-    });
-  }
-  next();
-};
-
 /**
  * POST /api/signup/software-house/request-otp
  * Step 1: Send an email verification code. No account is created yet.
  */
 router.post('/software-house/request-otp',
-  rejectTenantSubdomainOrigin,
   signupLimiter,
   [
     body('email').isEmail().normalizeEmail({ gmail_remove_dots: false }),
@@ -218,7 +181,6 @@ router.post('/software-house/request-otp',
  * Resend verification OTP
  */
 router.post('/resend-otp',
-  rejectTenantSubdomainOrigin,
   resendOtpLimiter,
   [
     body('email').isEmail().normalizeEmail({ gmail_remove_dots: false }),
@@ -257,7 +219,6 @@ router.post('/resend-otp',
  * Step 3: Check if tenant slug is available
  */
 router.get('/check-slug-availability',
-  rejectTenantSubdomainOrigin,
   slugCheckLimiter,
   ErrorHandler.asyncHandler(async (req, res) => {
     const { slug } = req.query;
@@ -383,7 +344,6 @@ router.get('/onboarding/:tenantId/progress',
  * Addresses Issue #4.1 and #4.2 - ensures atomic operations with rollback
  */
 router.post('/software-house/complete',
-  rejectTenantSubdomainOrigin,
   completeSignupLimiter,
   [
     body('email').isEmail().normalizeEmail({ gmail_remove_dots: false }),
@@ -436,9 +396,9 @@ router.post('/software-house/complete',
         });
       }
       
-      // Check reserved words (FR2: URL-safe, clear API error)
-      const reservedWords = ['api', 'admin', 'www', 'mail', 'ftp', 'localhost', 'test', 'staging', 'dev', 'app', 'dashboard', 'login', 'signup', 'register', 'nexaerp'];
-      if (reservedWords.includes(organizationSlug.toLowerCase())) {
+      // Check reserved words — infra names + every fixed SPA route (path-based
+      // tenancy means a colliding slug would be shadowed by that route).
+      if (isReservedSlug(organizationSlug)) {
         return res.status(400).json({
           success: false,
           message: 'This slug is reserved and cannot be used',

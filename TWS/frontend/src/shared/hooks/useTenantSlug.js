@@ -1,12 +1,10 @@
 import { useParams } from 'react-router-dom';
-import { getSubdomainSlug } from '../utils/subdomain';
 
 /**
- * Returns the current tenant slug from:
- * 1. The subdomain (acme.housesbase.com → 'acme')  — subdomain context
- * 2. React Router :tenantSlug param                  — legacy path-based context
+ * Returns the current tenant slug from the React Router :tenantSlug param.
+ * Tenancy is path-based: /<tenant-slug>/org/... — the slug is always in the URL.
  */
 export function useTenantSlug() {
   const params = useParams();
-  return getSubdomainSlug() || params.tenantSlug || '';
+  return params.tenantSlug || '';
 }

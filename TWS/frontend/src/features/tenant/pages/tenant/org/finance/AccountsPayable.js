@@ -11,20 +11,15 @@ import {
   PencilIcon,
   TrashIcon,
   DocumentTextIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
   ChartBarIcon,
   BanknotesIcon,
   FunnelIcon,
   DocumentDuplicateIcon,
-  ArrowPathIcon,
   UserGroupIcon,
-  BriefcaseIcon,
   BuildingOfficeIcon,
   CloudIcon,
   ComputerDesktopIcon,
   WrenchScrewdriverIcon,
-  CreditCardIcon,
   CheckBadgeIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -281,16 +276,6 @@ const AccountsPayable = () => {
     return 'text-red-600 dark:text-red-400';
   };
 
-  const calculateTotals = () => {
-    const filtered = getFilteredBills();
-    return {
-      totalOutstanding: filtered.reduce((sum, bill) => sum + (bill.remainingAmount || 0), 0),
-      totalPaid: filtered.reduce((sum, bill) => sum + (bill.paidAmount || 0), 0),
-      overdueAmount: filtered.filter(bill => bill.status === 'overdue').reduce((sum, bill) => sum + (bill.remainingAmount || 0), 0),
-      overdueCount: filtered.filter(bill => bill.status === 'overdue').length
-    };
-  };
-
   const addExpenseItem = () => {
     const newItem = {
       type: 'cloud_compute',
@@ -406,17 +391,6 @@ const AccountsPayable = () => {
     }
   };
 
-  const handleSchedulePayment = async (billId, scheduleData) => {
-    try {
-      await tenantApiService.scheduleBillPayment(tenantSlug, billId, scheduleData);
-      toast.success('Payment scheduled successfully');
-      fetchData();
-    } catch (error) {
-      console.error('Error scheduling payment:', error);
-      toast.error(error.message || 'Failed to schedule payment. Please try again.');
-    }
-  };
-
   const handleApproveBill = (billId) => {
     setConfirmDialog({
       isOpen: true,
@@ -489,7 +463,6 @@ const AccountsPayable = () => {
     return <LoadingSpinner message="Loading accounts payable..." className="min-h-[40vh] bg-transparent" />;
   }
 
-  const totals = calculateTotals();
   const filteredBills = getFilteredBills();
 
   // ── Full-page Bill Form ───────────────────────────────────────────────────

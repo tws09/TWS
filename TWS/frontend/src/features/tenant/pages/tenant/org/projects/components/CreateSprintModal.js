@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import tenantProjectApiService from '../services/tenantProjectApiService';
-import { handleApiError, handleSuccess } from '../utils/errorHandler';
+import { handleApiError } from '../utils/errorHandler';
 import { SPRINT_STATUS } from '../constants/projectConstants';
 import { showSuccess, showError } from '../utils/toastNotifications';
 import { useTenantSlug } from '../../../../../../../shared/hooks/useTenantSlug';

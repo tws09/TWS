@@ -4,10 +4,7 @@ import {
   PlusIcon,
   CalendarIcon,
   DocumentArrowDownIcon,
-  FunnelIcon,
-  ChartBarIcon,
   PlayIcon,
-  PauseIcon,
   StopIcon,
   FolderIcon,
   UserIcon

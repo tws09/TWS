@@ -5,8 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { CARD_STATUS } from '../constants/projectConstants';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 const QuickAddTask = ({ columnId, onAddTask, onCancel }) => {
   const [isExpanded, setIsExpanded] = useState(false);

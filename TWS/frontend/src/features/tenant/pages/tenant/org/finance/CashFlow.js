@@ -5,13 +5,9 @@ import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   ChartBarIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
   DocumentTextIcon,
   MagnifyingGlassIcon,
   FunnelIcon

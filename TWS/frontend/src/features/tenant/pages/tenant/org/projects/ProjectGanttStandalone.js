@@ -10,7 +10,6 @@ import GanttChart from './components/gantt/GanttChart';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProjectSelector from './components/ProjectSelector';
 import tenantProjectApiService from './services/tenantProjectApiService';
-import { showError } from './utils/toastNotifications';
 import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';
 
 const ProjectGanttStandalone = () => {

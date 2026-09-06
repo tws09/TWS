@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTenantAuth } from '../../../../../../app/providers/TenantAuthContext';
 import { useTenantPermissions } from '../../../../contexts/TenantPermissionsContext';
 import toast from 'react-hot-toast';
@@ -27,8 +26,7 @@ import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';
 
 const UserProfile = () => {
   const tenantSlug = useTenantSlug();
-  const navigate = useNavigate();
-  const { user, tenant, updateUser } = useTenantAuth();
+  const { user, updateUser } = useTenantAuth();
   const { hasModulePermission } = useTenantPermissions();
 
   // Profile pictures: build API URL and load via fetch with credentials so auth cookie is sent
@@ -40,9 +38,6 @@ const UserProfile = () => {
     }
     return url;
   };
-  const getProfilePicSrc = getProfilePicApiUrl; // alias for any remaining references
-
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);

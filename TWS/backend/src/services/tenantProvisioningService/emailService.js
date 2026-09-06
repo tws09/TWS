@@ -8,11 +8,12 @@ const emailService = require('../integrations/email.service');
  */
 async function sendWelcomeEmail(tenant, adminUser) {
   try {
-    const baseDomain = (process.env.BASE_DOMAIN || 'housesbase.com').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
-    const subdomain = `${tenant.slug}.${baseDomain}`;
-    
+    const appOrigin = String(process.env.FRONTEND_URL || `https://${(process.env.BASE_DOMAIN || 'housesbase.com').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '')}`)
+      .trim().replace(/\/+$/, '');
+    const workspaceUrl = `${appOrigin}/${tenant.slug}`;
+
     // Use the main email service
-    await emailService.sendTenantWelcomeEmail(adminUser, tenant, subdomain);
+    await emailService.sendTenantWelcomeEmail(adminUser, tenant, workspaceUrl);
     
     // Update tenant onboarding status
     await Tenant.findByIdAndUpdate(tenant._id, {

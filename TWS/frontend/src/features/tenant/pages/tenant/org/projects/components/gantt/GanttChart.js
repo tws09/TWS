@@ -30,7 +30,7 @@ const GanttChart = ({ projectId: propProjectId }) => {
     viewType: 'weekly',
     zoomLevel: 1
   });
-  const [filters, setFilters] = useState({
+  const [filters] = useState({
     category: 'all',
     sprint: 'all',
     assignee: 'all'

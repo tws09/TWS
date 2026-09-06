@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../../../../app/providers/AuthContext';
 import toast from 'react-hot-toast';
 import {
-  ChartBarIcon,
   TrophyIcon,
-  CalendarIcon,
-  CheckCircleIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 
@@ -32,7 +30,6 @@ const EmployeePerformanceView = ({ tenantSlug }) => {
       if (empResponse.ok) {
         const empData = await empResponse.json();
         if (empData.data?.employees?.length > 0) {
-          const employee = empData.data.employees[0];
           setPerformance({
             overallRating: 0,
             goals: [],

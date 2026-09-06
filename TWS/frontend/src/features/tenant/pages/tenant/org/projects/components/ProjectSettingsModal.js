@@ -17,8 +17,7 @@ import {
 
 import tenantProjectApiService from '../services/tenantProjectApiService';
 import { validateProjectForm, sanitizeProjectData } from '../utils/validation';
-import { handleApiError, handleSuccess } from '../utils/errorHandler';
-import { SUCCESS_MESSAGES, PROJECT_PRIORITY, PROJECT_TYPE } from '../constants/projectConstants';
+import { PROJECT_PRIORITY, PROJECT_TYPE } from '../constants/projectConstants';
 import { showSuccess, showError } from '../utils/toastNotifications';
 import { useTenantSlug } from '../../../../../../../shared/hooks/useTenantSlug';
 

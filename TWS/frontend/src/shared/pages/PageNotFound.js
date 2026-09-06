@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/providers/AuthContext';
 import {
   HomeIcon,
@@ -8,7 +8,6 @@ import {
 
 const PageNotFound = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
 
   const getHomePath = () => {

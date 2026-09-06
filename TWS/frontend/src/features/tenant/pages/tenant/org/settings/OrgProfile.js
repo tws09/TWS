@@ -8,10 +8,8 @@ import {
   EnvelopeIcon,
   BriefcaseIcon,
   SwatchIcon,
-  ArrowPathIcon,
   CheckIcon,
   ExclamationTriangleIcon,
-  PencilSquareIcon,
   PhotoIcon,
   TrashIcon,
   ArrowUpTrayIcon,
@@ -42,14 +40,6 @@ const NAV = [
   { id: 'business',  label: 'Business',  Icon: BriefcaseIcon },
   { id: 'branding',  label: 'Branding',  Icon: SwatchIcon },
 ];
-
-const PLAN_CLS = {
-  trial:        'bg-gray-100 dark:bg-gray-800 text-gray-500',
-  starter:      'bg-blue-50  dark:bg-blue-900/20  text-blue-600  dark:text-blue-400',
-  growth:       'bg-accent-50 dark:bg-accent-900/20 text-accent-600 dark:text-accent-400',
-  professional: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
-  enterprise:   'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
-};
 
 /* ─── atoms ──────────────────────────────────────────────────────────────────── */
 const Lbl = ({ children }) => <label className={S.label}>{children}</label>;
@@ -86,7 +76,7 @@ function Sel({ label, value, onChange, options, readOnly, span }) {
 /* ─── main ───────────────────────────────────────────────────────────────────── */
 const OrgProfile = () => {
   const tenantSlug = useTenantSlug();
-  const { user, tenant: ctxTenant, updateTenant } = useTenantAuth();
+  const { tenant: ctxTenant, updateTenant } = useTenantAuth();
   const { hasModulePermission } = useTenantPermissions();
 
   const [tab,           setTab]           = useState('overview');

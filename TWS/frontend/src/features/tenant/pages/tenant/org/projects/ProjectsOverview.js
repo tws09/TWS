@@ -12,16 +12,11 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   PlusIcon,
-  CodeBracketIcon,
-  BugAntIcon,
   StarIcon,
   RocketLaunchIcon,
   CpuChipIcon,
-  DocumentChartBarIcon,
-  FireIcon,
   BoltIcon,
-  CalendarDaysIcon,
-  GlobeAltIcon
+  CalendarDaysIcon
 } from '@heroicons/react/24/outline';
 import { 
   Line, 
@@ -46,7 +41,6 @@ import {
 } from 'chart.js';
 import tenantProjectApiService from './services/tenantProjectApiService';
 import { tenantApiService } from '../../../../../../shared/services/tenant/tenant-api.service';
-import { PROJECT_STATUS, PROJECT_TYPE } from './constants/projectConstants';
 import CreateProjectModal from './components/CreateProjectModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from '../../../../../../shared/components/feedback/LoadingSpinner';
@@ -196,7 +190,7 @@ const ProjectsOverviewContent = () => {
   const [recentProjects, setRecentProjects] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
   const [upcomingMilestones, setUpcomingMilestones] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [, setDepartments] = useState([]);
   const [departmentStats, setDepartmentStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

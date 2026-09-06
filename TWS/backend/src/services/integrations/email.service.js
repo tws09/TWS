@@ -94,17 +94,18 @@ class EmailService {
 
   /**
    * Tenant Signup Welcome Email
+   * @param {string} workspaceUrl - Full URL to the tenant's workspace, e.g.
+   *   "https://housesbase.com/example-co". Tenancy is path-based; the slug is a
+   *   path segment, never a subdomain.
    */
-  async sendTenantWelcomeEmail(user, tenant, subdomain) {
+  async sendTenantWelcomeEmail(user, tenant, workspaceUrl) {
     const subject = `Welcome to ${tenant.name || tenant.organizationName} - Your HousesBase workspace is ready!`;
-    // The tenant slug lives in the hostname in production. Build this link from
-    // the provisioned subdomain instead of a central frontend URL so welcome
-    // emails cannot accidentally point at a placeholder or duplicate the slug.
-    const tenantHost = String(subdomain || '')
+    const workspaceBase = String(workspaceUrl || '')
       .trim()
-      .replace(/^https?:\/\//i, '')
-      .replace(/\/+$/, '');
-    const tenantOrigin = `https://${tenantHost}`;
+      .replace(/\/+$/, '')
+      .replace(/^(?!https?:\/\/)/i, 'https://');
+    const workspaceDisplay = workspaceBase.replace(/^https?:\/\//i, '');
+    const setupUrl = `${workspaceBase}/org/onboarding`;
     const body = `
       <p style="font-size:16px;color:${COLORS.ink};margin:0 0 16px;">Dear ${user.fullName},</p>
       <p style="font-size:14px;color:${COLORS.muted};line-height:1.6;margin:0 0 8px;">
@@ -113,7 +114,7 @@ class EmailService {
       ${renderCard(`
         <h3 style="color:${COLORS.ink};margin:0 0 12px;font-size:15px;">Your tenant details</h3>
         ${renderRow('Organization', tenant.name || tenant.organizationName)}
-        ${renderRow('Subdomain', subdomain)}
+        ${renderRow('Workspace URL', workspaceDisplay)}
         ${renderRow('Industry', tenant.erpCategory || tenant.industry || 'Business')}
         ${renderRow('Status', '<span style="color:#047857;font-weight:600;">Active</span>')}
       `)}
@@ -127,7 +128,7 @@ class EmailService {
           <li>Review security settings and enable MFA</li>
         </ol>
       </div>
-      ${renderButton({ href: `${tenantOrigin}/onboarding`, label: 'Complete Your Setup' })}
+      ${renderButton({ href: setupUrl, label: 'Complete Your Setup' })}
       <p style="font-size:12px;color:${COLORS.muted};margin:20px 0 0;">
         <strong>Need help?</strong> <a href="mailto:hello@housesbase.com" style="color:${COLORS.navy};">Contact support</a>.
       </p>
@@ -142,14 +143,16 @@ class EmailService {
 
   /**
    * Workspace Lookup Email
-   * Sent when a user submits their email on the root-domain "find my workspace"
-   * page. Purely informational — contains a link to their org's subdomain,
+   * Sent when a user submits their email on the "find my workspace" page.
+   * Purely informational — contains a path-based link to their org's workspace,
    * no login token or auth material.
    */
   async sendWorkspaceLookupEmail(user, org) {
     const subject = 'Your HousesBase workspace';
-    const baseDomain = getSanitizedBaseDomain();
-    const workspaceUrl = `https://${org.slug}.${baseDomain}/login`;
+    const appOrigin = String(process.env.FRONTEND_URL || `https://${getSanitizedBaseDomain()}`)
+      .trim()
+      .replace(/\/+$/, '');
+    const workspaceUrl = `${appOrigin}/${org.slug}/org/home`;
     const body = `
       <p style="font-size:16px;color:${COLORS.ink};margin:0 0 16px;">Dear ${user.fullName || 'there'},</p>
       <p style="font-size:14px;color:${COLORS.muted};line-height:1.6;margin:0 0 8px;">

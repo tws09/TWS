@@ -4,7 +4,6 @@ import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
-  EyeIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   CurrencyDollarIcon,
@@ -38,7 +37,7 @@ const ChartOfAccounts = () => {
   const [filterType, setFilterType] = useState('all');
   const [expandedAccounts, setExpandedAccounts] = useState(new Set());
   const [showTemplates, setShowTemplates] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [, setSelectedTemplate] = useState(null);
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -479,24 +478,6 @@ const ChartOfAccounts = () => {
       }
     });
     return result;
-  };
-
-  const getFilteredAccounts = () => {
-    let flatAccounts = flattenAccounts(accounts);
-    
-    if (searchTerm) {
-      flatAccounts = flatAccounts.filter(account =>
-        account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        account.code.includes(searchTerm) ||
-        (account.description && account.description.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-    
-    if (filterType !== 'all') {
-      flatAccounts = flatAccounts.filter(account => account.type === filterType);
-    }
-    
-    return flatAccounts;
   };
 
   const getAccountTypeColor = (type) => {

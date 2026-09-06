@@ -33,8 +33,8 @@ const entries = [
     date: 'May 2026',
     title: 'Cleaner workspace addresses',
     category: 'Improved',
-    summary: 'Company workspaces now use simpler paths built around their own subdomain.',
-    changes: ['Simplified workspace URLs', 'Resolved company workspaces directly from their subdomain'],
+    summary: 'Every company workspace now lives under a simple path on housesbase.com.',
+    changes: ['Simplified workspace URLs', 'Resolved company workspaces from the address path'],
   },
   {
     date: 'April 2026',

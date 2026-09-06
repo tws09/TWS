@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircleIcon, XMarkIcon, KeyIcon } from '@heroicons/react/24/outline';
-import { tenantApiService } from '../../../shared/services/tenant/tenant-api.service';
 
 const InviteAccept = () => {
   const [searchParams] = useSearchParams();

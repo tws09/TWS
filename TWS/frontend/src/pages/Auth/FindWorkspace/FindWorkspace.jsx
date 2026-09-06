@@ -3,7 +3,6 @@ import axios from 'axios';
 import { EnvelopeIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../../../app/providers/ThemeContext';
 import { AuthMarketingNav } from '../../../marketing/components/MarketingShell';
-import { BASE_DOMAIN } from '../../../shared/utils/subdomain';
 import './FindWorkspace.css';
 
 const FindWorkspace = () => {
@@ -103,7 +102,7 @@ const FindWorkspace = () => {
         </form>
 
         <div className="sh-workspace-footer sh-workspace-admin-hint">
-          Software House Admin? <a href={`https://admin.${BASE_DOMAIN}/login`}>Sign in here</a>
+          Software House Admin? <a href="/supra-admin-login">Sign in here</a>
         </div>
       </div>
     </div>

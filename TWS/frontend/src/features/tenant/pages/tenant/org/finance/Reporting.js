@@ -12,9 +12,7 @@ import {
   ClockIcon,
   UserGroupIcon,
   PrinterIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  BuildingOffice2Icon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { tenantApiService } from '../../../../../../shared/services/tenant/tenant-api.service';
 import toast from 'react-hot-toast';
@@ -108,27 +106,6 @@ const fmt = (n) => formatCurrencyBase(n || 0, currentReportCurrency);
 const fmtN = (n, dp = 0) => (+n || 0).toFixed(dp);
 
 // ─── Sub-components for each report type ───────────────────────────────────
-
-const ReportHeader = ({ title, period, onPrint }) => (
-  <div className="flex items-start justify-between flex-wrap gap-4 mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 bg-primary-50 dark:bg-primary-900/20 rounded-xl flex items-center justify-center">
-        <BuildingOffice2Icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-      </div>
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{period}</p>
-      </div>
-    </div>
-    <button
-      onClick={onPrint}
-      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-    >
-      <PrinterIcon className="w-4 h-4" />
-      Print
-    </button>
-  </div>
-);
 
 const LineRow = ({ label, amount, bold, indent, highlight }) => (
   <div className={`flex justify-between items-center py-2 ${indent ? 'pl-6' : ''} ${bold ? 'font-semibold' : ''} ${highlight ? 'bg-gray-50 dark:bg-gray-800/50 rounded px-3 py-3 my-1' : 'border-b border-gray-100 dark:border-gray-800'}`}>

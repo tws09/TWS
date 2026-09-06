@@ -17,7 +17,6 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   BarsArrowDownIcon,
-  ListBulletIcon,
   Squares2X2Icon,
   UserGroupIcon,
   CalendarIcon,

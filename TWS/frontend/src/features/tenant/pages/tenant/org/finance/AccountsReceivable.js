@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   ArrowTrendingUpIcon,
   ClockIcon,
@@ -12,7 +11,6 @@ import {
   PencilIcon,
   TrashIcon,
   DocumentTextIcon,
-  CurrencyDollarIcon,
   CalendarIcon,
   ChartBarIcon,
   BanknotesIcon,
@@ -38,7 +36,6 @@ import ConfirmDialog from '../../../../../../components/ConfirmDialog/ConfirmDia
 const AccountsReceivable = () => {
   const tenantSlug = useTenantSlug();
   const currency = useTenantCurrency(tenantSlug);
-  const navigate = useNavigate();
   const { isAuthenticated, loading: authLoading } = useTenantAuth();
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
@@ -263,16 +260,6 @@ const AccountsReceivable = () => {
     return 'text-red-600 dark:text-red-400';
   };
 
-  const calculateTotals = () => {
-    const filtered = getFilteredInvoices();
-    return {
-      totalOutstanding: filtered.reduce((sum, inv) => sum + (inv.remainingAmount || 0), 0),
-      totalPaid: filtered.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0),
-      overdueAmount: filtered.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.remainingAmount || 0), 0),
-      overdueCount: filtered.filter(inv => inv.status === 'overdue').length
-    };
-  };
-
   const addBillingItem = () => {
     const newItem = {
       type: 'development',
@@ -451,7 +438,6 @@ const AccountsReceivable = () => {
     return <LoadingSpinner message="Loading accounts receivable..." className="min-h-[40vh] bg-transparent" />;
   }
 
-  const totals = calculateTotals();
   const filteredInvoices = getFilteredInvoices();
 
   // ── Full-page Invoice Form ────────────────────────────────────────────────

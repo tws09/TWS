@@ -162,3 +162,6 @@ secrets.json
 
 # Unrelated local project (WhatsApp contact/chat scraper) — never belongs in this repo
 shippershubcontacts/
+
+# Local video-render workspace (~436 MB) — not part of the app
+videos/

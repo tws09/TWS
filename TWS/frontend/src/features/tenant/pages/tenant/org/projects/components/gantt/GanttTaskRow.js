@@ -3,7 +3,7 @@
  * Displays a single task row with task bar
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import GanttTaskBar from './GanttTaskBar';
 
 const GanttTaskRow = ({
@@ -17,8 +17,6 @@ const GanttTaskRow = ({
   showProgress,
   onReschedule
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
-
   const taskStart = task.startDate ? new Date(task.startDate) : null;
   const taskEnd = task.endDate || task.dueDate ? new Date(task.endDate || task.dueDate) : null;
 

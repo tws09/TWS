@@ -11,10 +11,8 @@ import {
   FolderIcon
 } from '@heroicons/react/24/outline';
 import tenantProjectApiService from './services/tenantProjectApiService';
-import tenantApiService from '../../../../../../shared/services/tenant/tenant-api.service';
 import { MILESTONE_STATUS } from './constants/projectConstants';
 import { ApprovalProgress, ApprovalChainSetup } from './components/approvals';
-import { showSuccess, showError } from './utils/toastNotifications';
 import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';
 
 const ProjectMilestones = () => {
@@ -87,20 +85,6 @@ const ProjectMilestones = () => {
     }
     
     return milestone.progress || 0;
-  };
-
-  const handleDeleteMilestone = async (milestoneId) => {
-    if (!window.confirm('Are you sure you want to delete this milestone? This action cannot be undone.')) {
-      return;
-    }
-    try {
-      await tenantApiService.deleteMilestone(tenantSlug, milestoneId);
-      showSuccess('Milestone deleted successfully!');
-      fetchMilestones();
-    } catch (error) {
-      console.error('Error deleting milestone:', error);
-      showError(error.message || 'Failed to delete milestone. Please try again.');
-    }
   };
 
   if (loading) {

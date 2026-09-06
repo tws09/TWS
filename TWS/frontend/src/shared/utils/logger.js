@@ -3,13 +3,6 @@
  * Replaces console.log with secure, production-safe logging
  */
 
-const LOG_LEVELS = {
-  ERROR: 'error',
-  WARN: 'warn',
-  INFO: 'info',
-  DEBUG: 'debug'
-};
-
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -55,13 +48,6 @@ const sanitizeError = (error) => {
  */
 export const logError = (message, error = null, context = {}) => {
   const sanitizedError = error ? sanitizeError(error) : null;
-  const _logPayload = {
-    level: LOG_LEVELS.ERROR,
-    message,
-    error: sanitizedError,
-    context,
-    timestamp: new Date().toISOString(),
-  };
 
   // In development, use console.error
   if (isDevelopment) {
@@ -81,13 +67,6 @@ export const logError = (message, error = null, context = {}) => {
  * @param {Object} context - Additional context (optional)
  */
 export const logWarn = (message, context = {}) => {
-  const _logPayload = {
-    level: LOG_LEVELS.WARN,
-    message,
-    context,
-    timestamp: new Date().toISOString(),
-  };
-
   if (isDevelopment) {
     console.warn(`[WARN] ${message}`, context);
   }
@@ -103,13 +82,6 @@ export const logWarn = (message, context = {}) => {
  * @param {Object} context - Additional context (optional)
  */
 export const logInfo = (message, context = {}) => {
-  const logData = {
-    level: LOG_LEVELS.INFO,
-    message,
-    context,
-    timestamp: new Date().toISOString(),
-  };
-
   if (isDevelopment) {
     console.log(`[INFO] ${message}`, context);
   }

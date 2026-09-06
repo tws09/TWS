@@ -16,7 +16,6 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ClockIcon,
-  UserIcon,
   LinkIcon,
   XMarkIcon,
   PlusIcon
@@ -28,7 +27,6 @@ import { DeliverableForm } from './components/deliverables';
 import { ApprovalProgress } from './components/approvals';
 import ApprovalChainSetup from './components/approvals/ApprovalChainSetup';
 import { DateValidationForm } from './components/deliverables';
-import { ChangeRequestAuditTrail } from './components/changeRequests';
 import DeliverableCardSkeleton from './components/deliverables/DeliverableCardSkeleton';
 
 const DeliverableDetail = () => {

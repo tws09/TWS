@@ -7,6 +7,7 @@ const emailVerificationService = require('../integrations/email-verification.ser
 const emailService = require('../integrations/email.service');
 const masterERPService = require('../masterERPService');
 const validator = require('validator');
+const { isReservedSlug } = require('../../constants/reservedSlugs');
 
 // Must match AUTH_EMAIL_NORMALIZE in authentication.js so stored email == login lookup email
 const SIGNUP_EMAIL_NORMALIZE = { gmail_remove_dots: false };
@@ -45,9 +46,9 @@ class SelfServeSignupService {
     // Validate slug format
     this.validateSlug(slug);
 
-    // Check reserved words (include product/domain names; FR2)
-    const reservedWords = ['api', 'admin', 'www', 'mail', 'ftp', 'localhost', 'test', 'staging', 'dev', 'app', 'dashboard', 'login', 'signup', 'register', 'nexaerp'];
-    if (reservedWords.includes(slug.toLowerCase())) {
+    // Check reserved words — infra names + every fixed SPA route (path-based
+    // tenancy means a colliding slug would be shadowed by that route).
+    if (isReservedSlug(slug)) {
       return {
         available: false,
         reason: 'reserved',
@@ -347,9 +348,10 @@ class SelfServeSignupService {
       setImmediate(async () => {
         try {
           console.log('📝 Step 14: Sending welcome email (background)...');
-          const baseDomain = (process.env.BASE_DOMAIN || 'housesbase.com').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
-          const subdomain = `${organizationSlug}.${baseDomain}`;
-          await emailService.sendTenantWelcomeEmail(user, tenant, subdomain);
+          const appOrigin = String(process.env.FRONTEND_URL || `https://${(process.env.BASE_DOMAIN || 'housesbase.com').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '')}`)
+            .trim().replace(/\/+$/, '');
+          const workspaceUrl = `${appOrigin}/${organizationSlug}`;
+          await emailService.sendTenantWelcomeEmail(user, tenant, workspaceUrl);
           console.log('✅ Welcome email sent');
         } catch (emailError) {
           console.error('⚠️ Error sending welcome email (non-critical):', emailError);

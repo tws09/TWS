@@ -7,7 +7,6 @@ import EmptyState from '../../../../../../../shared/components/feedback/EmptySta
 import {
   CurrencyDollarIcon,
   DocumentTextIcon,
-  CalendarIcon,
   BanknotesIcon
 } from '@heroicons/react/24/outline';
 

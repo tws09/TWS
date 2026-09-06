@@ -189,7 +189,7 @@ const MarketingHome = () => {
       <section className="mk-section mk-workspace">
         <div className="mk-shell mk-workspace-grid">
           <Reveal><h2>Every company gets its own HousesBase.</h2><p>Each organization gets a dedicated workspace for its people, projects, clients and operations.</p></Reveal>
-          <Reveal className="mk-address"><span>yourcompany</span><b>.housesbase.com</b><small>Your company workspace</small></Reveal>
+          <Reveal className="mk-address"><b>housesbase.com/</b><span>yourcompany</span><small>Your company workspace</small></Reveal>
         </div>
       </section>
 

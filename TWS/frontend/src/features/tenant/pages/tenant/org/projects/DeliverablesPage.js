@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   FlagIcon,
   PlusIcon,
@@ -14,15 +14,12 @@ import {
   CalendarIcon,
   ChartBarIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
 import tenantProjectApiService from './services/tenantProjectApiService';
-import { handleApiError } from './utils/errorHandler';
 import { DeliverableForm } from './components/deliverables';
 import { ApprovalProgress } from './components/approvals';
 import DeliverableCardSkeleton from './components/deliverables/DeliverableCardSkeleton';
-import { showSuccess, showError } from './utils/toastNotifications';
 import ProjectSelector from './components/ProjectSelector';
 import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';
 
@@ -39,14 +36,13 @@ const DeliverablesPage = () => {
   const tenantSlug = useTenantSlug();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get('projectId');
-  const navigate = useNavigate();
   const [deliverables, setDeliverables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDeliverable, setEditingDeliverable] = useState(null);
-  const [selectedDeliverable, setSelectedDeliverable] = useState(null);
+  const [, setSelectedDeliverable] = useState(null);
   const [showApprovalProgress, setShowApprovalProgress] = useState(null);
 
   useEffect(() => {

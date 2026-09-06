@@ -4,20 +4,15 @@ import {
   UserPlusIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
-  EllipsisVerticalIcon,
   PencilIcon,
   TrashIcon,
   EyeIcon,
   SparklesIcon,
   BoltIcon,
-  ShieldCheckIcon,
-  CheckCircleIcon,
   XCircleIcon,
-  InformationCircleIcon,
-  AdjustmentsHorizontalIcon
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { useTheme } from '../../../../../app/providers/ThemeContext';
 import { get, patch, post } from '../../../../../shared/utils/apiClient';
 import { Button } from '../../../../../components/ui/Button/Button';
 import { Badge } from '../../../../../components/ui/Badge/Badge';
@@ -45,7 +40,6 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [assigning, setAssigning] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [selectedResponsibility, setSelectedResponsibility] = useState('');
   const defaultCreateForm = {
     email: '',
     password: '',
@@ -56,7 +50,6 @@ const Users = () => {
     status: 'active'
   };
   const [createForm, setCreateForm] = useState(defaultCreateForm);
-  const { isDarkMode } = useTheme();
 
   const closeCreateModal = () => {
     setShowCreateModal(false);

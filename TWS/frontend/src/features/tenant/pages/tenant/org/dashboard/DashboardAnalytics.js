@@ -9,7 +9,7 @@ const DashboardAnalytics = () => {
   const tenantSlug = useTenantSlug();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
+  const [, setAnalytics] = useState(null);
 
   useEffect(() => {
     fetchAnalytics();

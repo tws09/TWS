@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
-  DocumentTextIcon,
   ArrowRightIcon,
   CalendarIcon,
   CheckCircleIcon,

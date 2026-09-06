@@ -5,16 +5,11 @@ import {
   ShieldCheckIcon,
   CircleStackIcon,
   CloudIcon,
-  KeyIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
   CheckIcon,
-  XMarkIcon,
   SparklesIcon,
   BoltIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { useTheme } from '../../../../../app/providers/ThemeContext';
 import { Button } from '../../../../../components/ui/Button/Button';
 import { Spinner } from '../../../../../components/ui/Spinner/Spinner';
 import { get, put } from '../../../../../shared/utils/apiClient';
@@ -25,7 +20,6 @@ const Settings = () => {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
-  const { isDarkMode } = useTheme();
 
   useEffect(() => {
     fetchSettings();

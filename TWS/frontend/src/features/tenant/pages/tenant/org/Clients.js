@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTenantSlug } from '../../../../../shared/hooks/useTenantSlug';
 import { 
-  PlusIcon, 
+  PlusIcon,
   MagnifyingGlassIcon,
   ChartBarIcon,
-  ClockIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   PencilIcon,
@@ -157,8 +156,6 @@ const ClientMetrics = ({ metrics }) => {
 
 // Enhanced Client Card Component - Premium Wolfstack Style
 const ClientCard = ({ client, onEdit, onDelete, onView, deletingClientId }) => {
-  const navigate = useNavigate();
-  
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':

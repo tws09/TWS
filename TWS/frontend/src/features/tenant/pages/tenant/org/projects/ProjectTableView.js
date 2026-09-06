@@ -13,8 +13,6 @@ import {
   ChevronDownIcon,
   TrashIcon,
   DocumentDuplicateIcon,
-  PencilSquareIcon,
-  PlusIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import tenantProjectApiService from './services/tenantProjectApiService';
@@ -101,7 +99,6 @@ const ProjectTableView = () => {
   const [sortDir,  setSortDir]  = useState('desc');
   const [selected, setSelected] = useState(new Set());
   const [deleting, setDeleting] = useState(new Set());
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     if (!tenantSlug || !projectId) return;
@@ -309,8 +306,6 @@ const ProjectTableView = () => {
                   const isOverdue = task.dueDate && task.status !== 'completed' && new Date(task.dueDate) < today;
                   const isSelected = selected.has(id);
                   const isDeleting = deleting.has(id);
-                  const statusCfg   = STATUS_MAP[task.status]   || STATUS_MAP.todo;
-                  const priorityCfg = PRIORITY_MAP[task.priority] || PRIORITY_MAP.medium;
                   const assigneeName = task.assignee?.fullName || task.assignee?.name || task.assignee?.email || '';
 
                   return (

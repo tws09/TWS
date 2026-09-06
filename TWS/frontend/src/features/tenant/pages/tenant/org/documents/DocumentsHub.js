@@ -26,7 +26,6 @@ import {
   ClockIcon,
   ArchiveBoxIcon,
   FolderIcon,
-  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { DOCUMENT_TEMPLATES, TEMPLATE_IDS } from './documentTemplates';
 import * as documentHubApi from './documentHubApi';

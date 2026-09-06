@@ -5,11 +5,9 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   BanknotesIcon,
-  CreditCardIcon,
   ChartBarIcon,
   ExclamationTriangleIcon,
   PlusIcon,
-  EyeIcon,
   DocumentTextIcon,
   ClockIcon,
   ChartPieIcon,
@@ -18,8 +16,7 @@ import {
   CalendarIcon,
   CheckCircleIcon,
   ArrowUpIcon,
-  ArrowDownIcon,
-  UserGroupIcon
+  ArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { tenantApiService } from '../../../../../../shared/services/tenant/tenant-api.service';
 import { useTenantAuth } from '../../../../../../app/providers/TenantAuthContext';
@@ -40,7 +37,7 @@ const FinanceOverview = () => {
   const [overdueInvoices, setOverdueInvoices] = useState([]);
   const [upcomingBills, setUpcomingBills] = useState([]);
   const [projectProfitability, setProjectProfitability] = useState([]);
-  const [cashFlowData, setCashFlowData] = useState([]);
+  const [, setCashFlowData] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
 
   // Finance Ecosystem Modules
@@ -232,15 +229,9 @@ const FinanceOverview = () => {
   // Extract data with defaults
   const {
     totalRevenue = 0,
-    totalExpenses = 0,
     netIncome = 0,
-    accountsPayable = 0,
-    accountsReceivable = 0,
     cashBalance = 0,
-    grossMargin = 0,
-    monthlyRecurringRevenue = 0,
-    utilizationRate = 0,
-    financialMetrics = {}
+    grossMargin = 0
   } = financeData || {};
 
   const profitMargin = totalRevenue > 0 ? ((netIncome / totalRevenue) * 100) : 0;

@@ -9,8 +9,7 @@ import {
   PlusIcon,
   ClockIcon,
   CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon
+  XCircleIcon
 } from '@heroicons/react/24/outline';
 import { tenantApiService } from '../../../../../../../shared/services/tenant/tenant-api.service';
 

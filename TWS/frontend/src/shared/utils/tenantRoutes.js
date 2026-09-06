@@ -1,58 +1,71 @@
 /**
- * FR2: Tenant workspace URLs use path-based routing: app.nexaerp.com/<tenant-slug>/...
- * (In dev: localhost:3000/<tenant-slug>/...)
- * No /tenant/ prefix — slug is the first path segment.
+ * Tenant workspace routing — PATH-BASED on every environment.
+ *
+ *   housesbase.com/<tenant-slug>/org/...      (production)
+ *   localhost:3000/<tenant-slug>/org/...      (development)
+ *
+ * There is no subdomain tenancy. The slug is always the first path segment and
+ * every request stays on a single origin, so tenant URLs are plain same-origin
+ * paths — never cross-origin `https://<slug>.housesbase.com/...`.
  */
 
+/** Canonical app host, for display only (e.g. the signup "workspace URL" preview). */
+export const BASE_DOMAIN = (process.env.REACT_APP_BASE_DOMAIN || 'housesbase.com')
+  .trim()
+  .replace(/^https?:\/\//, '')
+  .replace(/\/+$/, '');
+
 /**
- * Build tenant workspace path. Example: tenantPath('ahmad', 'org', 'dashboard') => '/ahmad/org/dashboard'
+ * Build a tenant workspace path.
+ * Example: tenantPath('ahmad', 'org', 'dashboard') => '/ahmad/org/dashboard'
  * @param {string} tenantSlug
  * @param {...string} pathParts
  * @returns {string}
  */
 export function tenantPath(tenantSlug, ...pathParts) {
   if (!tenantSlug) return '/';
-  const cleanParts = pathParts.filter(Boolean);
-  const orgIndex = cleanParts.indexOf('org');
-  const workspaceParts = orgIndex >= 0 ? cleanParts.slice(orgIndex + 1) : cleanParts;
-
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.localhost');
-    if (!isLocal) {
-      const configuredBase = (process.env.REACT_APP_BASE_DOMAIN || 'housesbase.com')
-        .trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
-      const hostParts = hostname.split('.');
-      const hasTenantSubdomain =
-        hostParts.length > configuredBase.split('.').length &&
-        !['www', 'api', 'admin', 'mail', 'smtp', 'app', 'swh', 'edu'].includes(hostParts[0]);
-      if (hasTenantSubdomain) {
-        return workspaceParts.length ? `/${workspaceParts.join('/')}` : '/home';
-      }
-    }
-  }
-
-  const rest = cleanParts.join('/');
+  const rest = pathParts.filter(Boolean).join('/');
   return rest ? `/${tenantSlug}/${rest}` : `/${tenantSlug}`;
+}
+
+/**
+ * Alias kept for the many call sites that used the old subdomain helper.
+ * Identical to tenantPath now that everything is same-origin and path-based —
+ * callers pass the legacy parts (slug, 'org', 'home') and get '/slug/org/home'.
+ */
+export const getTenantWorkspaceUrl = tenantPath;
+
+/**
+ * Navigate helper. All tenant URLs are same-origin paths now, so this just
+ * defers to React Router's navigate(); the absolute-URL branch is a harmless
+ * safety net for any caller that still hands in a full URL.
+ */
+export function navigateTo(url, navigateFn) {
+  if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
+    window.location.href = url;
+  } else {
+    navigateFn(url);
+  }
 }
 
 /** First path segments that are NOT tenant slugs (fixed app routes) */
 export const RESERVED_FIRST_SEGMENTS = new Set([
-  'login', 'supra-admin', 'software-house', 'access-denied', 'debug', 'landing',
+  'login', 'supra-admin', 'supra-admin-login', 'software-house', 'access-denied', 'debug', 'landing',
   'monitoring-status', 'register', 'signup', 'api', 'software-house-login', 'software-house-signup',
-  'landing', 'tenant' // legacy; keep so old bookmarks can redirect if needed
+  'forgot-password', 'software-house-forgot-password', 'invite', 'changelog', 'product', 'solutions',
+  'pricing', 'security', 'resources', 'about', 'contact', 'privacy', 'terms', 'finance', 'hrm',
+  'projects', 'org', 'tenant' // 'tenant'/'org' legacy; keep so old bookmarks can redirect if needed
 ]);
 
 /**
- * Returns true if the current pathname is a tenant workspace route (/:slug/org/... or /:slug/dashboard).
+ * Returns true if the current pathname is a tenant workspace route
+ * (/:slug/org/... or /:slug/dashboard).
  * @param {string} pathname - location.pathname
  * @returns {boolean}
  */
 export function isTenantWorkspacePath(pathname) {
-  const seg = pathname.split('/').filter(Boolean)[0];
-  if (!seg) return false;
-  if (RESERVED_FIRST_SEGMENTS.has(seg)) return false;
-  // Tenant routes: /:slug/dashboard or /:slug/org/*
-  const second = pathname.split('/').filter(Boolean)[1];
-  return second === 'org' || second === 'dashboard';
+  const parts = String(pathname || '').split('/').filter(Boolean);
+  const seg = parts[0];
+  if (!seg || RESERVED_FIRST_SEGMENTS.has(seg)) return false;
+  return parts[1] === 'org' || parts[1] === 'dashboard';
 }

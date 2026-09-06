@@ -1,5 +1,4 @@
-﻿import { API_BASE_URL } from '../../../constants/apiEndpoints';
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 
 const BackendHealthCheck = () => {
   const apiBaseUrl = process.env.REACT_APP_API_URL || '';

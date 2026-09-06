@@ -7,7 +7,6 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   ArrowPathIcon,
-  CalendarIcon,
   EyeIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';

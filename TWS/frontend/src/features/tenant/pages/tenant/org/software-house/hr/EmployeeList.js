@@ -186,31 +186,6 @@ const EmployeeList = () => {
     emp.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDeleteEmployee = async (employeeId) => {
-    if (!window.confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
-      return;
-    }
-    try {
-      await tenantApiService.deleteEmployee(tenantSlug, employeeId);
-      alert('Employee deleted successfully!');
-      fetchEmployees();
-    } catch (error) {
-      console.error('Error deleting employee:', error);
-      alert(error.message || 'Failed to delete employee. Please try again.');
-    }
-  };
-
-  const handleUpdateEmployee = async (employeeId, employeeData) => {
-    try {
-      await tenantApiService.updateEmployee(tenantSlug, employeeId, employeeData);
-      alert('Employee updated successfully!');
-      fetchEmployees();
-    } catch (error) {
-      console.error('Error updating employee:', error);
-      alert(error.message || 'Failed to update employee. Please try again.');
-    }
-  };
-
   const statsData = [
     { label: 'Total Employees', value: stats.total.toString(), icon: UserGroupIcon, iconBg: 'bg-blue-50 dark:bg-blue-900/20', iconColor: 'text-blue-600 dark:text-blue-400' },
     { label: 'Active', value: stats.active.toString(), icon: UserIcon, iconBg: 'bg-green-50 dark:bg-green-900/20', iconColor: 'text-green-600 dark:text-green-400' },

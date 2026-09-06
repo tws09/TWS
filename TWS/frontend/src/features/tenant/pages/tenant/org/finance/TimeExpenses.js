@@ -2,18 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   ClockIcon,
   PlusIcon,
-  EyeIcon,
   PencilIcon,
-  TrashIcon,
   CurrencyDollarIcon,
-  CalendarIcon,
-  UserIcon,
-  DocumentTextIcon,
   ChartBarIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
-  CheckCircleIcon,
-  XCircleIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { tenantApiService } from '../../../../../../shared/services/tenant/tenant-api.service';
 import { useTenantSlug } from '../../../../../../shared/hooks/useTenantSlug';

@@ -12,21 +12,18 @@ import {
   LineElement,
   Filler
 } from 'chart.js';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import { 
-  BuildingOffice2Icon, 
-  CurrencyDollarIcon, 
-  UserGroupIcon, 
+  BuildingOffice2Icon,
+  CurrencyDollarIcon,
   ChartBarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   ClockIcon,
-  SparklesIcon,
   BoltIcon,
   ShieldCheckIcon,
-  TrendingUpIcon,
   FireIcon,
   ArrowRightIcon,
   ArrowPathIcon
@@ -156,10 +153,9 @@ const SupraAdminDashboard = () => {
   }
 
   const { 
-    overview = {}, 
-    tenantStats = {}, 
-    revenueStats = {}, 
-    systemHealth = {}, 
+    overview = {},
+    tenantStats = {},
+    systemHealth = {},
     recentActivity = [], 
     topTenants = [] 
   } = dashboardData || {};
